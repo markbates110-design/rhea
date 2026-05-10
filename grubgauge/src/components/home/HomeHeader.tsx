@@ -25,13 +25,13 @@ export function HomeHeader() {
   return (
     <>
       <header className="sticky top-0 z-40 w-full border-b border-outline-variant bg-surface-container-low text-primary md:hidden">
-        <div className="mx-auto flex h-16 w-full max-w-5xl items-center justify-between px-margin-edge">
+        <div className="mx-auto flex h-16 w-full min-w-0 max-w-5xl items-center justify-between px-margin-edge">
           <BrandMark />
           <ProfileAvatar />
         </div>
       </header>
       <header className="sticky top-0 z-40 hidden w-full border-b border-outline-variant bg-surface-container-low text-primary shadow-sm md:block">
-        <div className="mx-auto flex min-h-16 w-full max-w-5xl items-center justify-between gap-x-4 px-margin-edge py-3 md:py-0">
+        <div className="mx-auto flex min-h-16 w-full min-w-0 max-w-5xl items-center justify-between gap-x-4 px-margin-edge py-3 md:py-0">
           <div className="min-w-0 shrink-0">
             <BrandMark />
           </div>

@@ -87,7 +87,7 @@ export default function HistoryPage() {
 
   if (loading) {
     return (
-      <main className="mx-auto w-full max-w-2xl pt-lg pb-10">
+      <main className="mx-auto min-w-0 w-full max-w-2xl pt-lg pb-10">
         <div className="flex flex-col gap-md">
           <h1 className="font-display-lg text-[32px] font-bold leading-[40px] text-on-surface">My Ratings</h1>
           <div className="flex items-center gap-xs text-on-surface-variant">
@@ -103,7 +103,7 @@ export default function HistoryPage() {
 
   if (ratings.length === 0) {
     return (
-      <main className="mx-auto w-full max-w-2xl pt-lg pb-10">
+      <main className="mx-auto min-w-0 w-full max-w-2xl pt-lg pb-10">
         <div className="flex flex-col gap-md">
           <h1 className="font-display-lg text-[32px] font-bold leading-[40px] text-on-surface">My Ratings</h1>
           {error ? (
@@ -150,7 +150,7 @@ export default function HistoryPage() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-2xl pt-lg pb-10">
+    <main className="mx-auto min-w-0 w-full max-w-2xl pt-lg pb-10">
       <RatingEditSheet
         rating={editing}
         onClose={() => setEditing(null)}

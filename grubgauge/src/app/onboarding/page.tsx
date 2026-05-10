@@ -41,8 +41,8 @@ export default function OnboardingWelcomePage() {
       {/* Top spacer */}
       <div className="flex-1" />
 
-      <div className="mx-auto w-full max-w-5xl px-margin-edge pb-10">
-        <main className="mx-auto w-full max-w-2xl">
+      <div className="mx-auto min-w-0 w-full max-w-5xl px-margin-edge pb-10">
+        <main className="mx-auto min-w-0 w-full max-w-2xl">
         {/* Brand */}
         <div className="flex flex-col items-center gap-sm text-center">
           <div className="mb-xs flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/30 bg-primary/10">

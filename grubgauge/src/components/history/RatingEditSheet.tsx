@@ -221,7 +221,7 @@ function RatingEditSheetInner({ rating, onClose, onSaved, onDeleted }: InnerProp
   return (
     <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center sm:p-md">
       <button type="button" aria-label="Close" className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative flex max-h-[min(92dvh,760px)] w-full max-w-lg flex-col overflow-hidden rounded-t-2xl border border-outline-variant bg-surface-container-high shadow-xl sm:rounded-2xl">
+      <div className="relative flex max-h-[min(92dvh,760px)] w-full min-w-0 max-w-lg flex-col overflow-hidden rounded-t-2xl border border-outline-variant bg-surface-container-high shadow-xl sm:rounded-2xl">
         <div className="flex shrink-0 items-start justify-between gap-sm border-b border-outline-variant px-md py-sm">
           <div className="min-w-0">
             <h2 className="font-title-sm text-title-sm font-semibold text-on-surface">Edit rating</h2>
@@ -239,8 +239,8 @@ function RatingEditSheetInner({ rating, onClose, onSaved, onDeleted }: InnerProp
           </button>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-md py-md">
-          <div className="flex flex-col gap-md">
+        <div className="min-h-0 min-w-0 flex-1 overflow-y-auto px-md py-md">
+          <div className="flex min-w-0 flex-col gap-md">
             <div className="rounded-xl border border-outline-variant/80 bg-surface-container-low px-sm py-xs">
               <div className="flex items-start gap-xs">
                 <span
@@ -296,8 +296,8 @@ function RatingEditSheetInner({ rating, onClose, onSaved, onDeleted }: InnerProp
             </section>
 
             <section className="flex flex-col gap-lg rounded-xl border border-outline-variant bg-surface-container-low p-md">
-              <div className="flex items-center justify-between gap-sm">
-                <div>
+              <div className="flex min-w-0 items-center justify-between gap-sm">
+                <div className="min-w-0">
                   <h3 className="flex items-center gap-xs font-title-sm text-title-sm text-primary">
                     <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>
                       tune

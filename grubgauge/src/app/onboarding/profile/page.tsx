@@ -30,8 +30,8 @@ export default function OnboardingProfilePage() {
   }
 
   return (
-    <div className="mx-auto min-h-screen w-full max-w-5xl px-margin-edge">
-    <main className="mx-auto w-full max-w-md pt-lg pb-10">
+    <div className="mx-auto min-h-screen min-w-0 w-full max-w-5xl px-margin-edge">
+    <main className="mx-auto min-w-0 w-full max-w-md pt-lg pb-10">
       {/* Header */}
       <div className="mb-xl flex flex-col gap-xs">
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15">

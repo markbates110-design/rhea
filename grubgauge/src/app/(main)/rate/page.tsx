@@ -362,7 +362,7 @@ export default function RatePage() {
 
   if (submitted && spot) {
     return (
-      <main className="mx-auto w-full max-w-2xl pt-lg pb-10">
+      <main className="mx-auto min-w-0 w-full max-w-2xl pt-lg pb-10">
         {/* Score confirmation */}
         <div className="mb-6 flex flex-col items-center gap-3 text-center">
           <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary-container/20">
@@ -391,7 +391,7 @@ export default function RatePage() {
         </div>
 
         {/* Feedback prompt */}
-        <div className="rounded-xl border border-outline-variant bg-surface-container-low p-md">
+        <div className="w-full min-w-0 rounded-xl border border-outline-variant bg-surface-container-low p-md">
           <p className="mb-1 font-title-sm text-title-sm text-on-surface">Anything we should add or improve?</p>
           <p className="mb-3 font-body-md text-body-md text-on-surface-variant">Optional — takes 10 seconds.</p>
           <textarea
@@ -425,11 +425,11 @@ export default function RatePage() {
   // ── Main ─────────────────────────────────────────────────────────────────
 
   return (
-    <main className="mx-auto w-full pb-10 pt-lg md:pt-xl">
-      <div className="grid grid-cols-1 gap-lg lg:grid-cols-12">
+    <main className="mx-auto min-w-0 w-full pb-10 pt-lg md:pt-xl">
+      <div className="grid min-w-0 grid-cols-1 gap-lg lg:grid-cols-12">
 
         {/* ── Left: Form ── */}
-        <div className="flex flex-col gap-md lg:col-span-8">
+        <div className="flex min-w-0 flex-col gap-md lg:col-span-8">
 
           {/* Title */}
           <div>
@@ -643,7 +643,7 @@ export default function RatePage() {
         </div>
 
         {/* ── Right: Live score + desktop submit ── */}
-        <div className="hidden flex-col gap-md lg:col-span-4 lg:flex lg:sticky lg:top-24 lg:self-start">
+        <div className="hidden min-w-0 flex-col gap-md lg:col-span-4 lg:flex lg:sticky lg:top-24 lg:self-start">
           <div className="relative flex flex-col items-center overflow-hidden rounded-xl border border-outline-variant bg-surface-container-high p-xl text-center shadow-lg">
             <div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-primary/10 blur-3xl" />
             <p className="relative z-10 mb-xs font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant">

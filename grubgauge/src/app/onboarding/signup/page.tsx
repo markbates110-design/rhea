@@ -38,8 +38,8 @@ export default function OnboardingSignupPage() {
   }
 
   return (
-    <div className="mx-auto min-h-screen w-full max-w-5xl px-margin-edge">
-    <main className="mx-auto w-full max-w-md pt-lg pb-10">
+    <div className="mx-auto min-h-screen min-w-0 w-full max-w-5xl px-margin-edge">
+    <main className="mx-auto min-w-0 w-full max-w-md pt-lg pb-10">
       {/* Back */}
       <Link
         href="/onboarding"

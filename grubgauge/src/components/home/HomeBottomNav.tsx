@@ -12,7 +12,7 @@ export function HomeBottomNav() {
       aria-label="Primary"
       className="fixed inset-x-0 bottom-0 z-50 pb-[calc(12px+env(safe-area-inset-bottom))] pt-2 md:hidden"
     >
-      <div className="mx-auto w-full max-w-5xl px-margin-edge">
+      <div className="mx-auto w-full min-w-0 max-w-5xl px-margin-edge">
         <div className="flex justify-around gap-1 rounded-t-xl border border-outline-variant bg-surface-container px-2 py-3 shadow-lg">
           {navItems.map(({ href, label, icon }) => {
             const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
