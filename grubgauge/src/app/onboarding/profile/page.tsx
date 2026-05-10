@@ -27,7 +27,11 @@ export default function OnboardingProfilePage() {
     if (name.trim()) setUsername(name.trim());
     setFoodPrefs(selected);
     setOnboarded();
-    router.push("/");
+    // Signed-up users land on their actual profile so the just-created
+    // account is immediately visible; guests reach this screen via the
+    // "Update preferences" link on /profile, so /profile is the correct
+    // return target for them too.
+    router.push("/profile");
   }
 
   return (

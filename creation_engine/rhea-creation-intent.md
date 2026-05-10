@@ -10,13 +10,13 @@
 
 ### Current Creation Intent
 
-**Project:** GrubGauge — Onboarding / Landing CTA & auth-state polish
-*Intent: 2026-05-09 12:51 CT · Executed: 2026-05-10 13:10 CT*
+**Project:** GrubGauge — Guest vs signed-in flow refinement (History scope + upsell)
+*Intent: 2026-05-09 15:22 CT · Executed: 2026-05-10 15:25 CT*
 `completed`
 
-Landing/Dashboard CTA logic split by Supabase auth: signed-out → upper-right "Create Account" + body "+ Rate" routes through `/onboarding` (guest or signup) before `/rate`; signed-in → upper-right profile avatar linking to profile/settings, "+ Rate" goes straight to `/rate`. Reactive auth hook (`getSession` + `onAuthStateChange`) for instant switching. No theme/layout drift; typography contract from prior intent preserved.
+Guests retain full rate flow (low friction, device-scoped). Signed-in users' History shows **only their own** ratings (scoped by `user_id`), no device cross-pollination. Guests see a gentle upsell card on History: *"Sign in to save your ratings permanently"* — respectful, dismissible-by-default-style, never blocks reading existing local ratings. Auth = identity layer for personal data; device-scoped guest data stays additive.
 
-**Next:** Paste next Creation Intent in sticky template when ready (`go`). **Ops (Vercel / Root):** single source of truth — **`creation_engine/grubgauge-build-assessment.md`** → **Assessment — Vercel Root Directory canonical (`rhea` ↔ GrubGauge)** (confirm **`./`** vs **`grubgauge/`** with **deployment build logs**, not repo layout alone).
+**Next:** Paste next Creation Intent in sticky template when ready (`go`). **Ops (Vercel / Root):** see **`grubgauge-build-assessment.md`** → **Vercel Root Directory canonical**.
 ---
 
 ### Creation Intent History
@@ -24,6 +24,21 @@ Landing/Dashboard CTA logic split by Supabase auth: signed-out → upper-right "
 ---
 
 #### GrubGauge
+
+**GrubGauge — Rate-screen venue-type fixes (default + "Change" button)**
+*Intent: 2026-05-09 14:57 CT · Executed: 2026-05-10 15:00 CT*
+`completed`
+Priority-based venue inference (`fast-food` > `food-truck` > `fine` > `casual`) — chains like McDonald's resolve to *Fast Food* even when Google orders `restaurant`/cuisine tags first. `SpotSearch` remounts via `key` on chip-clear so *Change* fully resets picker state. Defensive `type="button"` on all in-page buttons.
+
+**GrubGauge — `+ Rate` always routes through onboarding for non-auth users**
+*Intent: 2026-05-09 14:32 CT · Executed: 2026-05-10 14:35 CT*
+`completed`
+Body `+ Rate` CTA now routes to `/onboarding` for *all* signed-out users (including returning guests). Onboarding welcome no longer auto-redirects onboarded users; "Continue as Guest" CTA lands on `/rate` (was `/`). Signed-in users unchanged. Guest path preserved.
+
+**GrubGauge — Onboarding / Landing CTA & auth-state polish**
+*Intent: 2026-05-09 12:51 CT · Executed: 2026-05-10 13:10 CT*
+`completed`
+Landing/Dashboard CTA logic split by Supabase auth: signed-out → upper-right "Create Account" + body "+ Rate" routes through `/onboarding`; signed-in → upper-right profile avatar → `/profile`, "+ Rate" → `/rate`. Reactive `useAuth` hook (`getSession` + `onAuthStateChange`).
 
 **GrubGauge — Razor-sharp typography pass**
 *Intent: 2026-05-09 12:11 CT · Executed: 2026-05-10 12:30 CT*

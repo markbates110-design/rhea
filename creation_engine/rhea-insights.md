@@ -1,6 +1,6 @@
 # Rhea Insights & Process Upgrades
 
-**Last Updated:** 2026-05-10 13:35 CT
+**Last Updated:** 2026-05-10 16:05 CT
 
 This file bookmarks key i² insights, process improvements, and patterns discovered across all creations. 
 The Governance Agent must read this file at the start of every major session.
@@ -10,6 +10,39 @@ The Governance Agent must read this file at the start of every major session.
 ### Bookmarked Insights
 
 #### Product (apps · governance · ops)
+
+**2026-05-10 16:05 CT — Auth methods can succeed without producing a session — branch on `data.session`, not just `error`**
+- **Class of bug.** `supabase.auth.signUp()` returns `{ data: { user, session: null }, error: null }` when the Supabase project has "Confirm email" enabled — a successful return *without* an authenticated session. The same shape applies to `signInWithOtp` (magic-link), `signInWithOAuth` (redirect flow), and `resetPasswordForEmail`. Branching only on `error` causes the app to push the user into authenticated routes while `useAuth.user` is still `null` — every downstream auth-gated decision (header CTA, `rateHref`, History scope) silently treats them as a guest, producing a "stuck in signup loop / not recognized as member" class of bug.
+- **Canonical pattern.** Any client surface that calls an auth method which *can* succeed without producing a session must explicitly branch on `data.session`: present → proceed to authenticated routes; null → render a first-class "awaiting verification" UI on the same surface, never a silent redirect. Mark the device onboarded so the welcome gate doesn't re-trap; supply `emailRedirectTo: ${origin}/<post-verify-route>` on `signUp` so the email link delivers users to a useful surface with the session already attached.
+- **Defensive re-entry.** Routes that exist to *create* a session (signup, OTP request, etc.) should `useAuth`-redirect signed-in users away — bounce them to `/profile` (or equivalent) instead of re-showing the form. Prevents a returning user from seeing "Create account" prompts they don't need.
+- **Verification Pass implication.** Add to scrutiny for any auth-related screen: *does this branch on `data.session` separately from `error`? Does it render an explicit "awaiting verification" state? Does it redirect already-signed-in visitors away?* These three questions close the class.
+- **Compounding rule:** never route into an authenticated flow on the strength of `!error` alone — *session* is the contract.
+
+**2026-05-10 15:25 CT — Personal-data scoping: canonical helper, not per-call ownership filters**
+- **Pattern.** When the same row table serves both *guest* (device-scoped) and *signed-in* (account-scoped) reads/writes, encode ownership in **one helper** (`applyRatingsOwnerScope`), not in each component's `.eq()` chain. Reads, updates, and deletes must share the *exact same* scope predicate — drift here is a silent correctness bug (orphaned rows, cross-account writes, "edit fails on device B").
+- **Identity is additive, not exclusive.** `device_id` stays written for *every* row (guest and signed-in alike). `user_id` is layered on top when an auth session exists. This preserves local-first guest data verbatim and gives a future "claim on signin" migration a clean target (rows where `device_id = X AND user_id is null`). Never replace device identity with auth identity — the two coexist.
+- **Hold the query until `useAuth.loading` resolves.** Otherwise a freshly-signed-in user flashes guest data on first paint (the device-scoped query lands before auth knows who they are). Rule for this codebase: any auth-scoped query gates on `if (authLoading) return` inside its `useEffect`.
+- **Schema discipline for additive auth.** Adding a nullable `user_id` column + indexes on both `user_id` and `device_id` is the minimum-viable migration to enable account-scoped reads without disturbing guest data or requiring a full RLS rewrite. RLS can layer on top later without app code rewrites.
+- **Compounding rule:** zero direct `.eq("device_id", …)` / `.eq("user_id", …)` in app code outside `lib/ratings/scope.ts` (and storage helpers that key uploads by device, not for ownership). Grep is the audit.
+
+**2026-05-10 15:00 CT — Selector-with-chip pattern: priority match + remount-on-clear**
+- **Priority over first-match for external-tag inference.** Google Places (and similar tag-bag APIs) don't guarantee specificity ordering inside `types[]`. First-match scans silently mis-classify chains whose generic tag (`restaurant`, cuisine name) appears before the specific one (`fast_food_restaurant`). Canonical pattern for this codebase: group inputs by output bucket (`TYPES_BY_VENUE`) + an explicit priority order (`VENUE_PRIORITY`); most-specific bucket wins regardless of input ordering.
+- **Remount upstream picker via `key` when chip clears.** When a selector renders a "selected" chip alongside the picker, clearing the chip must reset the picker's full internal state — query, suggestions overlay, debounce timer, third-party service refs. Cheapest correct fix: `key={selected ? "selected" : "empty"}` on the picker. Prevents the "nothing happens / page is locked" perception class from stale internal state surviving across the clear boundary.
+- **Defensive `type="button"` on every non-submit `<button>`** even outside a `<form>` — removes a latent footgun if the surrounding markup ever gets wrapped, and costs nothing at the call site.
+
+**2026-05-10 14:35 CT — `/onboarding` is now a stable re-entry surface (not a one-shot gate)**
+- Removing the welcome page's `if (isOnboarded()) router.replace("/")` converts onboarding from a one-shot first-run gate into a re-entry surface — re-engagement / upgrade-to-account CTAs can route here without loop risk.
+- `handleGuest` now routes to `/rate` (was `/`) so the guest path is one click from any entry point: tap `+ Rate` → welcome → guest → `/rate`. Keeps the upgrade-to-account discoverable on the welcome page for *every* re-entry, not just first-runs.
+- Marker discipline (prior insight): `setOnboarded()` still fires on every guest exit, so no completion-marker drift.
+
+**2026-05-10 13:51 CT — Forward directive: token conservation as a first-class governance constraint**
+- Rhea-governance overhead is part of the cost ledger. Future PAPs may compress post-iteration bookkeeping (Observed Effect flips, prod-verify stamps, `Last Updated` bumps), tighten `**Assessment ↓**` chat restatement, batch insight bookmarks at `stop`, and shrink PAP / Verification Pass response prose. **No protocol change yet — directive only; capture cost-saving patterns in candidate PAPs as they emerge.**
+
+**2026-05-10 13:45 CT — Vertical-text class closed by construction (v3.12 prod-verified)**
+- **Closure:** `/onboarding/signup` rendered cleanly on both prod (`https://grubgauge.vercel.app`, commit `111490a`) and local `npm run dev`. PageShell's `min-w-[280px]` floor on the `form` variant held without a follow-up triage cycle. **6th vertical-text surface closed by construction, not by patch.**
+- **Audit exception outcome:** User-waived local-repro (v3.12 step 5) closed net-positive — static checks (tsc + lint + ReadLints) plus the by-construction contract were sufficient for this class. Not a precedent to generalize: the override worked *because* the change was a prevention artifact, not a targeted patch. Targeted patches without local repro remain higher-risk and the v3.12 rule stands.
+- **Compounding pattern (three days, three protocol layers):** v3.10 (triage / `min-w-0` discipline) → v3.11 (typography render contract in `globals.css`) → v3.12 (`<PageShell>` prevention artifact). Each closed a recurrence class. The progression matches the v2.5 → v2.8 → v2.9 governance-evolution pattern from earlier in this build: *explicit mandate → hard gate → self-closing artifact.* Apply this arc to the next bug class that recurs 2+ times.
+- **Observed Effect flipped:** Archive rows for v3.11 + v3.12 stamped *Effective — prod-verified 2026-05-10 13:45 CT*.
 
 **2026-05-10 13:35 CT — GrubGauge `<PageShell>` (prevention over triage for vertical-text class)**
 - **Root learning (6+ recurrences):** Reactive triage (v3.10) is necessary but not sufficient — width-collapse kept resurfacing on new routes because each page re-invented its own outer-wrapper width contract. The cure is a **canonical artifact**, not a sharper checklist.

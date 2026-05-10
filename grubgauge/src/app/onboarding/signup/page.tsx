@@ -1,18 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { useAuth } from "@/lib/auth/useAuth";
 import { PageShell } from "@/components/layout/PageShell";
 import { setOnboarded } from "@/lib/identity/deviceId";
 
 export default function OnboardingSignupPage() {
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // When Supabase project has "Confirm email" enabled, signUp returns success
+  // with `session: null`. Surface a "check your inbox" state instead of
+  // silently routing the user into a flow that assumes they're authenticated
+  // — that path was the source of the post-signup loop on prod.
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
+
+  // If the user lands here already signed in (e.g. clicked an old CTA after
+  // a successful verification), bounce them to /profile — never re-show
+  // the signup form to an authenticated account.
+  useEffect(() => {
+    if (!authLoading && user) router.replace("/profile");
+  }, [authLoading, user, router]);
 
   async function handleSignUp(e: React.FormEvent) {
     e.preventDefault();
@@ -20,12 +34,28 @@ export default function OnboardingSignupPage() {
     setLoading(true);
     try {
       const supabase = createClient();
-      const { error: authError } = await supabase.auth.signUp({ email, password });
+      const emailRedirectTo =
+        typeof window !== "undefined" ? `${window.location.origin}/profile` : undefined;
+      const { data, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo },
+      });
       if (authError) {
         setError(authError.message);
         return;
       }
-      router.push("/onboarding/profile");
+      if (data.session) {
+        // Email confirmation disabled (or already auto-confirmed) → real
+        // session in hand, proceed to the quick preferences setup.
+        router.push("/onboarding/profile");
+        return;
+      }
+      // Email confirmation required → no session yet. Mark device as
+      // onboarded so the welcome gate doesn't re-trap them, and show the
+      // "check your inbox" state on this page.
+      setOnboarded();
+      setPendingEmail(email);
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -37,6 +67,61 @@ export default function OnboardingSignupPage() {
     setOnboarded();
     router.push("/");
   }
+
+  // ── Awaiting email verification ───────────────────────────────────────────
+
+  if (pendingEmail) {
+    return (
+      <PageShell variant="form" className="pt-lg pb-10">
+        <Link
+          href="/onboarding"
+          className="mb-lg inline-flex items-center gap-xs font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-colors"
+        >
+          <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+          Back
+        </Link>
+
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/15 mb-md">
+          <span
+            className="material-symbols-outlined text-[26px] text-primary"
+            style={{ fontVariationSettings: "'FILL' 1" }}
+          >
+            mark_email_read
+          </span>
+        </div>
+
+        <h1 className="font-headline-md text-headline-md font-semibold text-on-surface">
+          Check your inbox
+        </h1>
+        <p className="mt-xs font-body-md text-body-md text-on-surface-variant">
+          We sent a verification link to <span className="text-on-surface font-medium">{pendingEmail}</span>.
+          Click it to finish setting up your account — you&apos;ll land back here signed in.
+        </p>
+
+        <div className="mt-xl flex flex-col gap-sm">
+          <Link
+            href="/"
+            className="flex w-full items-center justify-center gap-xs rounded-xl border border-outline-variant bg-surface-container-low py-[14px] font-title-sm text-title-sm font-semibold text-on-surface-variant transition-all hover:bg-surface-container active:scale-95"
+          >
+            Continue browsing
+          </Link>
+          <button
+            type="button"
+            onClick={() => {
+              setPendingEmail(null);
+              setEmail("");
+              setPassword("");
+            }}
+            className="w-full text-center font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-colors"
+          >
+            Use a different email
+          </button>
+        </div>
+      </PageShell>
+    );
+  }
+
+  // ── Default signup form ───────────────────────────────────────────────────
 
   return (
     <PageShell variant="form" className="pt-lg pb-10">

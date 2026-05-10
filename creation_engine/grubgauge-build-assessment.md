@@ -563,9 +563,101 @@ No layout/JSX shell changes; no new colors; no font swap.
 
 Verified: `npx tsc --noEmit` ✓ exit 0, `npm run lint` ✓ exit 0, ReadLints clean across all seven touched files.
 
-**Audit exception (v3.12 step 5 override — 2026-05-10 13:40 CT):** User explicitly waived local-repro-before-redeploy ("I have not done local testing. Proceed with deployment.") for this push. Static checks (tsc + lint + ReadLints) clean; PageShell contract verified by construction at the source level. Vercel build itself becomes the next verification gate. If a width-collapse surfaces post-deploy, the targeted fix branches off with screenshot + computed-width evidence per v3.10 step 2.
+**Audit exception (v3.12 step 5 override — 2026-05-10 13:40 CT):** User explicitly waived local-repro-before-redeploy ("I have not done local testing. Proceed with deployment.") for this push. Static checks (tsc + lint + ReadLints) clean; PageShell contract verified by construction at the source level. Vercel build itself becomes the next verification gate.
+
+**Verified on prod: 2026-05-10 13:45 CT** — https://grubgauge.vercel.app (Vercel build ✓ + paint ✓) **and** local `npm run dev`. User confirmed: "The fix was successful both in vercel and locally. All modification to governance approved." Audit exception closes net-positive — the PageShell prevention layer held without an additional triage cycle.
 
 **i²:** When the same bug *class* (not the same instance) recurs **2+ times across different routes**, the fix is to **codify the contract as an artifact, not as a checklist**. v3.10's triage protocol was the right *reaction*; v3.12's `<PageShell>` is the right *prevention*. The two layers are complementary — triage tells you what to do when a new class appears, `<PageShell>` ensures known classes never reappear. **Compounding rule for this codebase:** every new page route renders through `<PageShell>` (or matches its contract exactly) — *no exceptions, gated by Verification Pass*.
+
+---
+
+## Error Fix — Post-signup loop (email-confirmation gating + missing post-signup destination)
+**Timestamp: 2026-05-10 16:05 CT** · **Governance ref** — `rhea-governance-agent.md` **v3.12**
+
+**Error:** After signing up on prod, the new account was stuck in a sign-up loop — tapping `+ Rate` routed back to `/onboarding`, the header's *Create Account* never swapped to a profile icon, and the user reported "once I am signed in I am not recognized a member." There was also no clean post-signup landing surface.
+
+**Root Cause:** The Supabase project has the default **"Confirm email"** setting enabled. With that on, `supabase.auth.signUp({ email, password })` returns `{ data: { user, session: null }, error: null }` — the account is created but **no session** is established until the verification email is clicked. Our signup page only branched on `authError`, so on `session === null` it still ran `router.push("/onboarding/profile")` as if the user were authenticated. Downstream: `useAuth.user` stayed `null` → AuthSlot kept the *Create Account* CTA → `rateHref` resolved to `/onboarding` → `+ Rate` re-entered the signup funnel → user perceived a loop. Compounding the confusion, the onboarding-profile prefs screen routed to `/` (dashboard), not `/profile`, so even a *successful* signup never visibly produced a profile surface — exactly the symptom the user articulated.
+
+**Fix:** Three additive edits, no schema change:
+1. **`grubgauge/src/app/onboarding/signup/page.tsx`** — pass `options.emailRedirectTo = ${origin}/profile` to `signUp`, then branch explicitly on the returned session:
+   - `data.session` present → `router.push("/onboarding/profile")` (real session in hand).
+   - `data.session === null` → call `setOnboarded()` (so the welcome gate doesn't re-trap the device) and render a new **"Check your inbox"** state inline with the verified email address, a "Continue browsing" link to `/`, and a "Use a different email" reset path. No silent redirect into authenticated flows.
+   - Added `useEffect` redirect to `/profile` when `useAuth` resolves a signed-in user on this route — defensive against any re-entry where an authenticated user lands back on signup.
+2. **`grubgauge/src/app/onboarding/profile/page.tsx`** — `handleFinish` now routes to `/profile` (was `/`). Signed-up users land on their profile per explicit user intent; the "Update preferences" entry on `/profile` already returns here, so the round-trip is symmetric for both signup-derived and existing users.
+3. **No app change required for email-link callback**: `emailRedirectTo` points at `/profile`; `@supabase/ssr` `createBrowserClient` picks up the URL token on landing and `useAuth.onAuthStateChange` fires `SIGNED_IN`, so the profile surface paints with the session already attached.
+
+**i²:**
+- *First iteration:* `npx tsc --noEmit` ✓, `ReadLints` ✓, PageShell + typography + `useAuth` SSOT contracts honored. No new conditional-return root drift (new "Check your inbox" state uses the same `<PageShell variant="form" className="pt-lg pb-10">` as the form state).
+- *Second iteration / compounding rule:* **Any client surface that calls a Supabase auth method that *can* succeed without producing a session MUST branch on `data.session` before routing**, not on `error` alone. This applies to `signUp` (email confirmation), `signInWithOtp` (magic-link), `signInWithOAuth` (redirect flow), and `resetPasswordForEmail`. Treat "success without session" as a first-class state with its own UI — never a silent redirect into authenticated routes. Add to Verification Pass scrutiny for any future auth-related screen.
+
+**Supabase config note for the user:** if you want the *no-confirm* fast path during build (signup → instant session → straight to prefs → /profile), toggle **Supabase Dashboard → Authentication → Providers → Email → "Confirm email" = OFF**. Either setting now works correctly in the app — the code handles both.
+
+---
+
+## Assessment — Guest vs signed-in flow refinement (History scope + upsell)
+**Timestamp: 2026-05-10 15:25 CT** · **Governance ref** — `rhea-governance-agent.md` **v3.12**
+
+**e** — Three axes:
+1. *Personal-data scoping.* Today every `ratings` read filters by `device_id`. Signed-in users see all device rows (including pre-account guest rows) and **only** rows from the current device — a fresh sign-in on a new device shows an empty History. Considered: (a) leave device-scoped + claim-on-signin (deferred — separate iteration); (b) account-scoped via `user_id` (chosen — matches brief "see only their own ratings").
+2. *Schema discipline.* No `user_id` column today. Options: full RLS migration (heavier — out of scope), or additive nullable column + app-level scoping (chosen — keeps local-first guest data untouched; RLS can layer on later without app rewrite).
+3. *Upsell placement & tone.* Inline-at-top of History vs modal vs sticky banner. Modal blocks; sticky steals scroll real estate. Inline card at the top of `My Ratings` is dismissible-by-design (just scroll past) and never blocks reading existing local ratings — matches brief "gentle prompt … without adding unnecessary complexity."
+
+**s** — Additive across schema + app, single scoping authority:
+1. **Migration** `grubgauge/supabase/migrations/20260510010000_ratings_user_id.sql` — adds `ratings.user_id uuid references auth.users(id) on delete set null` + indexes on `user_id` and `device_id`. Nullable so guest rows remain valid. Must be run in Supabase SQL Editor before deploy.
+2. **Canonical helper** `grubgauge/src/lib/ratings/scope.ts` → `applyRatingsOwnerScope(query, { user, deviceId })`. Signed-in: `.eq("user_id", user.id)`. Guest: `.eq("device_id", deviceId).is("user_id", null)` — keeps signed-in rows from leaking into guest mode on a shared device. Single source of truth; used by reads, updates, and deletes.
+3. **Rate insert** (`(main)/rate/page.tsx`) — calls `supabase.auth.getUser()`, writes `user_id` alongside `device_id`. Identity is additive: device_id always written, user_id set when present.
+4. **History** (`(main)/history/page.tsx`) — `useAuth()` + `applyRatingsOwnerScope`; query held until auth resolves (`if (authLoading) return`) so signed-in users never flash guest data on first paint. New `GuestUpsellCard` rendered at the top of the main + empty states when `!user` — "Sign in to save your ratings permanently" → `/onboarding/signup`. Migrated all three conditional returns to `<PageShell variant="feed">` per v3.12 Verification Pass.
+5. **Dashboard** (`(main)/page.tsx`) — same auth-resolution gate + `applyRatingsOwnerScope`; brought along because Dashboard renders personal stats (spots rated, avg, best, fav type) and would otherwise diverge from History.
+6. **Edit sheet** (`components/history/RatingEditSheet.tsx`) — `useAuth()` + `applyRatingsOwnerScope` on both update and delete builders. Closes the corner case where a signed-in user views a rating from device A but tries to edit it from device B: with user-scoped ownership, the edit/delete row-match succeeds across devices for signed-in users while guest rows stay device-locked.
+
+No theme drift; no new Tailwind tokens; typography + PageShell + `useAuth` SSOT contracts all honored.
+
+**i² First** — `npx tsc --noEmit` ✓, `ReadLints` ✓ on all five touched files. Conditional-return roots match within History (`<PageShell variant="feed" className="pt-lg pb-10">` × 3). **i² Second** — applied two prior insights: (a) *"useAuth is the canonical session source"* — every new scoping decision in this iteration runs through `useAuth`, never bare `supabase.auth.getSession()`; (b) *"layer auth on top as optional"* — guest device-scoped model is preserved verbatim; `user_id` is additive. **Compounding rule for this codebase:** any future query against the `ratings` table goes through `applyRatingsOwnerScope` — no component composes `.eq("device_id", …)` / `.eq("user_id", …)` ownership filters by hand. Audit by grep: zero direct `.eq("device_id"|"user_id", …)` in app code outside `lib/ratings/scope.ts` and `lib/storage/mealPhoto.ts` (storage path).
+
+★★★★★ — Targets brief precisely; canonicalizes scoping as an artifact (helper) rather than a checklist; PageShell coverage extended; backward-compatible for existing guest data.
+
+**Next:**
+1. **Run migration** in Supabase SQL Editor: paste `supabase/migrations/20260510010000_ratings_user_id.sql` and execute (idempotent — safe to re-run).
+2. Optional local spot-check: as guest → `/history` shows upsell card; sign up → upsell disappears and History scopes to new account (initially empty); rate something → row appears under account.
+3. Push to Vercel.
+4. **Follow-up candidates (out of scope, captured here):** (a) claim-on-signin — atomic update setting `user_id` on prior device-scoped rows when a guest signs up, so their history doesn't reset to empty; (b) sign-in route — `/onboarding/signup` is signup-only today, returning users need a sign-in surface.
+
+---
+
+## Assessment — Rate-screen venue-type fixes (default + "Change" button)
+**Timestamp: 2026-05-10 15:00 CT** · **Governance ref** — `rhea-governance-agent.md` **v3.12**
+
+**e** — Two coupled bugs on `/rate`:
+1. *Default mis-classification.* `inferVenueType` did **first-match-wins** over the place's `types[]`. Google Places sometimes orders generic / cuisine types (`restaurant`, `american_restaurant`) ahead of `fast_food_restaurant` for chains like McDonald's, so first-match silently lands on `casual`. Considered: hard-coding chain-name heuristics (rejected — brittle, locale-dependent), expanding the flat map alone (rejected — still order-dependent).
+2. *"Change" button non-responsive / "locks the body".* The button itself fires (`setSpot(null)` etc.), but `SpotSearch` stays mounted with stale internal state (query, suggestions, `placesRef` / `autocompleteRef`, debounce timer) — the page visibly collapses below the chip with no positive feedback at the search surface, which presents as "nothing happens / page is stuck." Defensive concern: `<button>` without explicit `type` defaults to `submit` if ever wrapped in a `<form>` — current page has no form, but adding `type="button"` removes the latent footgun.
+
+**s** — Surgical, additive only:
+1. **Priority-based inference** (`grubgauge/src/app/(main)/rate/page.tsx`): replaced flat `PLACE_TYPE_MAP` with `TYPES_BY_VENUE` (grouped by `VenueType`) + `VENUE_PRIORITY = ["fast-food", "food-truck", "fine", "casual"]`. Inference scans buckets in priority order — most-specific bucket wins regardless of `types[]` ordering. Bucket coverage broadened (donut/bagel/coffee/cafe/chicken/taco/burrito for fast-food; full cuisine matrix + bar/pub/wine_bar/brewery for casual; ramen/sushi/bbq/steak/seafood/veg/vegan added).
+2. **`SpotSearch` remount on Change**: added `key={spot ? "selected" : "empty"}` to the `<SpotSearch>` render site. Toggling `spot` resets all internal state cleanly — no stale dropdown, query, or service refs can carry across the Change boundary.
+3. **Defensive `type="button"`** on the Change button + suggestion items + clear-query button. Change handler also now resets `setError("")` so a stale submit error from a prior attempt doesn't linger past a venue swap.
+
+No theme drift, no Tailwind-token additions, no PageShell impact (in-page logic, not page route).
+
+**i² First** — `npx tsc --noEmit` ✓, `ReadLints` ✓ on the touched file. **i² Second** — applied insight *"every exit must converge on the same completion marker"* in spirit: Change is treated as a full reset (`spot`, `scores`, `error`, `mealPhoto` + remounted search) so there's a single canonical "back to search" state, not a partial one. **Compounding rule for this codebase:** any future selector-with-chip pattern remounts the upstream picker via `key` on chip-clear — prevents the stale-internal-state class generally.
+
+★★★★★ — Targets both reported bugs at the root (priority semantics + state-isolation) rather than papering over symptoms.
+
+**Next:** (1) optional local repro on `/rate` — search "McDonald's", confirm chip shows *Fast Food* (was *Casual Dining*); tap Change, confirm input refocuses with empty query and page no longer feels stuck; (2) push when ready.
+
+---
+
+## Assessment — `+ Rate` always routes through onboarding for non-auth users
+**Timestamp: 2026-05-10 14:35 CT** · **Governance ref** — `rhea-governance-agent.md` **v3.12**
+
+**e** — Prior `rateHref` (`user || isOnboarded() ? "/rate" : "/onboarding"`) let onboarded guests bypass onboarding — that bypass is what the brief targets. Considered query-string intent flags + keeping welcome's auto-redirect (rejected: complexity / loop risk with new rateHref).
+
+**s** — Three minimal edits: (1) `(main)/page.tsx` → `rateHref = user ? "/rate" : "/onboarding"`; (2) `onboarding/page.tsx` → removed `useEffect(() => { if (isOnboarded()) router.replace("/"); })` + dropped now-unused `useEffect` / `isOnboarded` imports; (3) `onboarding/page.tsx` `handleGuest` → `setOnboarded(); router.push("/rate")` (was `"/"`). New flow: new visitor → `/onboarding` → guest → `/rate`. Returning guest taps `+ Rate` → `/onboarding` (upgrade discoverable) → guest → `/rate`. Signed-in unchanged. Guest path preserved verbatim.
+
+**i² First** — `tsc` ✓, `lint` ✓; v3.12 PageShell contract + v3.11 typography contract + `useAuth` SSOT untouched. **i² Second** — applied prior insight *"Every exit from onboarding must converge on the same completion marker"* (`setOnboarded()` still called on every guest path; no marker drift). **Compounding rule:** `/onboarding` is now a re-entry surface — future re-engagement / upgrade CTAs can route here without redirect-loop risk.
+
+★★★★★ — Eliminates the bypass without weakening guests; local repro pending per v3.12 step 5.
+
+**Next:** (1) `npm run dev` spot-check guest path; (2) push when ready.
 
 ---
 

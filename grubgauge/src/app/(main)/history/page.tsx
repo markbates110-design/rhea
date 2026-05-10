@@ -4,6 +4,9 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { getDeviceId } from "@/lib/identity/deviceId";
+import { useAuth } from "@/lib/auth/useAuth";
+import { applyRatingsOwnerScope } from "@/lib/ratings/scope";
+import { PageShell } from "@/components/layout/PageShell";
 import { RatingEditSheet, type EditableRatingRow } from "@/components/history/RatingEditSheet";
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -47,47 +50,89 @@ function formatDate(dateStr: string): string {
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
+// ── Guest upsell card ──────────────────────────────────────────────────────
+
+function GuestUpsellCard() {
+  return (
+    <div className="flex items-start gap-sm rounded-xl border border-primary/30 bg-primary/5 px-md py-sm">
+      <span
+        className="material-symbols-outlined text-[20px] text-primary mt-0.5 shrink-0"
+        style={{ fontVariationSettings: "'FILL' 1" }}
+      >
+        cloud_sync
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="font-title-sm text-title-sm text-on-surface">
+          Sign in to save your ratings permanently
+        </p>
+        <p className="mt-0.5 font-label-sm text-label-sm text-on-surface-variant">
+          Your ratings stay on this device until you create an account — then they live with you across devices.
+        </p>
+      </div>
+      <Link
+        href="/onboarding/signup"
+        className="shrink-0 inline-flex items-center gap-xs rounded-lg bg-primary-container px-sm py-xs font-label-sm text-label-sm font-bold text-on-primary-container transition-all hover:bg-primary-fixed active:scale-95"
+      >
+        Sign up
+      </Link>
+    </div>
+  );
+}
+
 // ── History Page ───────────────────────────────────────────────────────────
 
 export default function HistoryPage() {
+  const { user, loading: authLoading } = useAuth();
   const [ratings, setRatings] = useState<Rating[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [editing, setEditing] = useState<EditableRatingRow | null>(null);
 
   useEffect(() => {
+    // Wait for auth resolution before querying — without this, a freshly-
+    // signed-in user can see a flash of guest history (device-scoped rows
+    // with user_id is null) before the user-scoped query lands.
+    if (authLoading) return;
+    let cancelled = false;
     async function fetchRatings() {
       try {
         const supabase = createClient();
-        const { data, error } = await supabase
+        const base = supabase
           .from("ratings")
           .select(
             "id, place_id, venue_name, venue_address, venue_type, meal_type, visit_date, weighted_score, notes, meal_photo_url, criteria_scores, created_at"
-          )
-          .eq("device_id", getDeviceId())
-          .order("created_at", { ascending: false });
+          );
+        const { data, error } = await applyRatingsOwnerScope(base, {
+          user,
+          deviceId: getDeviceId(),
+        }).order("created_at", { ascending: false });
+        if (cancelled) return;
         if (error) {
           console.error("Supabase error:", error.code, error.message, error.details, error.hint);
           setError(`${error.message || error.code || "Unknown Supabase error"}`);
           return;
         }
-        const rows = (data ?? []) as Rating[];
-        setRatings(rows);
+        setRatings((data ?? []) as Rating[]);
       } catch (err) {
+        if (cancelled) return;
         console.error("Fetch error:", err);
         setError(err instanceof Error ? err.message : "Could not load ratings.");
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
+    setLoading(true);
     fetchRatings();
-  }, []);
+    return () => {
+      cancelled = true;
+    };
+  }, [authLoading, user]);
 
   // ── Loading ──────────────────────────────────────────────────────────────
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
-      <main className="mx-auto min-w-0 w-full max-w-2xl pt-lg pb-10">
+      <PageShell variant="feed" className="pt-lg pb-10">
         <div className="flex flex-col gap-md">
           <h1 className="font-display-lg text-[32px] font-bold leading-[40px] text-on-surface">My Ratings</h1>
           <div className="flex items-center gap-xs text-on-surface-variant">
@@ -95,7 +140,7 @@ export default function HistoryPage() {
             <span className="font-body-md text-body-md">Loading…</span>
           </div>
         </div>
-      </main>
+      </PageShell>
     );
   }
 
@@ -103,9 +148,10 @@ export default function HistoryPage() {
 
   if (ratings.length === 0) {
     return (
-      <main className="mx-auto min-w-0 w-full max-w-2xl pt-lg pb-10">
+      <PageShell variant="feed" className="pt-lg pb-10">
         <div className="flex flex-col gap-md">
           <h1 className="font-display-lg text-[32px] font-bold leading-[40px] text-on-surface">My Ratings</h1>
+          {!user && <GuestUpsellCard />}
           {error ? (
             <p className="rounded-xl border border-error-container bg-error-container/20 px-md py-sm font-body-md text-body-md text-error">
               {error}
@@ -139,7 +185,7 @@ export default function HistoryPage() {
             </div>
           )}
         </div>
-      </main>
+      </PageShell>
     );
   }
 
@@ -150,7 +196,7 @@ export default function HistoryPage() {
   }
 
   return (
-    <main className="mx-auto min-w-0 w-full max-w-2xl pt-lg pb-10">
+    <PageShell variant="feed" className="pt-lg pb-10">
       <RatingEditSheet
         rating={editing}
         onClose={() => setEditing(null)}
@@ -167,7 +213,7 @@ export default function HistoryPage() {
           <div>
             <h1 className="font-display-lg text-[32px] font-bold leading-[40px] text-on-surface">My Ratings</h1>
             <p className="mt-xs font-body-md text-body-md text-on-surface-variant">
-              {ratings.length} {ratings.length === 1 ? "spot" : "spots"} rated
+              <span className="tabular-nums">{ratings.length}</span> {ratings.length === 1 ? "spot" : "spots"} rated
             </p>
           </div>
           <Link
@@ -180,6 +226,8 @@ export default function HistoryPage() {
             Rate
           </Link>
         </div>
+
+        {!user && <GuestUpsellCard />}
 
         {/* Cards */}
         <div className="flex flex-col gap-sm">
@@ -264,6 +312,6 @@ export default function HistoryPage() {
           })}
         </div>
       </div>
-    </main>
+    </PageShell>
   );
 }

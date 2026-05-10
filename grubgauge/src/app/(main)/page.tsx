@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { PageShell } from "@/components/layout/PageShell";
 import { getDeviceId, isOnboarded } from "@/lib/identity/deviceId";
 import { useAuth } from "@/lib/auth/useAuth";
+import { applyRatingsOwnerScope } from "@/lib/ratings/scope";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -51,7 +52,7 @@ function formatDate(dateStr: string): string {
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [ratings, setRatings] = useState<Rating[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -67,21 +68,32 @@ export default function DashboardPage() {
       router.replace("/onboarding");
       return;
     }
-    async function fetch() {
+    // Hold the query until auth resolves so a freshly-signed-in user never
+    // flashes guest stats (matches History scoping discipline).
+    if (authLoading) return;
+    let cancelled = false;
+    async function fetchRatings() {
       try {
         const supabase = createClient();
-        const { data } = await supabase
+        const base = supabase
           .from("ratings")
-          .select("id, venue_name, venue_address, venue_type, meal_type, visit_date, weighted_score, notes, meal_photo_url, created_at")
-          .eq("device_id", getDeviceId())
-          .order("created_at", { ascending: false });
+          .select("id, venue_name, venue_address, venue_type, meal_type, visit_date, weighted_score, notes, meal_photo_url, created_at");
+        const { data } = await applyRatingsOwnerScope(base, {
+          user,
+          deviceId: getDeviceId(),
+        }).order("created_at", { ascending: false });
+        if (cancelled) return;
         setRatings(data ?? []);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
-    fetch();
-  }, [router]);
+    setLoading(true);
+    fetchRatings();
+    return () => {
+      cancelled = true;
+    };
+  }, [router, authLoading, user]);
 
   const stats = useMemo(() => {
     if (ratings.length === 0) return null;

@@ -347,6 +347,11 @@ export default function RatePage() {
     try {
       const supabase = createClient();
       const deviceId = getDeviceId();
+      // Identity is additive: `device_id` is always written so guest rows
+      // remain device-scoped; `user_id` is set when signed in so History /
+      // Dashboard can scope by account across devices.
+      const { data: authData } = await supabase.auth.getUser();
+      const userId = authData.user?.id ?? null;
       let mealPhotoUrl: string | null = null;
       if (mealPhotoFile) {
         try {
@@ -370,6 +375,7 @@ export default function RatePage() {
         notes: notes.trim() || null,
         meal_photo_url: mealPhotoUrl,
         device_id: deviceId,
+        user_id: userId,
       });
       setSubmittedMealPhotoUrl(mealPhotoUrl);
       clearMealPhoto();

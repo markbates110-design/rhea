@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { createClient } from "@/lib/supabase/client";
 import { getDeviceId } from "@/lib/identity/deviceId";
+import { useAuth } from "@/lib/auth/useAuth";
+import { applyRatingsOwnerScope } from "@/lib/ratings/scope";
 import {
   DEFAULT_SCORE,
   VENUE_CRITERIA,
@@ -66,6 +68,10 @@ function buildInitialScores(r: EditableRatingRow): Record<string, number> {
 
 /** Mounted with key={rating.id} so hooks initialize from rating without effect sync */
 function RatingEditSheetInner({ rating, onClose, onSaved, onDeleted }: InnerProps) {
+  // Same auth-aware ownership scope used by History / Dashboard reads — keeps
+  // edit/delete from succeeding cross-account or failing for a signed-in
+  // user who rated on a different device.
+  const { user } = useAuth();
   const venueType: VenueType = normalizeVenueType(rating.venue_type);
   const criteria = useMemo(() => VENUE_CRITERIA[venueType], [venueType]);
   const meta = VENUE_META[venueType];
@@ -151,7 +157,7 @@ function RatingEditSheetInner({ rating, onClose, onSaved, onDeleted }: InnerProp
         }
       }
 
-      const { data, error: upErr } = await supabase
+      const updateBase = supabase
         .from("ratings")
         .update({
           meal_type: mealType,
@@ -161,8 +167,11 @@ function RatingEditSheetInner({ rating, onClose, onSaved, onDeleted }: InnerProp
           notes: notes.trim() || null,
           meal_photo_url: mealPhotoUrl,
         })
-        .eq("id", rating.id)
-        .eq("device_id", deviceId)
+        .eq("id", rating.id);
+      const { data, error: upErr } = await applyRatingsOwnerScope(updateBase, {
+        user,
+        deviceId,
+      })
         .select(
           "id, place_id, venue_name, venue_address, venue_type, meal_type, visit_date, weighted_score, notes, meal_photo_url, criteria_scores, created_at"
         )
@@ -193,12 +202,14 @@ function RatingEditSheetInner({ rating, onClose, onSaved, onDeleted }: InnerProp
     try {
       const supabase = createClient();
       const deviceId = getDeviceId();
-      const { data: deletedRows, error: delErr } = await supabase
+      const deleteBase = supabase
         .from("ratings")
         .delete()
-        .eq("id", rating.id)
-        .eq("device_id", deviceId)
-        .select("id");
+        .eq("id", rating.id);
+      const { data: deletedRows, error: delErr } = await applyRatingsOwnerScope(deleteBase, {
+        user,
+        deviceId,
+      }).select("id");
 
       if (delErr) {
         console.error(delErr);
