@@ -15,8 +15,7 @@
 
 History / My Ratings: edit sheet (criteria sliders, visit details, notes, meal photo) plus delete with confirmation. Supabase `update` / `delete` scoped with `.eq("id").eq("device_id", …)`; Explore unchanged (read-only).
 
-**Next:** Paste next Creation Intent in sticky template when ready (`go`). Ops: Vercel GitHub repo **`markbates110-design/rhea`** · **Root Directory `./`** (repo root — verified after extended deploy troubleshooting per **Assessment — Vercel Root Directory canonical (`rhea` ↔ GrubGauge)**); deployments/dashboard may appear under **`markbates110-designs-projects`**. *(Session reconciled explicit `stop`: 2026-05-12.)*
-
+**Next:** Paste next Creation Intent in sticky template when ready (`go`). Ops: Vercel GitHub **`markbates110-design/rhea`** · dashboard **Root `./`** (confirm in **deployment build logs**; **filesystem** puts GrubGauge under **`grubgauge/` only** — see **Assessment — Vercel Root Directory canonical**). Deployments UI may appear under **`markbates110-designs-projects`**.
 ---
 
 ### Creation Intent History

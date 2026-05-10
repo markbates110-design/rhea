@@ -23,8 +23,9 @@ The Governance Agent must read this file at the start of every major session.
 - Negative space phrasing ("You don’t have to fix me") creates more vulnerability than direct pleas.
 
 **2026-05-13 — GrubGauge / Vercel `rhea` Root Directory**
-- **Canonical:** GitHub **`markbates110-design/rhea`** + Vercel **Root Directory `./`** — locked in after **hours** of overnight troubleshooting; **Sonnet 4.6** matched this setting. Deployments UI may show **`markbates110-designs-projects`** — same org/project, different URL slug.
-- **Stale guidance:** Earlier logs said Root **`grubgauge`**; that path **burned time** when the live project actually builds from **`./`**. Update runbooks and **Creation Intent `Next:`** to **`./`**; keep old lines in assessments only with explicit **supersedence** notes.
+- **Dashboard vs repo:** Vercel UI + session notes cited **Root `./`** (**Sonnet 4.6** aligned). **On `main` this repo has no `package.json` at `./`** — GrubGauge Next.js lives only under **`grubgauge/`**. **`./` is not inferable from filesystem alone**; **`grubgauge`** matches vanilla “app in subfolder” wiring. **Truth test:** latest **Deployment → Building** log (`npm ci`, `next build` working directory).
+- **Stale agent copy** alternated **`grubgauge`** vs **`./`** — either can be valid per project; **trust logs + dashboard**, not chat. See **`grubgauge-build-assessment.md`** — **Vercel Root Directory canonical**.
+- Deployments UI slugs: **`markbates110-designs-projects`** vs **`markbates110-design`** — org URL variance only.
 
 **2026-05-12 — GrubGauge flex / “vertical text”**
 - Site-wide **`min-w-0`** on shells, page `<main>`, and nested flex/grid columns that host **`w-full`** forms — pair with the existing **`<main> mx-auto w-full max-w-*` contract** so block text never resolves to one-character wrapping.
@@ -179,7 +180,7 @@ The Governance Agent must read this file at the start of every major session.
 ### Session Close - 2026-05-09 (Governance + GrubGauge deploy hygiene)
 - `stop` as Session Close trigger in `rhea-governance-agent.md` is binding **when that protocol is explicitly invoked** in Cursor (e.g. “Session Close per governance”). Plain **`stop`** is otherwise ambiguous — assistants default to ending chatter rather than flushing assessments or intents unless instructed.
 - Monorepo folders recorded as **`160000` gitlinks** without valid `.gitmodules` / submodule fetch cause clones where **`grubgauge/` exists only as an empty pointer** → Vercel “Root Directory does not exist” / “No Next.js detected”. Fix locally with **`git rm --cached`**, remove nested **`.git`**, **`git add`** full trees, push — never rely on submodule shims for single-repo deployments unless CI submodule auth is intentional.
-- **`rhea` ↔ GrubGauge — Vercel Root (2026-05-13):** Gitlink repair and **Root Directory** are different levers. Canonical for the live **`rhea`** project: **`./`** (extended overnight triage; **Sonnet 4.6** alignment). See **`grubgauge-build-assessment.md`** — **Vercel Root Directory canonical** and **`rhea-creation-intent` Next:** — do not copy stale **Root `grubgauge`** into runbooks.
+- **`rhea` ↔ GrubGauge — Vercel Root (2026-05-13 reconcile):** Gitlink repair ≠ Root Directory. **`./`** was dashboard/assistant-asserted (**Sonnet**); **repo `main` holds `package.json` only under `grubgauge/`** — verify **build logs**. See **`grubgauge-build-assessment.md`** — **Vercel Root Directory canonical**.
 
 ### Session Insights - 2026-05-09 (GrubGauge Onboarding Flow)
 - When adding auth to an app that already uses device_id, don't replace device_id — layer auth on top as optional. Guest path keeps the existing data model intact. Auth path adds identity without breaking existing records. Migration can happen in a later iteration when there's enough signal that users want it.
@@ -233,9 +234,9 @@ The Governance Agent must read this file at the start of every major session.
 
 ### Session Insights — 2026-05-13 (GrubGauge Vercel Root Directory reconciliation)
 
-- **Canonical:** **`markbates110-design/rhea`** builds on Vercel with **Root Directory `./`** — outcome of sustained troubleshooting (**Sonnet 4.6** corroborated). URLs like **`vercel.com/.../markbates110-designs-projects/rhea/deployments`** are the same linkage.
-- **Process failure mode:** Logs and intents said **`Root: grubgauge`** while production used **`./`** — collaborators and assistants burned hours chasing UI/CSS when deploy/config narrative was inconsistent.
-- **Remedy logged:** **`rhea-creation-intent` Next:** + **`grubgauge-build-assessment.md`** canonical assessment + **bookmark** updated; archival **`grubgauge`** Root mentions carry **Supersedence** notes.
+- **Facts:** **`./`** appears in dashboard/session guidance; **cloned `main`** has **no root `package.json`** — Next app paths are **`grubgauge/next.config.ts`** etc.
+- **`./` vs `grubgauge`:** Resolves only with **successful Vercel build logs** / install path; naive monorepo default for this layout is **`grubgauge`**.
+- **Lesson:** Logs and assistants contradicted → wasted triage until **truth** anchored on **filesystem + deployment output**, not rhetoric.
 
 ---
 

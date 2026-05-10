@@ -280,7 +280,7 @@
 
 **i²:** Monorepos on GitHub must not expose apps as dangling submodule commits — hosts clone shallow/submodules inconsistently → empty app dirs → “No Next.js”. **`stop`** in plain Cursor chat does not auto-run Session Close unless the governance protocol is explicitly invoked.
 
-**Supersedence (*Root Directory wording*):** The **s** line above recommended Vercel **Root Directory `grubgauge`** for this repo layout. After **hours of troubleshooting** (including **Sonnet 4.6** confirmation), **`./`** at repo root is **authoritative** for the **`rhea`** deployment link — see **Assessment — Vercel Root Directory canonical (`rhea` ↔ GrubGauge)** — keep this stale line for traceability only.
+**Supersedence (*Root Directory wording*):** The **s** line above recommended **Root `grubgauge`**, which matches **this repo’s on-disk GrubGauge paths** (`package.json` under **`grubgauge/`** only). Later session + **Sonnet** pointed at dashboard **Root `./`** — **not provable from filesystem alone** (see **Assessment — Vercel Root Directory canonical**) — **confirm with Vercel build logs**; keep archival **s** line for traceability.
 
 ---
 
@@ -424,7 +424,12 @@
 
 **e** — Creation Intent **Next:** lines and Session Close notes repeatedly cited **Root Directory `grubgauge`** while the **`rhea`** monorepo on disk nests the Next app under **`grubgauge/`**. Vercel + GitHub wiring drift (`./` vs subdirectory) burned **hours** of triage overnight; resolved with dashboard verification and **Sonnet 4.6** guidance (**Root `./`**).
 
-**s** — **Authoritative:** Vercel project for GrubGauge linked from GitHub **`markbates110-design/rhea`** uses **Root Directory `./`** (repo root as in the Vercel UI). Deployments URLs may appear under **`vercel.com/.../markbates110-designs-projects/rhea/deployments`** — same linkage, alternate org slug. Older log lines that specify **`grubgauge`** as Root are **retained historically** where noted but **must not drive new configuration**.
+**s** — **Dashboard-reported:** The live Vercel project for **`rhea`** (**`markbates110-design`** / **`markbates110-designs-projects`** URL variants) shows **Root Directory `./`**, corroborated in-session by extended troubleshooting notes + **Sonnet 4.6** guidance.
+
+**Filesystem cross-check *(this workspace / `main` clone)*:** **`package.json`** and **`next.config.ts`** for GrubGauge exist **only** under **`grubgauge/`**, not at repo **`./`** root alongside **`creation_engine/`** etc. So **inferring Root from repo layout alone** would point at **`grubgauge`**. If the dashboard truly uses **`./`**, the deploy must rely on something outside this tree (custom **Install / Build** commands, a different Git ref, dashboard-only overrides) — **`./` is not “confirmed correct” purely from filesystem evidence** without matching **Deploy → Logs** (**where `npm ci` / `next build` run**).
+**Practical verdict:** **`./`** is **confirmed iff** production build logs show a successful **`next build`** with that Root (or documented custom commands equivalent). **`grubgauge`** matches the monorepo **as checked in** here; reconcile any mismatch via Vercel settings + logs — do not assume assistants’ prior **`grubgauge`** or **`./`** tips without them.
+
+Deployments URLs may appear under **`vercel.com/.../markbates110-designs-projects/rhea/deployments`**. Older log lines that specify **`grubgauge`** as Root remain **historical**; **`./`** stays **dashboard-asserted**, not filesystem-derived.
 
 **i²**
 - *First Iteration:* **Painful deploy incidents** should overwrite assistant-guessed Root paths in **`rhea-creation-intent`** and assessments immediately — ambiguity is recurring entropy.
