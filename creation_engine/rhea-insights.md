@@ -1,6 +1,6 @@
 # Rhea Insights & Process Upgrades
 
-**Last Updated:** 2026-05-10 17:50 CT
+**Last Updated:** 2026-05-10 18:00 CT
 
 This file bookmarks key i² insights, process improvements, and patterns discovered across all creations. 
 The Governance Agent must read this file at the start of every major session.
@@ -10,6 +10,12 @@ The Governance Agent must read this file at the start of every major session.
 ### Bookmarked Insights
 
 #### Product (apps · governance · ops)
+
+**2026-05-10 18:00 CT — Session close: governance v3.13 + v3.14 stamped under Stop-batch authorization**
+- **v3.13 stamped** — build gate on route-touching iterations is now part of Verification Pass — Page route. Catches the prerender-shape class (`useSearchParams` outside `<Suspense>`, etc.) that `tsc` + `eslint` + `next dev` miss but Vercel will fail on. Applied to the staged PAP candidate from `2026-05-10 17:30 CT`.
+- **v3.14 stamped** — *Token conservation* is now a first-class governance constraint. Codifies the forward directive from `2026-05-10 13:51 CT`: post-iteration bookkeeping (prod-verify stamps, Observed Effect flips, `Last Updated` bumps) batches at Session Close; bookmarked insights may consolidate per arc; `Assessment ↓` chat restatement stays terse — the canonical record lives in the assessment file, not the chat.
+- **Pattern this Stop modeled.** "Run any batched PAP or final clean up" granted blanket approval to the staged PAP queue, so both amendments landed in one bookkeeping pass plus an archive mirror — exactly the batching v3.14 codifies. The Stop directive is the canonical batching surface; multi-PAP approval is legitimate here.
+- **Arc closed tonight (commits `5a1eb8a` → `7488de7`):** rate-screen venue fixes; guest vs signed-in scoping + `ratings.user_id` migration + History upsell; post-signup loop fix; dual-mode auth; header text-link pair; *Create Account → Sign Up* copy pass; Suspense fix for prerender; username persistence via `user_metadata`. Two governance bumps (v3.13, v3.14). All prod-verified end-to-end per user confirmation at `2026-05-10 17:15 CT`.
 
 **2026-05-10 17:50 CT — Supabase `user_metadata` is the canonical store for small per-user profile fields**
 - **Pattern.** Per-user fields that are small (≤ a few KB), don't need to be queryable from other users' contexts, and travel with the account (username, food prefs, avatar URL, default city, notification flags) live on `auth.users.raw_user_meta_data` — accessed as `user.user_metadata.<field>` and updated via `supabase.auth.updateUser({ data: { … } })`. **Zero migration, zero extra round-trip** (the field arrives on the `user` object that `useAuth` already returns).

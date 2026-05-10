@@ -16,7 +16,7 @@
 
 Chosen screen name (and food prefs) now persist on `auth.users.raw_user_meta_data` via `supabase.auth.updateUser({ data: { username, food_prefs } })` — no migration; uses Supabase's built-in metadata field. `/onboarding/profile` hydrates from `user_metadata` for signed-in users (localStorage fallback for guests) and mirrors saves back to local for fast-path hydration. `/profile` greets the user by name and surfaces the screen name above the email when set. Identity stays additive: local mirror never replaces the auth-backed canonical value.
 
-**Next:** Paste next Creation Intent in sticky template when ready (`go`). **Ops (Vercel / Root):** see **`grubgauge-build-assessment.md`** → **Vercel Root Directory canonical**.
+**Next:** Session closed 2026-05-10 18:00 CT — paste next Creation Intent in sticky template when ready (`go`). Follow-on cleanups landed inside this session: dual-mode auth · header text-link pair · post-signup loop fix · prerender Suspense fix · *Create Account → Sign Up* copy pass. **Ops (Vercel / Root):** see **`grubgauge-build-assessment.md`** → **Vercel Root Directory canonical**.
 ---
 
 ### Creation Intent History
