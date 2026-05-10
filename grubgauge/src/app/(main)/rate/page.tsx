@@ -22,28 +22,68 @@ interface SpotSelection {
   venueType: VenueType;
 }
 
-// Google Places type → VenueType mapping
-const PLACE_TYPE_MAP: Record<string, VenueType> = {
-  fast_food_restaurant: "fast-food",
-  hamburger_restaurant: "fast-food",
-  sandwich_shop: "fast-food",
-  pizza_restaurant: "fast-food",
-  meal_takeaway: "fast-food",
-  meal_delivery: "fast-food",
-  fine_dining_restaurant: "fine",
-  american_restaurant: "casual",
-  restaurant: "casual",
-  casual_dining_restaurant: "casual",
-  bar: "casual",
-  pub: "casual",
-  food_truck: "food-truck",
-  food_stall: "food-truck",
-  street_food: "food-truck",
+// Google Places types grouped by VenueType. Inference uses priority order
+// (fast-food > food-truck > fine > casual) — Google sometimes returns the
+// generic `restaurant` / cuisine type *before* `fast_food_restaurant`, which
+// would mis-classify chains like McDonald's as Casual Dining under a
+// first-match scan. Priority match guarantees the most specific bucket wins.
+const TYPES_BY_VENUE: Record<VenueType, readonly string[]> = {
+  "fast-food": [
+    "fast_food_restaurant",
+    "hamburger_restaurant",
+    "sandwich_shop",
+    "pizza_restaurant",
+    "meal_takeaway",
+    "meal_delivery",
+    "donut_shop",
+    "bagel_shop",
+    "ice_cream_shop",
+    "coffee_shop",
+    "cafe",
+    "chicken_restaurant",
+    "fried_chicken_restaurant",
+    "taco_restaurant",
+    "burrito_restaurant",
+  ],
+  "food-truck": ["food_truck", "food_stall", "street_food"],
+  fine: ["fine_dining_restaurant"],
+  casual: [
+    "casual_dining_restaurant",
+    "restaurant",
+    "american_restaurant",
+    "italian_restaurant",
+    "mexican_restaurant",
+    "chinese_restaurant",
+    "japanese_restaurant",
+    "thai_restaurant",
+    "indian_restaurant",
+    "korean_restaurant",
+    "vietnamese_restaurant",
+    "french_restaurant",
+    "mediterranean_restaurant",
+    "greek_restaurant",
+    "spanish_restaurant",
+    "middle_eastern_restaurant",
+    "steak_house",
+    "seafood_restaurant",
+    "vegetarian_restaurant",
+    "vegan_restaurant",
+    "barbecue_restaurant",
+    "ramen_restaurant",
+    "sushi_restaurant",
+    "bar",
+    "pub",
+    "wine_bar",
+    "brewery",
+  ],
 };
 
+const VENUE_PRIORITY: readonly VenueType[] = ["fast-food", "food-truck", "fine", "casual"];
+
 function inferVenueType(types: string[]): VenueType {
-  for (const t of types) {
-    if (t in PLACE_TYPE_MAP) return PLACE_TYPE_MAP[t];
+  const set = new Set(types);
+  for (const venue of VENUE_PRIORITY) {
+    if (TYPES_BY_VENUE[venue].some((t) => set.has(t))) return venue;
   }
   return "casual";
 }
@@ -151,7 +191,7 @@ function SpotSearch({ onSelect }: { onSelect: (s: SpotSelection) => void }) {
           className="min-w-0 flex-1 bg-transparent font-body-md text-body-md text-on-surface outline-none placeholder:text-on-surface-variant/50"
         />
         {query && (
-          <button onClick={() => { setQuery(""); setSuggestions([]); }} className="text-on-surface-variant hover:text-on-surface transition-colors shrink-0">
+          <button type="button" onClick={() => { setQuery(""); setSuggestions([]); }} className="text-on-surface-variant hover:text-on-surface transition-colors shrink-0">
             <span className="material-symbols-outlined text-[18px]">close</span>
           </button>
         )}
@@ -168,6 +208,7 @@ function SpotSearch({ onSelect }: { onSelect: (s: SpotSelection) => void }) {
           {suggestions.map((pred, i) => (
             <button
               key={i}
+              type="button"
               onClick={() => handleSelect(pred)}
               className="flex w-full items-start gap-sm px-sm py-xs text-left hover:bg-surface-container-highest transition-colors border-b border-outline-variant/50 last:border-0"
             >
@@ -455,7 +496,11 @@ export default function RatePage() {
             )}
 
             {mapsReady ? (
-              <SpotSearch onSelect={handleSpotSelect} />
+              // `key` resets all internal SpotSearch state (query, suggestions,
+              // Places service refs, debounce timer) when the user clicks
+              // "Change" on the selected-spot chip. Guarantees a clean search
+              // surface — no stale dropdown can overlay the chip area.
+              <SpotSearch key={spot ? "selected" : "empty"} onSelect={handleSpotSelect} />
             ) : !mapsError ? (
               <div className="flex items-center gap-xs text-on-surface-variant font-body-md text-body-md">
                 <span className="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
@@ -479,7 +524,16 @@ export default function RatePage() {
                   <span className="inline-flex items-center gap-xs rounded-full bg-primary-container px-xs py-0.5 font-label-sm text-label-sm font-bold text-on-primary-container whitespace-nowrap">
                     {meta?.label}
                   </span>
-                  <button onClick={() => { setSpot(null); setScores({}); clearMealPhoto(); }} className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSpot(null);
+                      setScores({});
+                      setError("");
+                      clearMealPhoto();
+                    }}
+                    className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors"
+                  >
                     Change
                   </button>
                 </div>
