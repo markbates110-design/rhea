@@ -338,6 +338,26 @@
 
 ---
 
+## Assessment — History edit & delete (device-scoped ratings)
+**Timestamp: 2026-05-11**
+
+**e** — Explored reusing `/rate` vs modal; shared `VENUE_CRITERIA`/`calcWeightedScore` with `/rate`; owner enforcement via dual filter on mutate; Explore explicitly left without controls.
+
+**s** — Added `src/lib/ratings/scoring.ts` (shared criteria + weights); `RatingEditSheet` on History with live weighted score, visit details, notes, photo replace/remove; `update` + `delete().select("id")` both `.eq("device_id", getDeviceId())`; delete uses second-step confirm. Build + eslint clean.
+
+**i²**
+- *First Iteration:* Keyed inner editor (`key={rating.id}`) avoids effect-driven form reset and satisfies `react-hooks/set-state-in-effect`.
+- *Second Iteration:* `delete().select("id")` verifies a row was removed when PostgREST returns no error on zero rows.
+
+**Performance Rating: ★★★★★** — Scoped to History; data model unchanged except client fetch of `criteria_scores` / `place_id`.
+
+**Recommended Next Steps:**
+1. If UPDATE/DELETE fails in prod, add matching Supabase RLS policies for anon + `device_id` model (or move to auth).
+2. Optional: storage cleanup when removing meal photos.
+3. Paste next Creation Intent → `go`.
+
+---
+
 ## Session Close — explicit `stop` + iteration reconcile
 **Timestamp: 2026-05-10**
 

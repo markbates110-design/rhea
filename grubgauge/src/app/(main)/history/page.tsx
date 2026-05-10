@@ -4,27 +4,28 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { getDeviceId } from "@/lib/identity/deviceId";
+import { RatingEditSheet, type EditableRatingRow } from "@/components/history/RatingEditSheet";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
-type VenueType = "fast-food" | "casual" | "fine" | "food-truck";
-
 interface Rating {
   id: string;
+  place_id: string;
   venue_name: string;
   venue_address: string;
-  venue_type: VenueType;
+  venue_type: string;
   meal_type: string;
   visit_date: string;
   weighted_score: number;
   notes: string | null;
   meal_photo_url: string | null;
+  criteria_scores: Record<string, number> | null;
   created_at: string;
 }
 
 // ── Venue config ───────────────────────────────────────────────────────────
 
-const VENUE_META: Record<VenueType, { label: string; icon: string }> = {
+const VENUE_META: Record<string, { label: string; icon: string }> = {
   "fast-food":  { label: "Fast Food",     icon: "fastfood" },
   casual:       { label: "Casual Dining", icon: "restaurant" },
   fine:         { label: "Fine Dining",   icon: "dining" },
@@ -52,6 +53,7 @@ export default function HistoryPage() {
   const [ratings, setRatings] = useState<Rating[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [editing, setEditing] = useState<EditableRatingRow | null>(null);
 
   useEffect(() => {
     async function fetchRatings() {
@@ -59,7 +61,9 @@ export default function HistoryPage() {
         const supabase = createClient();
         const { data, error } = await supabase
           .from("ratings")
-          .select("id, venue_name, venue_address, venue_type, meal_type, visit_date, weighted_score, notes, meal_photo_url, created_at")
+          .select(
+            "id, place_id, venue_name, venue_address, venue_type, meal_type, visit_date, weighted_score, notes, meal_photo_url, criteria_scores, created_at"
+          )
           .eq("device_id", getDeviceId())
           .order("created_at", { ascending: false });
         if (error) {
@@ -67,7 +71,8 @@ export default function HistoryPage() {
           setError(`${error.message || error.code || "Unknown Supabase error"}`);
           return;
         }
-        setRatings(data ?? []);
+        const rows = (data ?? []) as Rating[];
+        setRatings(rows);
       } catch (err) {
         console.error("Fetch error:", err);
         setError(err instanceof Error ? err.message : "Could not load ratings.");
@@ -140,8 +145,21 @@ export default function HistoryPage() {
 
   // ── Main ─────────────────────────────────────────────────────────────────
 
+  function openEditor(r: Rating) {
+    setEditing(r as EditableRatingRow);
+  }
+
   return (
     <main className="mx-auto w-full max-w-2xl pt-lg pb-10">
+      <RatingEditSheet
+        rating={editing}
+        onClose={() => setEditing(null)}
+        onSaved={(row) =>
+          setRatings((prev) => prev.map((x) => (x.id === row.id ? ({ ...x, ...row } as Rating) : x)))
+        }
+        onDeleted={(id) => setRatings((prev) => prev.filter((x) => x.id !== id))}
+      />
+
       <div className="flex flex-col gap-lg">
 
         {/* Header */}
@@ -176,9 +194,19 @@ export default function HistoryPage() {
                 {/* Name + Score */}
                 <div className="flex items-start justify-between gap-sm">
                   <div className="min-w-0 flex-1">
-                    <p className="font-title-sm text-title-sm font-semibold text-on-surface truncate">
-                      {r.venue_name}
-                    </p>
+                    <div className="flex items-start justify-between gap-xs">
+                      <p className="font-title-sm text-title-sm font-semibold text-on-surface truncate">
+                        {r.venue_name}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => openEditor(r)}
+                        className="shrink-0 rounded-lg border border-outline-variant bg-surface-container px-xs py-0.5 font-label-sm text-label-sm text-on-surface hover:border-primary hover:bg-surface-container-high transition-colors"
+                        aria-label={`Edit rating for ${r.venue_name}`}
+                      >
+                        Edit
+                      </button>
+                    </div>
                     {r.venue_address && (
                       <p className="mt-0.5 font-label-sm text-label-sm text-on-surface-variant truncate">
                         {r.venue_address}

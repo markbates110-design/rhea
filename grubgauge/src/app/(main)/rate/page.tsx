@@ -4,19 +4,16 @@ import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { getDeviceId } from "@/lib/identity/deviceId";
+import {
+  DEFAULT_SCORE,
+  VENUE_CRITERIA,
+  VENUE_META,
+  calcWeightedScore,
+  type VenueType,
+} from "@/lib/ratings/scoring";
 import { uploadMealPhoto } from "@/lib/storage/mealPhoto";
 
 // ── Types ──────────────────────────────────────────────────────────────────
-
-type VenueType = "fast-food" | "casual" | "fine" | "food-truck";
-
-interface Criterion {
-  key: string;
-  label: string;
-  weight: number; // 0–1, must sum to 1 per venue type
-  low: string;
-  high: string;
-}
 
 interface SpotSelection {
   placeId: string;
@@ -24,46 +21,6 @@ interface SpotSelection {
   address: string;
   venueType: VenueType;
 }
-
-// ── Venue config ───────────────────────────────────────────────────────────
-
-const VENUE_META: Record<VenueType, { label: string; icon: string; tagline: string }> = {
-  "fast-food":  { label: "Fast Food",    icon: "fastfood",   tagline: "Maximum Value in Minimum Time" },
-  casual:       { label: "Casual Dining", icon: "restaurant", tagline: "Reliable, Enjoyable Experience" },
-  fine:         { label: "Fine Dining",   icon: "dining",     tagline: "Memorable Luxury Experience" },
-  "food-truck": { label: "Food Truck",    icon: "local_shipping", tagline: "Bold Street Experience" },
-};
-
-const VENUE_CRITERIA: Record<VenueType, Criterion[]> = {
-  "fast-food": [
-    { key: "portion",   label: "Portion Size vs Price",      weight: 0.35, low: "Skimpy",      high: "Generous" },
-    { key: "taste",     label: "Taste & Freshness",           weight: 0.25, low: "Bland",       high: "Delicious" },
-    { key: "speed",     label: "Speed of Service",            weight: 0.20, low: "Very Slow",   high: "Lightning Fast" },
-    { key: "accuracy",  label: "Cleanliness & Order Accuracy",weight: 0.10, low: "Poor",        high: "Spotless & Perfect" },
-    { key: "deal",      label: "Deal / Combo Value",          weight: 0.10, low: "No Value",    high: "Excellent Deal" },
-  ],
-  casual: [
-    { key: "quality",   label: "Food Quality & Freshness",    weight: 0.30, low: "Poor",        high: "Exceptional" },
-    { key: "service",   label: "Service & Friendliness",      weight: 0.25, low: "Lacking",     high: "Excellent" },
-    { key: "portion",   label: "Portion Size vs Price",       weight: 0.20, low: "Skimpy",      high: "Generous" },
-    { key: "atmosphere",label: "Atmosphere & Comfort",        weight: 0.15, low: "Unpleasant",  high: "Wonderful" },
-    { key: "value",     label: "Overall Value (full check)",  weight: 0.10, low: "Poor",        high: "Outstanding" },
-  ],
-  fine: [
-    { key: "quality",   label: "Food Quality & Creativity",   weight: 0.35, low: "Disappointing",high: "Extraordinary" },
-    { key: "service",   label: "Service Excellence",          weight: 0.25, low: "Lacking",     high: "Impeccable" },
-    { key: "ambiance",  label: "Ambiance & Atmosphere",       weight: 0.20, low: "Poor",        high: "Sublime" },
-    { key: "detail",    label: "Attention to Detail",         weight: 0.10, low: "Careless",    high: "Flawless" },
-    { key: "value",     label: "Value Perception",            weight: 0.10, low: "Overpriced",  high: "Worth Every Cent" },
-  ],
-  "food-truck": [
-    { key: "taste",     label: "Taste & Creativity",          weight: 0.35, low: "Generic",     high: "Outstanding" },
-    { key: "portion",   label: "Portion Size vs Price",       weight: 0.25, low: "Skimpy",      high: "Generous" },
-    { key: "freshness", label: "Freshness & Quality",         weight: 0.15, low: "Poor",        high: "Exceptional" },
-    { key: "vibes",     label: "Truck Vibes & Cleanliness",   weight: 0.15, low: "Grimy",       high: "Great Energy" },
-    { key: "speed",     label: "Speed & Friendliness",        weight: 0.10, low: "Slow & Cold", high: "Fast & Warm" },
-  ],
-};
 
 // Google Places type → VenueType mapping
 const PLACE_TYPE_MAP: Record<string, VenueType> = {
@@ -92,15 +49,6 @@ function inferVenueType(types: string[]): VenueType {
 }
 
 // ── Scoring ────────────────────────────────────────────────────────────────
-
-const DEFAULT_SCORE = 7.5; // out of 10
-
-function calcWeightedScore(criteria: Criterion[], scores: Record<string, number>): number {
-  return criteria.reduce((total, c) => {
-    const raw = scores[c.key] ?? DEFAULT_SCORE;
-    return total + raw * c.weight;
-  }, 0);
-}
 
 function scoreBadge(score: number): { label: string; colorClass: string } {
   if (score >= 9.0) return { label: "Exceptional", colorClass: "text-primary" };

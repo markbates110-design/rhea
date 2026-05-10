@@ -1,6 +1,6 @@
 # Rhea Insights & Process Upgrades
 
-**Last Updated:** 2026-05-10
+**Last Updated:** 2026-05-11
 
 This file bookmarks key i² insights, process improvements, and patterns discovered across all creations. 
 The Governance Agent must read this file at the start of every major session.
@@ -202,6 +202,14 @@ The Governance Agent must read this file at the start of every major session.
 - **Single outer shell:** Put `max-w-*` + horizontal gutter once on the route-group layout (or shared header/body wrapper) so every page’s `<main>` only controls *inner* max width — eliminates double `px-*` and aligns sticky nav with scrolling content.
 - **Bottom nav on wide phones:** Fix the bar to the same `max-w-5xl px-margin-edge` column as the page body (with `env(safe-area-inset-bottom)` padding) so thumbs and content share one vertical rhythm.
 - **Desktop header:** Constrain the header row to that same column; never full-bleed flex nav when body is a centered column — it reads “misaligned” on ultrawide displays.
+
+---
+
+### Session Insights — 2026-05-11 (GrubGauge History edit/delete)
+
+- **Shared scoring module:** When edit flows mirror submit flows, extract `VENUE_CRITERIA` + `calcWeightedScore` to one module so reweighted scores never drift between create and update.
+- **Form reset without effects:** Mount the editor with `key={rating.id}` (or pass a fresh `revision` key) so initial state is derived on mount; avoids syncing props→state in `useEffect` and keeps lint clean under React 19 rules.
+- **Delete confirmation + representation:** Pair a human confirm dialog with a `delete().select("id")` (or count) check so “success with zero rows” does not look like a deleted rating in the UI.
 
 ---
 

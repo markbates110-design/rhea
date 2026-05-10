@@ -7,14 +7,13 @@
 *(Paste your new or updated Creation Intent below this line. Then say `go` — the agent will promote and execute automatically.)*
 
 ---
-
 ### Current Creation Intent
 
-**Project:** GrubGauge — Layout & alignment polish
-*Intent: 2026-05-09 08:04 CT · Executed: 2026-05-11*
+**Project:** GrubGauge — Edit & delete own ratings
+*Intent: 2026-05-09 08:14 CT · Executed: 2026-05-11*
 `completed`
 
-Align nav, body gutters, and max-width shell across `/`, `/explore`, `/history`, `/rate`; polish onboarding routes to the same horizontal rhythm. No new tokens or components — shared `max-w-5xl` + `px-margin-edge` only.
+History / My Ratings: edit sheet (criteria sliders, visit details, notes, meal photo) plus delete with confirmation. Supabase `update` / `delete` scoped with `.eq("id").eq("device_id", …)`; Explore unchanged (read-only).
 
 **Next:** Paste next Creation Intent in sticky template when ready (`go`). Ops: Vercel **`markbates110-design/rhea`** + Root **`grubgauge`**.
 
@@ -26,6 +25,10 @@ Align nav, body gutters, and max-width shell across `/`, `/explore`, `/history`,
 
 #### GrubGauge
 
+**GrubGauge — Layout & alignment polish**
+*Intent: 2026-05-09 08:04 CT · Executed: 2026-05-11*
+`completed`
+Align nav, body gutters, and max-width shell across `/`, `/explore`, `/history`, `/rate`; onboarding to same rhythm. Shared `max-w-5xl` + `px-margin-edge` only.
 **GrubGauge — Design assets palette rollout**
 *Intent: 2026-05-09 06:52 CT · Executed: 2026-05-10*
 `completed`
