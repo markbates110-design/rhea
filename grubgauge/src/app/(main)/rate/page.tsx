@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { getDeviceId } from "@/lib/identity/deviceId";
+import { uploadMealPhoto } from "@/lib/storage/mealPhoto";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -255,6 +256,9 @@ export default function RatePage() {
   const [mealType, setMealType] = useState("dinner");
   const [scores, setScores] = useState<Record<string, number>>({});
   const [notes, setNotes] = useState("");
+  const [mealPhotoFile, setMealPhotoFile] = useState<File | null>(null);
+  const [mealPhotoPreviewUrl, setMealPhotoPreviewUrl] = useState<string | null>(null);
+  const [submittedMealPhotoUrl, setSubmittedMealPhotoUrl] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
@@ -263,6 +267,7 @@ export default function RatePage() {
 
   // Load Google Maps / Places
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect -- imperative script loader + guarded status flags */
     const key = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
     if (!key) { setMapsError(true); return; }
 
@@ -284,9 +289,14 @@ export default function RatePage() {
     script.onload = () => setMapsReady(true);
     script.onerror = () => setMapsError(true);
     document.head.appendChild(script);
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, []);
 
-  const criteria = spot ? VENUE_CRITERIA[spot.venueType] : [];
+  const venueTypeKey = spot?.venueType;
+  const criteria = useMemo(
+    () => (venueTypeKey ? VENUE_CRITERIA[venueTypeKey] : []),
+    [venueTypeKey]
+  );
   const meta = spot ? VENUE_META[spot.venueType] : null;
 
   const weightedScore = useMemo(
@@ -301,11 +311,45 @@ export default function RatePage() {
     setScores((prev) => ({ ...prev, [key]: value }));
   }
 
+  function clearMealPhoto() {
+    setMealPhotoFile(null);
+    setMealPhotoPreviewUrl((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return null;
+    });
+  }
+
   function handleSpotSelect(s: SpotSelection) {
     setSpot(s);
     setScores({});
     setError("");
+    clearMealPhoto();
   }
+
+  function handleMealPhotoPick(fileList: FileList | null) {
+    const file = fileList?.[0];
+    if (!file) return;
+    if (!/^image\/(jpeg|png|webp)$/.test(file.type)) {
+      setError("Photo must be JPEG, PNG, or WebP.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Photo must be 5 MB or smaller.");
+      return;
+    }
+    setError("");
+    setMealPhotoPreviewUrl((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return URL.createObjectURL(file);
+    });
+    setMealPhotoFile(file);
+  }
+
+  useEffect(() => {
+    return () => {
+      if (mealPhotoPreviewUrl) URL.revokeObjectURL(mealPhotoPreviewUrl);
+    };
+  }, [mealPhotoPreviewUrl]);
 
   async function handleSubmit() {
     if (!spot) { setError("Please select a spot first."); return; }
@@ -313,6 +357,17 @@ export default function RatePage() {
     setSubmitting(true);
     try {
       const supabase = createClient();
+      const deviceId = getDeviceId();
+      let mealPhotoUrl: string | null = null;
+      if (mealPhotoFile) {
+        try {
+          mealPhotoUrl = await uploadMealPhoto(supabase, mealPhotoFile, deviceId);
+        } catch (uploadErr) {
+          console.error(uploadErr);
+          setError("Photo upload failed. Remove the photo or try a smaller image.");
+          return;
+        }
+      }
       const criteriaScores = Object.fromEntries(criteria.map((c) => [c.key, getScore(c.key)]));
       await supabase.from("ratings").insert({
         place_id: spot.placeId,
@@ -324,8 +379,11 @@ export default function RatePage() {
         criteria_scores: criteriaScores,
         weighted_score: parseFloat(weightedScore.toFixed(1)),
         notes: notes.trim() || null,
-        device_id: getDeviceId(),
+        meal_photo_url: mealPhotoUrl,
+        device_id: deviceId,
       });
+      setSubmittedMealPhotoUrl(mealPhotoUrl);
+      clearMealPhoto();
       setSubmitted(true);
     } catch (err) {
       console.error(err);
@@ -364,6 +422,16 @@ export default function RatePage() {
               check_circle
             </span>
           </div>
+          {submittedMealPhotoUrl && (
+            <div className="mx-auto w-full max-w-xs overflow-hidden rounded-xl border border-outline-variant shadow-lg">
+              {/* eslint-disable-next-line @next/next/no-img-element -- Supabase CDN URL */}
+              <img
+                src={submittedMealPhotoUrl}
+                alt={`Food at ${spot.name}`}
+                className="aspect-[4/3] w-full max-h-[220px] object-cover"
+              />
+            </div>
+          )}
           <div>
             <p className="font-title-sm text-title-sm text-on-surface">{spot.name}</p>
             <p className="mt-1 font-body-md text-body-md text-on-surface-variant">Rating logged successfully.</p>
@@ -419,7 +487,7 @@ export default function RatePage() {
           <div>
             <h1 className="font-display-lg text-[32px] font-bold leading-[40px] text-on-surface">Rate a Spot</h1>
             <p className="mt-xs font-body-md text-body-md text-on-surface-variant">
-              Find your spot — we'll load the right scoring criteria automatically.
+              Find your spot — we&apos;ll load the right scoring criteria automatically.
             </p>
           </div>
 
@@ -463,7 +531,7 @@ export default function RatePage() {
                   <span className="inline-flex items-center gap-xs rounded-full bg-primary-container px-xs py-0.5 font-label-sm text-label-sm font-bold text-on-primary-container whitespace-nowrap">
                     {meta?.label}
                   </span>
-                  <button onClick={() => { setSpot(null); setScores({}); }} className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors">
+                  <button onClick={() => { setSpot(null); setScores({}); clearMealPhoto(); }} className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors">
                     Change
                   </button>
                 </div>
@@ -552,6 +620,60 @@ export default function RatePage() {
               rows={3}
               className="resize-none rounded-lg border border-outline-variant bg-surface-container px-sm py-xs font-body-md text-body-md text-on-surface outline-none placeholder:text-on-surface-variant/50 transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
             />
+          </section>
+
+          {/* Meal photo */}
+          <section className="flex flex-col gap-sm rounded-xl border border-outline-variant bg-surface-container-low p-md">
+            <h2 className="flex items-center gap-xs font-title-sm text-title-sm text-primary">
+              <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+                photo_camera
+              </span>
+              Food photo
+              <span className="font-body-md text-body-md font-normal text-on-surface-variant">(optional)</span>
+            </h2>
+            <p className="font-body-md text-body-md text-on-surface-variant">
+              Add a snapshot of what you ate — shown in your history and explore.
+            </p>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              capture="environment"
+              className="hidden"
+              id="meal-photo-input"
+              disabled={submitting}
+              onChange={(e) => {
+                handleMealPhotoPick(e.target.files);
+                e.target.value = "";
+              }}
+            />
+            {!mealPhotoPreviewUrl ? (
+              <label
+                htmlFor="meal-photo-input"
+                className={`inline-flex w-fit cursor-pointer items-center gap-xs rounded-xl border border-outline-variant bg-surface-container px-md py-xs font-label-sm text-label-sm text-on-surface transition-colors hover:border-primary hover:bg-surface-container-high ${submitting ? "pointer-events-none opacity-40" : ""}`}
+              >
+                <span className="material-symbols-outlined text-[18px]">add_photo_alternate</span>
+                Choose photo
+              </label>
+            ) : (
+              <div className="flex flex-col gap-sm">
+                <div className="relative overflow-hidden rounded-xl border border-outline-variant bg-surface-container">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- user-uploaded URLs from Supabase vary per deployment */}
+                  <img
+                    src={mealPhotoPreviewUrl}
+                    alt="Selected meal preview"
+                    className="aspect-[4/3] w-full object-cover max-h-[220px]"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => clearMealPhoto()}
+                  disabled={submitting}
+                  className="w-fit rounded-lg border border-outline-variant px-sm py-xs font-label-sm text-label-sm text-on-surface-variant hover:bg-surface-container transition-colors disabled:opacity-40"
+                >
+                  Remove photo
+                </button>
+              </div>
+            )}
           </section>
 
           {/* Mobile submit */}

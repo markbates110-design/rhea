@@ -18,6 +18,7 @@ interface Rating {
   visit_date: string;
   weighted_score: number;
   notes: string | null;
+  meal_photo_url: string | null;
   created_at: string;
 }
 
@@ -58,7 +59,7 @@ export default function HistoryPage() {
         const supabase = createClient();
         const { data, error } = await supabase
           .from("ratings")
-          .select("id, venue_name, venue_address, venue_type, meal_type, visit_date, weighted_score, notes, created_at")
+          .select("id, venue_name, venue_address, venue_type, meal_type, visit_date, weighted_score, notes, meal_photo_url, created_at")
           .eq("device_id", getDeviceId())
           .order("created_at", { ascending: false });
         if (error) {
@@ -214,10 +215,20 @@ export default function HistoryPage() {
                   </span>
                 </div>
 
-                {/* Notes */}
+                {/* Photo + notes */}
+                {r.meal_photo_url && (
+                  <div className="overflow-hidden rounded-lg border border-outline-variant/50">
+                    {/* eslint-disable-next-line @next/next/no-img-element -- user meal photos from Storage */}
+                    <img
+                      src={r.meal_photo_url}
+                      alt={`Meal photo at ${r.venue_name}`}
+                      className="aspect-[16/9] w-full max-h-[200px] object-cover"
+                    />
+                  </div>
+                )}
                 {r.notes && (
                   <p className="border-t border-outline-variant/50 pt-xs font-body-md text-body-md italic text-on-surface-variant line-clamp-2">
-                    "{r.notes}"
+                    {`\u201C${r.notes}\u201D`}
                   </p>
                 )}
               </div>

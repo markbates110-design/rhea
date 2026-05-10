@@ -1,6 +1,6 @@
 # Rhea Insights & Process Upgrades
 
-**Last Updated:** 2026-05-09
+**Last Updated:** 2026-05-10
 
 This file bookmarks key i² insights, process improvements, and patterns discovered across all creations. 
 The Governance Agent must read this file at the start of every major session.
@@ -169,8 +169,35 @@ The Governance Agent must read this file at the start of every major session.
 - Streak logic requires consecutive-day schema support (e.g. daily check-in table or visit_date uniqueness constraint). Do not attempt to derive streaks from a raw ratings table without this -- defer cleanly and document the dependency.
 - Recent section (chronological) and Best Spot (deduplicated top performer) create distinct semantic value from the same dataset -- always look for what two different views the same data can serve before adding new data sources.
 
+### Session Close - 2026-05-09 (Governance + GrubGauge deploy hygiene)
+- `stop` as Session Close trigger in `rhea-governance-agent.md` is binding **when that protocol is explicitly invoked** in Cursor (e.g. “Session Close per governance”). Plain **`stop`** is otherwise ambiguous — assistants default to ending chatter rather than flushing assessments or intents unless instructed.
+- Monorepo folders recorded as **`160000` gitlinks** without valid `.gitmodules` / submodule fetch cause clones where **`grubgauge/` exists only as an empty pointer** → Vercel “Root Directory does not exist” / “No Next.js detected”. Fix locally with **`git rm --cached`**, remove nested **`.git`**, **`git add`** full trees, push — never rely on submodule shims for single-repo deployments unless CI submodule auth is intentional.
+
 ### Session Insights - 2026-05-09 (GrubGauge Onboarding Flow)
 - When adding auth to an app that already uses device_id, don't replace device_id — layer auth on top as optional. Guest path keeps the existing data model intact. Auth path adds identity without breaking existing records. Migration can happen in a later iteration when there's enough signal that users want it.
 - Onboarding routes that live outside the main app layout (no nav, no header) belong in standalone `/onboarding` routes, not inside the `(main)` group. Route groups control layout inheritance — keeping onboarding outside keeps it visually clean without extra layout files.
 - A client-side guard (`isOnboarded()` → redirect) is the right primitive for optional onboarding flows. It's fast (no server round-trip), works with localStorage, and doesn't require middleware. Use middleware only when the redirect must be enforced before hydration (e.g., hard auth walls).
 - "Skip" paths in onboarding must call `setOnboarded()` the same way the primary path does — otherwise users who skip can get stuck in a redirect loop. Every exit from onboarding must converge on the same completion marker.
+
+
+### Session Insights — 2026-05-10 (GrubGauge design_assets palette rollout)
+
+- **Canonical palette file:** Keep core brand hex only in `design/design_assets/grubgauge-palette.css`; map semantics in `globals.css @theme inline` via `var(--palette-*)` so the rest of the app never forks colors.
+- **Derivative surfaces:** On near-black canvases (#0a0903-class), derive card layers by warming and lifting lightness in small steps—not pure neutral gray—to stay appetizing and cohesive with custard/orange accents.
+- **Governance `go` branch:** Populated sticky template → promote previous Current to History → clear template → execute new intent → Iteration Close (assessment + **Assessment ↓** line in reply + insight flush).
+
+---
+
+### Session Insights — 2026-05-10 (GrubGauge optional meal photos)
+
+- **User media:** Store a public Storage URL on the row (`meal_photo_url`), not Base64 in Postgres — keeps rows small, leverages CDN, and matches how other clients will fetch images.
+- **Upload order:** Upload first, insert second; on upload failure, block submit with a clear message so you never get ratings without promised photos or orphan-only storage objects where avoidable.
+- **Deduped feeds:** When merging rows (e.g. Explore by `place_id`), define tie-breakers (e.g. same score → keep row with `meal_photo_url`) so discovery surfaces richer cards without extra queries.
+- **Governance apply:** When the user says “apply governance” without a fresh sticky intent, **Session Start** + **Iteration Close** still run for shippable work done in-thread; formal `rhea-creation-intent.md` promotion remains `go` + template to avoid silent intent drift.
+
+---
+
+### Session Close — 2026-05-10 (explicit `stop`)
+
+- Saying **`stop`** together with **“execute iteration close”** ties Session Close to Iteration Close in one instruction: flush assessment backlog, refresh stale cross-references in prior assessment steps, and restate intent file **Next:** with a session boundary — without requiring a new Creation Intent.
+- When the active intent is already **`completed`** and **`Executed:`** is set, Session Close is bookkeeping (reconcile + stamp), not re-execution; avoid duplicating full Iteration Close blocks unless new work shipped since the last flush.

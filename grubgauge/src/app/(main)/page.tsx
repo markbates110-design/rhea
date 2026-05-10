@@ -17,6 +17,7 @@ interface Rating {
   visit_date: string;
   weighted_score: number;
   notes: string | null;
+  meal_photo_url: string | null;
   created_at: string;
 }
 
@@ -61,7 +62,7 @@ export default function DashboardPage() {
         const supabase = createClient();
         const { data } = await supabase
           .from("ratings")
-          .select("id, venue_name, venue_address, venue_type, meal_type, visit_date, weighted_score, notes, created_at")
+          .select("id, venue_name, venue_address, venue_type, meal_type, visit_date, weighted_score, notes, meal_photo_url, created_at")
           .eq("device_id", getDeviceId())
           .order("created_at", { ascending: false });
         setRatings(data ?? []);
@@ -246,12 +247,23 @@ export default function DashboardPage() {
                 key={r.id}
                 className="flex items-center gap-sm rounded-xl border border-outline-variant bg-surface-container-low px-md py-sm transition-colors hover:bg-surface-container"
               >
-                <span
-                  className="material-symbols-outlined text-[20px] text-on-surface-variant shrink-0"
-                  style={{ fontVariationSettings: "'FILL' 1" }}
-                >
-                  {meta.icon}
-                </span>
+                {r.meal_photo_url ? (
+                  <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-outline-variant/50">
+                    {/* eslint-disable-next-line @next/next/no-img-element -- user meal photos from Storage */}
+                    <img
+                      src={r.meal_photo_url}
+                      alt={`Meal at ${r.venue_name}`}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                ) : (
+                  <span
+                    className="material-symbols-outlined text-[20px] text-on-surface-variant shrink-0"
+                    style={{ fontVariationSettings: "'FILL' 1" }}
+                  >
+                    {meta.icon}
+                  </span>
+                )}
                 <div className="flex-1 min-w-0">
                   <p className="font-body-md text-body-md font-medium text-on-surface truncate">{r.venue_name}</p>
                   <p className="font-label-sm text-label-sm text-on-surface-variant">{formatDate(r.visit_date)} · {r.meal_type}</p>

@@ -1,58 +1,60 @@
-@import "tailwindcss";
+@import "../../design/design_assets/grubgauge-palette.css";
+@import "tailwindcss" source("../../src/**/*.{tsx,ts,jsx,js}");
 
-/* Material Symbols: load via <link> in layout.tsx — @import url() here breaks after Tailwind expands (must be first in file). */
+/* Material Symbols: load via <link> in layout.tsx — @import url() here breaks after Tailwind expands.
+   Keep grubgauge-palette.css as the first import so :root tokens exist before @theme. */
 
-/* GrubGauge / Stitch design tokens — dark-first (html.dark) */
+/* GrubGauge — dark theme; accents from design/design_assets/grubgauge-palette.css */
 @theme inline {
   --font-sans: var(--font-work-sans), ui-sans-serif, system-ui, sans-serif;
 
-  --color-background: #131313;
-  --color-surface: #131313;
-  --color-on-background: #e5e2e1;
-  --color-primary: #3fe56c;
-  --color-on-primary: #003912;
-  --color-primary-container: #00c853;
-  --color-on-primary-container: #004c1b;
-  --color-primary-fixed: #69ff87;
-  --color-primary-fixed-dim: #3ce36a;
-  --color-on-primary-fixed: #002108;
-  --color-on-primary-fixed-variant: #00531e;
-  --color-tertiary: #fdbf02;
-  --color-tertiary-container: #dba500;
-  --color-on-tertiary: #3f2e00;
-  --color-on-tertiary-container: #543e00;
-  --color-tertiary-fixed: #ffdf9e;
-  --color-tertiary-fixed-dim: #fabd00;
-  --color-on-tertiary-fixed: #261a00;
-  --color-on-tertiary-fixed-variant: #5b4300;
-  --color-secondary: #c8c6c6;
-  --color-on-secondary: #303030;
-  --color-secondary-container: #474747;
-  --color-on-secondary-container: #b6b5b4;
-  --color-secondary-fixed: #e4e2e1;
-  --color-secondary-fixed-dim: #c8c6c6;
-  --color-on-secondary-fixed: #1b1c1c;
-  --color-on-secondary-fixed-variant: #474747;
-  --color-on-surface: #e5e2e1;
-  --color-on-surface-variant: #bbcbb8;
-  --color-surface-variant: #353534;
-  --color-surface-container: #201f1f;
-  --color-surface-container-low: #1c1b1b;
-  --color-surface-container-lowest: #0e0e0e;
-  --color-surface-container-high: #2a2a2a;
-  --color-surface-container-highest: #353534;
-  --color-surface-bright: #393939;
-  --color-surface-dim: #131313;
-  --color-outline: #869583;
-  --color-outline-variant: #3c4a3c;
-  --color-inverse-surface: #e5e2e1;
-  --color-inverse-on-surface: #313030;
-  --color-inverse-primary: #006e2a;
-  --color-error: #ffb4ab;
-  --color-on-error: #690005;
-  --color-error-container: #93000a;
-  --color-on-error-container: #ffdad6;
-  --color-surface-tint: #3ce36a;
+  --color-background: var(--palette-pitch-black);
+  --color-surface: var(--palette-pitch-black);
+  --color-on-background: var(--palette-vanilla-custard);
+  --color-primary: var(--palette-princeton-orange);
+  --color-on-primary: var(--palette-pitch-black);
+  --color-primary-container: #cc6800;
+  --color-on-primary-container: var(--palette-vanilla-custard);
+  --color-primary-fixed: #ffa040;
+  --color-primary-fixed-dim: var(--palette-princeton-orange);
+  --color-on-primary-fixed: var(--palette-pitch-black);
+  --color-on-primary-fixed-variant: #1a1408;
+  --color-tertiary: var(--palette-amber-gold);
+  --color-on-tertiary: var(--palette-pitch-black);
+  --color-tertiary-container: #c99400;
+  --color-on-tertiary-container: var(--palette-pitch-black);
+  --color-tertiary-fixed: #ffd54a;
+  --color-tertiary-fixed-dim: var(--palette-amber-gold);
+  --color-on-tertiary-fixed: var(--palette-pitch-black);
+  --color-on-tertiary-fixed-variant: #1a1408;
+  --color-secondary: #a89b7a;
+  --color-on-secondary: var(--palette-pitch-black);
+  --color-secondary-container: #3d382c;
+  --color-on-secondary-container: #e8dcc4;
+  --color-secondary-fixed: #d4c4a8;
+  --color-secondary-fixed-dim: #a89b7a;
+  --color-on-secondary-fixed: var(--palette-pitch-black);
+  --color-on-secondary-fixed-variant: #2a261c;
+  --color-on-surface: var(--palette-vanilla-custard);
+  --color-on-surface-variant: #c4b896;
+  --color-surface-variant: #3a3528;
+  --color-surface-container: #1c1912;
+  --color-surface-container-low: #14120c;
+  --color-surface-container-lowest: var(--palette-pitch-black);
+  --color-surface-container-high: #252118;
+  --color-surface-container-highest: #2e2a20;
+  --color-surface-bright: #454031;
+  --color-surface-dim: var(--palette-pitch-black);
+  --color-outline: #6b6350;
+  --color-outline-variant: #2e2a21;
+  --color-inverse-surface: var(--palette-vanilla-custard);
+  --color-inverse-on-surface: var(--palette-pitch-black);
+  --color-inverse-primary: #e67400;
+  --color-error: color-mix(in srgb, var(--palette-red) 72%, white);
+  --color-on-error: var(--palette-pitch-black);
+  --color-error-container: #5c0a0a;
+  --color-on-error-container: #ffc9c9;
+  --color-surface-tint: var(--palette-princeton-orange);
 
   --spacing-xs: 8px;
   --spacing-sm: 12px;

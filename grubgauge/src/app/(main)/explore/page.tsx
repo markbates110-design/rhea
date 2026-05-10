@@ -18,6 +18,7 @@ interface Rating {
   visit_date: string;
   weighted_score: number;
   notes: string | null;
+  meal_photo_url: string | null;
 }
 
 // ── Config ──────────────────────────────────────────────────────────────────
@@ -69,7 +70,7 @@ export default function ExplorePage() {
         const supabase = createClient();
         const { data, error } = await supabase
           .from("ratings")
-          .select("id, place_id, venue_name, venue_address, venue_type, meal_type, visit_date, weighted_score, notes")
+          .select("id, place_id, venue_name, venue_address, venue_type, meal_type, visit_date, weighted_score, notes, meal_photo_url")
           .order("weighted_score", { ascending: false });
         if (error) {
           console.error("Supabase error:", error.code, error.message);
@@ -92,6 +93,13 @@ export default function ExplorePage() {
     for (const r of ratings) {
       const existing = map.get(r.place_id);
       if (!existing || r.weighted_score > existing.weighted_score) {
+        map.set(r.place_id, r);
+      } else if (
+        existing &&
+        Math.abs(r.weighted_score - existing.weighted_score) < 0.001 &&
+        r.meal_photo_url &&
+        !existing.meal_photo_url
+      ) {
         map.set(r.place_id, r);
       }
     }
@@ -253,6 +261,19 @@ export default function ExplorePage() {
                   </div>
                 </div>
 
+                {r.meal_photo_url && (
+                  <div className="pl-7 pr-0">
+                    <div className="overflow-hidden rounded-lg border border-outline-variant/50">
+                      {/* eslint-disable-next-line @next/next/no-img-element -- community meal photos from Storage */}
+                      <img
+                        src={r.meal_photo_url}
+                        alt={`Meal photo at ${r.venue_name}`}
+                        className="aspect-[16/9] w-full max-h-[180px] object-cover"
+                      />
+                    </div>
+                  </div>
+                )}
+
                 {/* Chips */}
                 <div className="flex items-center gap-xs flex-wrap pl-7">
                   <span className="inline-flex items-center gap-xs rounded-full bg-surface-variant px-xs py-0.5 font-label-sm text-label-sm text-on-surface-variant">
@@ -270,7 +291,7 @@ export default function ExplorePage() {
                 {/* Notes */}
                 {r.notes && (
                   <p className="border-t border-outline-variant/50 pt-xs pl-7 font-body-md text-body-md italic text-on-surface-variant line-clamp-2">
-                    "{r.notes}"
+                    {`\u201C${r.notes}\u201D`}
                   </p>
                 )}
               </div>

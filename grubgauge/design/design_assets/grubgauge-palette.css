@@ -1,0 +1,11 @@
+/*
+ * GrubGauge — canonical palette (single source of truth).
+ * Import from src/app/globals.css; do not duplicate hex in @theme.
+ */
+:root {
+  --palette-pitch-black: #0a0903;
+  --palette-red: #ff0000;
+  --palette-princeton-orange: #ff8200;
+  --palette-amber-gold: #ffc100;
+  --palette-vanilla-custard: #ffeaae;
+}

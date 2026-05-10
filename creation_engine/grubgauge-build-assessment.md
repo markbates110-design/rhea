@@ -264,3 +264,65 @@
 **i²:** Build verified clean — 10 routes, 0 TypeScript errors, 0 lints. Verification Pass: root elements match established patterns for all new screens; tokens from @theme only; no new env vars; build script unchanged.
 
 **Observed wins:** Onboarding flow preserves all existing functionality — no regressions. Guest path = zero friction (one tap). Auth path = real Supabase email/password sign-up with graceful error handling. Food preferences + name persist locally. Pro teaser planted. Design system 100% consistent.
+
+---
+
+## Session Close — GrubGauge follow-on (Vercel, Git monorepo, UI polish)
+**Timestamp: 2026-05-09 · Session Close**
+
+**e** — Traced production `/onboarding` 404 and failed builds through Git/Vercel: submodule gitlinks (`160000`) without `.gitmodules`, CLI `vercel deploy` vs Git-triggered builds, Root Directory `./` vs `grubgauge`, empty **`markbates110-design/grubgauge`** GitHub repo, Cursor locking `.git/objects` on Windows.
+
+**s** — Replaced broken submodule pointers with normal tracked trees (`git rm --cached`, removed nested `.git`, full `git add`, commit/push). Vercel: Git **`markbates110-design/rhea`** + **Root Directory `grubgauge`** + pushes from **`main`**; avoided deploying only inner-app tarball when Root expects nested folder. Welcome onboarding narrowed with **`max-w-2xl`** (`1241bb0`) for desktop.
+
+**i²:** Monorepos on GitHub must not expose apps as dangling submodule commits — hosts clone shallow/submodules inconsistently → empty app dirs → “No Next.js”. **`stop`** in plain Cursor chat does not auto-run Session Close unless the governance protocol is explicitly invoked.
+
+---
+
+## Assessment — Optional meal photo per rating (+ theme tokens refresh)
+**Timestamp: 2026-05-10**
+
+**e** — Explored client-only Base64 in `ratings` vs Supabase Storage + URL column; explored private bucket + signed URLs vs public read for MVP; confirmed UI already uses `@theme` tokens for palette swaps. Palette aligned to Premium Culinary DESIGN.md prose (charcoal layers, emerald CTA, neutral outlines).
+
+**s** — Storage chosen: **`meal-photos`** public bucket, **`ratings.meal_photo_url`** text, upload before insert on `/rate`, `uploadMealPhoto()` helper with type/size guards (JPEG/PNG/WebP, 5 MB). History, Explore (dedupe prefers photo on score ties), Dashboard recent show thumbnails where present. Migration SQL tracked in-repo (`supabase/migrations/`). ESLint: quote escaping in notes lines, Maps effect disable scoped, `criteria` stabilized with `useMemo`.
+
+**i²**
+- *First Iteration:* Ship feature + Verification Pass (`npm run build` clean). Conditional returns on Rate success/main already match `<main … max-w-*>` patterns; new sections use tokens only.
+- *Second Iteration:* (Protocol Target — `rhea-governance-agent.md` v3.7 Verification Pass) Applying *"Assessment = completion certificate; verify before writing"* — build run completed before this log. Applying *"assessments must remain concise"* — scoped log to essentials. **Ops:** DDL + Storage policies must be applied in Supabase dashboard once; inserts fail until column exists — same class of risk as prior `ratings` table insight.
+
+**Performance Rating: ★★★★☆** — Feature complete in code; production depends on user running migration and accepting public anonymous upload trade-off (documented in SQL comments / ops).
+
+**Recommended Next Steps:**
+1. Run `20260510000000_meal_photos.sql` in Supabase SQL Editor; smoke-test upload on deployed app.
+2. Paste next Creation Intent in sticky template + `go` (current palette intent is **`completed`**; template empty pending new scope).
+3. If abuse appears: tighten Storage RLS (e.g. path prefix + rate limits) or move uploads behind auth.
+
+---
+
+## Assessment — Design assets palette (warm dark / food cues)
+**Timestamp: 2026-05-10**
+
+**e** — Sticky Intent required SSOT under `design/design_assets` and `@theme`-only rollout (no new patterns). Compared duplicating hex in `@theme` vs `:root` palette file + `var()` indirection — latter wins for single edit point.
+
+**s** — Added `grubgauge-palette.css` with five canonical hex vars; `globals.css` imports it above Tailwind then maps semantic Material-style tokens (pitch-black canvas, vanilla-custard copy, Princeton orange primary, amber-gold tertiary, warm elevated surfaces/outlines). Error text uses `color-mix` from `--palette-red` for legibility without leaving the red family.
+
+**i²**
+- *First Iteration:* Promotion + Execution per `go` — intent archived to history, onboarding moved to History block, current intent stamped Executed post-verify. Verification Pass: `npm run build` + `eslint` clean; screens remain token-driven (no stray hex in TSX).
+- *Second Iteration:* Applying *“assessments must remain concise”* AND *design_tokens SSOT* — exploration snippet redirected to cite canonical file; avoids two competing hex sources.
+
+**Performance Rating: ★★★★★** — Systematic palette swap under governance; zero component API changes required.
+
+**Recommended Next Steps:**
+1. Eyeball onboarding + `/rate` in browser for hierarchy/contrast tweaks if any edge badges feel hot.
+2. Optional: regenerate `premium_culinary_system/DESIGN.md` YAML when marketing wants doc parity — not blocking app.
+3. Paste next Creation Intent → `go`.
+
+---
+
+## Session Close — explicit `stop` + iteration reconcile
+**Timestamp: 2026-05-10**
+
+**Flushed:** No pending Creation Intent executions left open — palette rollout already had Iteration Close (assessment + insights). Meal photo assessment “Recommended Next Steps” item 2 updated to match current intent file (palette `completed`, template empty).
+
+**Intent file:** Current remains **GrubGauge — Design assets palette rollout** · `completed` · `Executed: 2026-05-10`. **Next:** paste new intent → `go` (ops note preserved in file).
+
+**i²:** Pairing **`stop`** with explicit **iteration close** forces file reconciliation in one utterance instead of relying on implicit session end — aligns with avoiding plain-`stop` ambiguity noted in insights.
