@@ -496,4 +496,20 @@ Deployments URLs may appear under **`vercel.com/.../markbates110-designs-project
 
 **i²:** For **modal-within-modal** overlays where a vertical-text class has surfaced once, isolate the inner overlay into its own `createPortal` styled with **hardcoded inline widths + `display: block`** rather than re-using the shared utility chain. Reserve Tailwind/flex `min-w-0`/`shrink-0` strategies for *single-layer* modals; nested portals should default to a **fixed width floor** so width never has to resolve through any ancestor's flex tree.
 
+**Verified on prod:** https://grubgauge.vercel.app/history (Chrome desktop) — user-confirmed fix shipped on commit **`eb3d004`** (`origin/main`).
+
+---
+
+## Session Close — vertical-text follow-on shipped (`stop` after prod verify)
+**Timestamp: 2026-05-10 11:01 CT**
+**Governance ref** — `rhea-governance-agent.md` **v3.10**
+
+**Flushed:** Error & Debug already settled this turn — Error Fix entry (Delete-confirm overlay nested portal vertical glyphs) + bookmarked insight (modal-within-modal width contract) + commit/push **`eb3d004`** on `origin/main`. User confirmed prod-verified on **https://grubgauge.vercel.app**. No additional pending assessments or insights at this boundary.
+
+**Intent file:** **Current** — **GrubGauge — Edit & delete own ratings** · `completed` · **Executed: 2026-05-11**. Sticky template empty. Today's nested-modal width-contract work is a follow-on Error & Debug under that intent — not a new intent execution; no `Executed:` re-stamp. **Next:** paste Creation Intent → `go` — repo `markbates110-design/rhea`, Root per dashboard (see **Assessment — Vercel Root Directory canonical (`rhea` ↔ GrubGauge)**).
+
+**Reconcile:** Vertical-text arc opened by 2026-05-09 Feedback Error Fixes, hardened by 2026-05-12 `min-w-0` rollout + Edit-sheet Error Fix, and now closed via the nested-portal extraction (`DeleteRatingConfirm`). Cross-links in the two earlier Feedback Error Fix entries remain accurate; no stale-snapshot rewrites required.
+
+**i²:** **Production verification is the canonical close marker for visual-collapse fixes** — `npm run lint` + `npx tsc --noEmit` are necessary but not sufficient. The signal that converts a "shipped" state into a "resolved" state is the user confirming the fix on the deployed URL in the originally-failing browser. Future **Visual / layout triage** Session Closes should append a `**Verified on prod:**` line; encoded above in the Error Fix entry as the new pattern.
+
 ---

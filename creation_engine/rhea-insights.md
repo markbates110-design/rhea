@@ -1,6 +1,6 @@
 # Rhea Insights & Process Upgrades
 
-**Last Updated:** 2026-05-10 10:47 CT
+**Last Updated:** 2026-05-10 11:01 CT
 
 This file bookmarks key i² insights, process improvements, and patterns discovered across all creations. 
 The Governance Agent must read this file at the start of every major session.
@@ -289,3 +289,11 @@ The Governance Agent must read this file at the start of every major session.
 
 - Saying **`stop`** together with **“execute iteration close”** ties Session Close to Iteration Close in one instruction: flush assessment backlog, refresh stale cross-references in prior assessment steps, and restate intent file **Next:** with a session boundary — without requiring a new Creation Intent.
 - When the active intent is already **`completed`** and **`Executed:`** is set, Session Close is bookkeeping (reconcile + stamp), not re-execution; avoid duplicating full Iteration Close blocks unless new work shipped since the last flush.
+
+---
+
+### Session Close — 2026-05-10 11:01 CT (explicit `stop` after prod verify)
+
+- **Production verification is the canonical close marker for visual-collapse fixes.** `lint` + `tsc` clean is necessary but not sufficient — the close-out signal is the user confirming the fix on the deployed URL in the originally-failing browser. Future **Visual / layout triage** Session Closes should include a `**Verified on prod:**` line in the Error Fix entry it closes.
+- **Nested-portal width contract (resolved + verified):** `DeleteRatingConfirm` extracted as inline-style `createPortal` — confirmed working on **https://grubgauge.vercel.app** from Chrome desktop on commit **`eb3d004`**. Pattern is now durable: single-layer modals use the Tailwind / `min-w-0` / `shrink-0` chain; nested portals use a hardcoded inline width floor + `display: block` + `whiteSpace: normal`.
+- **Bookkeeping cadence:** Today's `stop` follows an Error & Debug already settled in the same turn (assessment + insight + commit + push). Session Close adds only a closure row + this insight block; no new Iteration Close, no `Executed:` re-stamp on the active intent.
