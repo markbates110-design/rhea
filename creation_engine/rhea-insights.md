@@ -197,6 +197,14 @@ The Governance Agent must read this file at the start of every major session.
 
 ---
 
+### Session Insights — 2026-05-11 (GrubGauge layout shell)
+
+- **Single outer shell:** Put `max-w-*` + horizontal gutter once on the route-group layout (or shared header/body wrapper) so every page’s `<main>` only controls *inner* max width — eliminates double `px-*` and aligns sticky nav with scrolling content.
+- **Bottom nav on wide phones:** Fix the bar to the same `max-w-5xl px-margin-edge` column as the page body (with `env(safe-area-inset-bottom)` padding) so thumbs and content share one vertical rhythm.
+- **Desktop header:** Constrain the header row to that same column; never full-bleed flex nav when body is a centered column — it reads “misaligned” on ultrawide displays.
+
+---
+
 ### Session Close — 2026-05-10 (explicit `stop`)
 
 - Saying **`stop`** together with **“execute iteration close”** ties Session Close to Iteration Close in one instruction: flush assessment backlog, refresh stale cross-references in prior assessment steps, and restate intent file **Next:** with a session boundary — without requiring a new Creation Intent.

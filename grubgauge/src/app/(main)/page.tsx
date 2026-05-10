@@ -91,7 +91,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <main className="mx-auto w-full max-w-2xl px-margin-edge pt-lg pb-10">
+      <main className="mx-auto w-full max-w-2xl pt-lg pb-10">
         <div className="flex items-center gap-xs text-on-surface-variant">
           <span className="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
           <span className="font-body-md text-body-md">Loading…</span>
@@ -104,7 +104,7 @@ export default function DashboardPage() {
 
   if (ratings.length === 0) {
     return (
-      <main className="mx-auto w-full max-w-2xl px-margin-edge pt-lg pb-10">
+      <main className="mx-auto w-full max-w-2xl pt-lg pb-10">
         <div className="flex flex-col gap-lg">
           <div>
             <h1 className="font-display-lg text-[32px] font-bold leading-[40px] text-on-surface">GrubGauge</h1>
@@ -136,7 +136,7 @@ export default function DashboardPage() {
   const favMeta = VENUE_META[stats!.favType] ?? VENUE_META.casual;
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-margin-edge pt-lg pb-10">
+    <main className="mx-auto w-full max-w-2xl pt-lg pb-10">
       <div className="flex flex-col gap-lg">
 
         {/* Header */}

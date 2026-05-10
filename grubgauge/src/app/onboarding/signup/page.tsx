@@ -38,7 +38,8 @@ export default function OnboardingSignupPage() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-md px-margin-edge pt-lg pb-10">
+    <div className="mx-auto min-h-screen w-full max-w-5xl px-margin-edge">
+    <main className="mx-auto w-full max-w-md pt-lg pb-10">
       {/* Back */}
       <Link
         href="/onboarding"
@@ -131,5 +132,6 @@ export default function OnboardingSignupPage() {
         Skip, continue as guest
       </button>
     </main>
+    </div>
   );
 }

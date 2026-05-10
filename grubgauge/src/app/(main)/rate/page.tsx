@@ -414,7 +414,7 @@ export default function RatePage() {
 
   if (submitted && spot) {
     return (
-      <main className="mx-auto w-full max-w-2xl px-margin-edge pt-lg pb-10">
+      <main className="mx-auto w-full max-w-2xl pt-lg pb-10">
         {/* Score confirmation */}
         <div className="mb-6 flex flex-col items-center gap-3 text-center">
           <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary-container/20">
@@ -477,7 +477,7 @@ export default function RatePage() {
   // ── Main ─────────────────────────────────────────────────────────────────
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-margin-edge pb-10 pt-lg md:pt-xl">
+    <main className="mx-auto w-full pb-10 pt-lg md:pt-xl">
       <div className="grid grid-cols-1 gap-lg lg:grid-cols-12">
 
         {/* ── Left: Form ── */}

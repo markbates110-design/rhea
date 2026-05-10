@@ -10,13 +10,13 @@
 
 ### Current Creation Intent
 
-**Project:** GrubGauge — Design assets palette rollout
-*Intent: 2026-05-09 06:52 CT · Executed: 2026-05-10*
+**Project:** GrubGauge — Layout & alignment polish
+*Intent: 2026-05-09 08:04 CT · Executed: 2026-05-11*
 `completed`
 
-Use `design_assets` as single source of truth for core hex; apply new warm dark palette consistently across Rate, History, Dashboard, Explore, Onboarding via `@theme`; keep established components/spacing only.
+Align nav, body gutters, and max-width shell across `/`, `/explore`, `/history`, `/rate`; polish onboarding routes to the same horizontal rhythm. No new tokens or components — shared `max-w-5xl` + `px-margin-edge` only.
 
-**Next:** Paste next Creation Intent in sticky template when ready (`go`). Session closed **2026-05-10** (explicit `stop` + iteration reconcile). Ops: Vercel **`markbates110-design/rhea`** + Root **`grubgauge`**.
+**Next:** Paste next Creation Intent in sticky template when ready (`go`). Ops: Vercel **`markbates110-design/rhea`** + Root **`grubgauge`**.
 
 ---
 
@@ -25,6 +25,11 @@ Use `design_assets` as single source of truth for core hex; apply new warm dark 
 ---
 
 #### GrubGauge
+
+**GrubGauge — Design assets palette rollout**
+*Intent: 2026-05-09 06:52 CT · Executed: 2026-05-10*
+`completed`
+Use `design_assets` as SSOT hex; `@theme`; warm dark rollout (Rate, History, Dashboard, Explore, Onboarding).
 
 **GrubGauge — Onboarding & Sign-up Flow**
 *Intent: 2026-05-09 22:17 CT · Executed: 2026-05-09 22:30 CT*

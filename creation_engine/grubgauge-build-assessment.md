@@ -318,6 +318,26 @@
 
 ---
 
+## Assessment — Layout & alignment shell (nav + mains + onboarding)
+**Timestamp: 2026-05-11**
+
+**e** — Compared per-page duplicated `px-margin-edge` vs a single `(main)` content shell; mobile bottom nav full-bleed vs gutter-aligned bar; desktop header edge-to-edge row vs centered `max-w-2xl` columns.
+
+**s** — One canonical outer **max-w-5xl + px-margin-edge** for `(main)` layout children; header (mobile + desktop) and bottom nav use the same inner width so nav edges line up with body. Removed duplicate horizontal padding from page `<main>` elements; narrow screens stay `max-w-2xl mx-auto` inside the shell; `/rate` main spans full shell width. Onboarding welcome/signup/profile wrap in the same 5xl + gutter pattern with inner `max-w-2xl` / `max-w-md` unchanged.
+
+**i²**
+- *First Iteration:* Ship + Verification Pass (`npm run build`, `eslint` clean). No new utilities; only layout composition.
+- *Second Iteration:* Applying *“match root / layout contract across returns”* (Feedback screen insight family) — shell lives in `layout.tsx` + header/bottom nav, not re-declared on every page — reduces drift and double-gutter bugs.
+
+**Performance Rating: ★★★★★** — Targeted alignment pass; low regression risk.
+
+**Recommended Next Steps:**
+1. Visual QA on real devices (notch + home indicator) for bottom nav `safe-area` padding.
+2. `git push` so Vercel picks up layout changes.
+3. Paste next Creation Intent → `go`.
+
+---
+
 ## Session Close — explicit `stop` + iteration reconcile
 **Timestamp: 2026-05-10**
 

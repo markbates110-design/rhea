@@ -9,7 +9,8 @@ export default function MainLayout({
   return (
     <div className="flex min-h-screen flex-col bg-background pb-24 text-on-background md:pb-0">
       <HomeHeader />
-      {children}
+      {/* Single content shell: matches header / bottom-nav max width so lists & nav align */}
+      <div className="mx-auto w-full max-w-5xl flex-1 px-margin-edge">{children}</div>
       <HomeBottomNav />
     </div>
   );
