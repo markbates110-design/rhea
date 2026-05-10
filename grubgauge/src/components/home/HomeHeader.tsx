@@ -26,9 +26,9 @@ function ProfileAvatar({ user }: { user: User }) {
 }
 
 /**
- * Two text-only entry points so members aren't pushed through a Create
- * Account funnel they don't need. Each link deep-links the dual-mode auth
- * page directly to its mode (`?mode=signin|signup`), bypassing the
+ * Two text-only entry points so members aren't pushed through a sign-up
+ * funnel they don't need. Each link deep-links the dual-mode auth page
+ * directly to its mode (`?mode=signin|signup`), bypassing the
  * isOnboarded() smart-default — explicit intent wins over inference here
  * because the user clicked a specific link.
  */
@@ -39,14 +39,14 @@ function SignedOutLinks() {
         href="/onboarding/signup?mode=signin"
         className="font-label-sm text-label-sm font-semibold text-on-surface-variant hover:text-on-surface transition-colors"
       >
-        Sign in
+        Sign In
       </Link>
       <span aria-hidden className="font-label-sm text-label-sm text-outline-variant">·</span>
       <Link
         href="/onboarding/signup?mode=signup"
         className="font-label-sm text-label-sm font-semibold text-primary hover:brightness-110 transition-all"
       >
-        Create account
+        Sign Up
       </Link>
     </div>
   );
@@ -56,8 +56,8 @@ function SignedOutLinks() {
  * Auth-aware right slot:
  * - `loading` → fixed-size placeholder (prevents CTA flicker on first paint)
  * - signed-in → profile avatar → /profile
- * - signed-out → text-only "Sign in · Create account" pair (both deep-link
- *   into the dual-mode auth page at the appropriate mode)
+ * - signed-out → text-only "Sign In · Sign Up" pair (both deep-link into
+ *   the dual-mode auth page at the appropriate mode)
  */
 function AuthSlot() {
   const { user, loading } = useAuth();

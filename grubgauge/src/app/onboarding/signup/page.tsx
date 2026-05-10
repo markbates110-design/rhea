@@ -36,7 +36,7 @@ function OnboardingAuthPageInner() {
   const searchParams = useSearchParams();
   const { user, loading: authLoading } = useAuth();
   // Default mode: returning user (onboarded device) → sign in; new visitor →
-  // create account. URL param `?mode=signin|signup` overrides for deep-links
+  // sign up. URL param `?mode=signin|signup` overrides for deep-links
   // (e.g. the History upsell card). isOnboarded() is localStorage-backed and
   // safe to call here because the route is client-rendered.
   const [mode, setMode] = useState<Mode>(() => {
@@ -221,7 +221,7 @@ function OnboardingAuthPageInner() {
       {/* Heading */}
       <div className="mb-lg">
         <h1 className="font-headline-md text-headline-md font-semibold text-on-surface">
-          {isSignup ? "Create your account" : "Welcome back"}
+          {isSignup ? "Sign up for GrubGauge" : "Welcome back"}
         </h1>
         <p className="mt-xs font-body-md text-body-md text-on-surface-variant">
           {isSignup
@@ -241,7 +241,7 @@ function OnboardingAuthPageInner() {
               : "text-on-surface-variant hover:text-on-surface"
           }`}
         >
-          Sign in
+          Sign In
         </button>
         <button
           type="button"
@@ -252,7 +252,7 @@ function OnboardingAuthPageInner() {
               : "text-on-surface-variant hover:text-on-surface"
           }`}
         >
-          Create account
+          Sign Up
         </button>
       </div>
 
@@ -305,10 +305,10 @@ function OnboardingAuthPageInner() {
           {loading ? (
             <>
               <span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
-              {isSignup ? "Creating account…" : "Signing in…"}
+              {isSignup ? "Signing up…" : "Signing in…"}
             </>
           ) : isSignup ? (
-            "Create Account"
+            "Sign Up"
           ) : (
             "Sign In"
           )}

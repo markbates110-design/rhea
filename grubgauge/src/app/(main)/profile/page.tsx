@@ -62,16 +62,16 @@ export default function ProfilePage() {
               <p className="font-title-sm text-title-sm font-semibold text-on-surface">Save your ratings forever</p>
             </div>
             <p className="font-body-md text-body-md text-on-surface-variant">
-              Create a free account to access your history from any device and never lose a rating.
+              Sign up for a free account to access your history from any device and never lose a rating.
             </p>
             <Link
-              href="/onboarding/signup"
+              href="/onboarding/signup?mode=signup"
               className="mt-xs flex w-full items-center justify-center gap-xs rounded-xl bg-primary py-[12px] font-title-sm text-title-sm font-bold text-on-primary transition-all hover:brightness-110 active:scale-95"
             >
               <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>
                 person_add
               </span>
-              Create Account
+              Sign Up
             </Link>
           </div>
 
