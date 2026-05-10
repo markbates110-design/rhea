@@ -29,6 +29,12 @@ History / My Ratings: edit sheet (criteria sliders, visit details, notes, meal p
 *Intent: 2026-05-09 08:04 CT · Executed: 2026-05-11*
 `completed`
 Align nav, body gutters, and max-width shell across `/`, `/explore`, `/history`, `/rate`; onboarding to same rhythm. Shared `max-w-5xl` + `px-margin-edge` only.
+
+**GrubGauge — Width contract (`min-w-0`, vertical-text prevention)**  
+*Follow-up: assessment Error Fixes + user request · Executed: 2026-05-12*  
+`completed`  
+Applied `min-w-0` (and aligned `main` widths) across `(main)` shell, app `<main>` pages, onboarding shells, `/rate` grid + feedback card, History edit sheet, header/bottom-nav rows — cross-links in `grubgauge-build-assessment.md` Error Fix sections; rollup assessment **Width contract (`min-w-0` rollout)**. Git **`dd742f7`**.
+
 **GrubGauge — Design assets palette rollout**
 *Intent: 2026-05-09 06:52 CT · Executed: 2026-05-10*
 `completed`

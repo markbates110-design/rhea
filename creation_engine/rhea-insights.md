@@ -1,6 +1,6 @@
 # Rhea Insights & Process Upgrades
 
-**Last Updated:** 2026-05-11
+**Last Updated:** 2026-05-12
 
 This file bookmarks key i² insights, process improvements, and patterns discovered across all creations. 
 The Governance Agent must read this file at the start of every major session.
@@ -21,6 +21,9 @@ The Governance Agent must read this file at the start of every major session.
 **2026-05-09 — Songwriting**
 - Starting with emotional core before hook produces stronger lyrics.
 - Negative space phrasing ("You don’t have to fix me") creates more vulnerability than direct pleas.
+
+**2026-05-12 — GrubGauge flex / “vertical text”**
+- Site-wide **`min-w-0`** on shells, page `<main>`, and nested flex/grid columns that host **`w-full`** forms — pair with the existing **`<main> mx-auto w-full max-w-*` contract** so block text never resolves to one-character wrapping.
 
 ---
 
@@ -210,6 +213,14 @@ The Governance Agent must read this file at the start of every major session.
 - **Shared scoring module:** When edit flows mirror submit flows, extract `VENUE_CRITERIA` + `calcWeightedScore` to one module so reweighted scores never drift between create and update.
 - **Form reset without effects:** Mount the editor with `key={rating.id}` (or pass a fresh `revision` key) so initial state is derived on mount; avoids syncing props→state in `useEffect` and keeps lint clean under React 19 rules.
 - **Delete confirmation + representation:** Pair a human confirm dialog with a `delete().select("id")` (or count) check so “success with zero rows” does not look like a deleted rating in the UI.
+
+---
+
+### Session Insights — 2026-05-12 (GrubGauge width contract / “vertical text”)
+
+- **`min-w-0` everywhere it matters:** On flex/grid children that must host `w-full` paragraphs, inputs, or textareas, set **`min-w-0`** (and keep **`mx-auto min-w-0 w-full`** on page `<main>`) so intrinsic minimum width never traps layout at effectively zero usable width — the “vertical stacking” symptom.
+- **`items-center` + full-width siblings:** Prefer splitting centered hero stacks from **`w-full` cards** (`items-center`-free wrapper for the wide block), *and* add **`min-w-0`** on ancestors so **`w-full`** always resolves correctly.
+- **Regression guard:** Match the **exact `<main>` pattern** across conditional returns **and** propagate **`min-w-0`** up the ancestor chain whenever a screen adds nested flex/grid.
 
 ---
 

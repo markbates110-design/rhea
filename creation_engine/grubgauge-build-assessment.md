@@ -239,6 +239,8 @@
 
 **i²:** In a flex column with `items-center`, `w-full` on a child means 100% of the *shrunk* parent — not 100% of the viewport or named container. When mixing centered intrinsic-size elements with full-width blocks in the same flex column, split them into separate containers rather than sharing one `items-center` wrapper.
 
+**Follow-up rolled up (2026-05-12):** Same symptom class is also prevented by **`min-w-0`** on flex/grid participants site-wide — see **Assessment — Width contract (`min-w-0` rollout)**.
+
 ---
 
 ## Error Fix — Feedback Screen: Text Still Vertical After Multiple CSS Fixes
@@ -251,6 +253,8 @@
 **Fix:** Changed success screen to return `<main className="mx-auto w-full max-w-2xl px-margin-edge pt-lg pb-10">` — exactly matching all other working screens in the component. Resolved immediately.
 
 **i²:** When adding a new conditional return to an existing page component, always copy the root element pattern from an existing working return in the same component. Diverging from the established layout contract — even with seemingly equivalent HTML — breaks layout width resolution in ways invisible from code inspection. The working pattern is the contract; match it exactly.
+
+**Follow-up rolled up (see 2026-05-12):** Global **`min-w-0`** on shells, `<main>` roots, grids, modal bodies, and header/nav rows prevents nested flex/grid from ever resolving usable width to zero alongside the **`main`** contract above — see **Assessment — Width contract (`min-w-0` rollout)** below.
 
 ---
 
@@ -355,6 +359,25 @@
 1. If UPDATE/DELETE fails in prod, add matching Supabase RLS policies for anon + `device_id` model (or move to auth).
 2. Optional: storage cleanup when removing meal photos.
 3. Paste next Creation Intent → `go`.
+
+---
+
+## Assessment — Width contract (`min-w-0` rollout)
+**Timestamp: 2026-05-12**
+
+**e** — Re-read Error Fix logs for Feedback “vertical text” (collapsed block width → one character per line); pattern extends to any nested flex/grid where default `min-width: auto` blocks proper shrink and percentage/`w-full` resolution.
+
+**s** — Applied **`mx-auto min-w-0 w-full`** (with existing **`max-w-*`** / padding) consistently: `(main)/layout.tsx` content shell; all app `<main>` returns (dashboard, explore, history, rate success + wide form grid + sidebar + feedback card `w-full min-w-0`); onboarding outer wrappers + `<main>`; `RatingEditSheet` panel/scroll/stack and criteria header text column **`min-w-0`**; **`HomeHeader`** / **`HomeBottomNav`** inner **`max-w-5xl`** rows. Verification: **`npm run lint`**, **`npm run build`** clean; **`dd742f7`** pushed.
+
+**i²**
+- *First Iteration:* Cross-links added from both Feedback Error Fix entries to this rollup so diagnosis + prevention stay adjacent in the assessment file.
+- *Second Iteration:* Pair **`min-w-0`** with the established **`<main> mx-auto w-full max-w-*` contract** (`rhea-insights`) — fixes at layout root and at flex/grid ancestors are complements, not substitutes.
+
+**Performance Rating: ★★★★★** — Low-risk CSS-only hardening; tight scope.
+
+**Recommended Next Steps:**
+1. New screens: copy an existing page’s `<main>` class string and include **`min-w-0`**.
+2. Any new `flex`/`grid` parent of `w-full` forms: add **`min-w-0`** to the chain if text ever “stacks vertically” again.
 
 ---
 
