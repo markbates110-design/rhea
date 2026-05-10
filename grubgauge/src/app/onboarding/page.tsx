@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { BrandMark } from "@/components/brand/BrandMark";
 import { PageShell } from "@/components/layout/PageShell";
-import { isOnboarded, setOnboarded } from "@/lib/identity/deviceId";
+import { setOnboarded } from "@/lib/identity/deviceId";
 
 const VALUE_PROPS = [
   {
@@ -28,13 +27,14 @@ const VALUE_PROPS = [
 export default function OnboardingWelcomePage() {
   const router = useRouter();
 
-  useEffect(() => {
-    if (isOnboarded()) router.replace("/");
-  }, [router]);
+  // No auto-redirect for already-onboarded users — `/onboarding` is now a
+  // re-entry surface for returning guests routed here from the body `+ Rate`
+  // CTA. Auto-redirecting would create a loop with that CTA's new behavior.
 
   function handleGuest() {
     setOnboarded();
-    router.push("/");
+    // Guests proceed straight to the rate screen post-onboarding choice.
+    router.push("/rate");
   }
 
   return (

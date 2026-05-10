@@ -55,9 +55,12 @@ export default function DashboardPage() {
   const [ratings, setRatings] = useState<Rating[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Smart "+ Rate" target: signed-in users + onboarded guests go straight to /rate;
-  // brand-new visitors (no auth, no guest flag) flow through onboarding first.
-  const rateHref = user || (typeof window !== "undefined" && isOnboarded()) ? "/rate" : "/onboarding";
+  // Smart "+ Rate" target: signed-in users go straight to /rate; everyone else
+  // (brand-new visitors AND returning guests) routes through /onboarding first.
+  // The onboarding welcome page's "Continue as Guest" CTA lands the user on
+  // /rate, so guests reach the rate screen in one click without losing the
+  // upgrade-to-account entry point.
+  const rateHref = user ? "/rate" : "/onboarding";
 
   useEffect(() => {
     if (!isOnboarded()) {
