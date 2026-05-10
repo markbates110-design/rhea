@@ -1,6 +1,6 @@
 # Rhea Insights & Process Upgrades
 
-**Last Updated:** 2026-05-10 23:45 UTC
+**Last Updated:** 2026-05-10 10:47 CT
 
 This file bookmarks key i² insights, process improvements, and patterns discovered across all creations. 
 The Governance Agent must read this file at the start of every major session.
@@ -44,6 +44,12 @@ The Governance Agent must read this file at the start of every major session.
 
 **2026-05-12 — GrubGauge flex / “vertical text”**
 - Site-wide **`min-w-0`** on shells, page `<main>`, and nested flex/grid columns that host **`w-full`** forms — pair with the existing **`<main> mx-auto w-full max-w-*` contract** so block text never resolves to one-character wrapping.
+
+**2026-05-10 10:47 CT — GrubGauge nested-modal vertical text (delete-confirm portal)**
+- **Symptom:** After the v3.10 width-contract fix (commit **`9c77db8`**), the **inner** `confirmDelete` alertdialog rendered inside the already-portaled `RatingEditSheet` still stacked title/body **one glyph per line** in Chrome. Parent sheet rendered correctly; only the nested overlay collapsed.
+- **Resolution:** Extract any **modal-within-modal** to its own **`createPortal(..., document.body)`** and style it with **inline `style={…}` only** — fixed `width: min(384px, calc(100vw - 32px))`, `minWidth: 280`, `flexShrink: 0`, `display: block`, `whiteSpace: "normal"`, `overflowWrap: "break-word"`. Bypasses Tailwind + flex %-width chains that Chrome can compute to min-content under nested portal contexts.
+- **Discipline:** Reserve **`min-w-0`** + Tailwind utility chains for **single-layer** modals. For **nested portals**, default to a **hardcoded width floor + `display: block`** so width never has to resolve through an ancestor's flex tree.
+- **Files:** `grubgauge/src/components/history/DeleteRatingConfirm.tsx` (new); `grubgauge/src/components/history/RatingEditSheet.tsx` (consumes new component, drops inline conditional `<div>`).
 
 #### Creative (songwriting · lyrical process)
 

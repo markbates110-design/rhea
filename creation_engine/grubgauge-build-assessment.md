@@ -483,3 +483,17 @@ Deployments URLs may appear under **`vercel.com/.../markbates110-designs-project
 **Operational summary (one line):** *Evidence order = computed layout → minimal patch → verify same browser; infra order = logs → dashboard → code.*
 
 ---
+
+## Error Fix — Delete-confirm overlay: nested portal vertical glyphs
+**Timestamp: 2026-05-10 10:47 CT**
+**Governance ref** — `rhea-governance-agent.md` **v3.10**
+
+**Error:** After v3.10 width-contract fixes shipped in **`9c77db8`**, the **delete confirmation** rendered *inside* the already-portaled `RatingEditSheet` still showed one-glyph-per-line in Chrome — the alertdialog title and body stacked vertically while the surrounding edit sheet rendered correctly.
+
+**Root Cause:** Modal-within-modal width-collapse class, parent fixes alone insufficient. Two compounding factors: (1) Tailwind utility classes on the inner panel resolved through a flex-row + percentage-width chain that Chrome computed to ~min-content for the alertdialog text under the nested portal context. (2) Sharing a z-index stack with the parent sheet meant the parent's flex context could still influence intrinsic sizing on certain repaints. A separate width contract was needed for nested overlays.
+
+**Fix:** Extracted the dialog into **`grubgauge/src/components/history/DeleteRatingConfirm.tsx`** — its own `createPortal(..., document.body)` rendered with **inline `style={…}` only** (no Tailwind, no flex %-width chain). Panel uses fixed `width: min(384px, calc(100vw - 32px))`, `minWidth: 280`, `flexShrink: 0`, `display: block`, explicit `writingMode: "horizontal-tb"`, `whiteSpace: "normal"` and `overflowWrap: "break-word"` on body copy. `RatingEditSheet` renders `<DeleteRatingConfirm />` instead of an inline conditional `<div>` and keeps the v3.10 panel contract (`shrink-0 min-w-[280px] w-full max-w-lg`, header `min-w-0 flex-1`, body `min-h-0 min-w-0 flex-1 overflow-y-auto`) unchanged. Verified: `npm run lint` clean, `npx tsc --noEmit` clean.
+
+**i²:** For **modal-within-modal** overlays where a vertical-text class has surfaced once, isolate the inner overlay into its own `createPortal` styled with **hardcoded inline widths + `display: block`** rather than re-using the shared utility chain. Reserve Tailwind/flex `min-w-0`/`shrink-0` strategies for *single-layer* modals; nested portals should default to a **fixed width floor** so width never has to resolve through any ancestor's flex tree.
+
+---

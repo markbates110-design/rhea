@@ -13,6 +13,7 @@ import {
   type VenueType,
 } from "@/lib/ratings/scoring";
 import { uploadMealPhoto } from "@/lib/storage/mealPhoto";
+import { DeleteRatingConfirm } from "@/components/history/DeleteRatingConfirm";
 
 export interface EditableRatingRow {
   id: string;
@@ -459,42 +460,13 @@ function RatingEditSheetInner({ rating, onClose, onSaved, onDeleted }: InnerProp
       </div>
     </div>
 
-      {confirmDelete ? (
-        <div className="fixed inset-0 z-[110]">
-          <button
-            type="button"
-            aria-label="Dismiss"
-            className="absolute inset-0 bg-black/60"
-            onClick={() => !deleting && setConfirmDelete(false)}
-          />
-          <div className="absolute inset-0 z-[1] flex items-center justify-center p-md">
-            <div className="relative w-full max-w-sm shrink-0 rounded-2xl border border-outline-variant bg-surface-container-high p-lg shadow-xl">
-              <p className="font-title-sm text-title-sm text-on-surface">Delete this rating?</p>
-              <p className="mt-sm font-body-md text-body-md text-on-surface-variant">
-                This removes your review for {rating.venue_name}. This cannot be undone.
-              </p>
-              <div className="mt-md flex justify-end gap-xs">
-              <button
-                type="button"
-                disabled={deleting}
-                onClick={() => setConfirmDelete(false)}
-                className="rounded-lg border border-outline-variant px-md py-xs font-label-sm text-label-sm text-on-surface hover:bg-surface-container disabled:opacity-40"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                disabled={deleting}
-                onClick={handleDelete}
-                className="rounded-lg bg-error px-md py-xs font-label-sm text-label-sm font-bold hover:opacity-90 disabled:opacity-40"
-              >
-                {deleting ? "Removing…" : "Delete"}
-              </button>
-            </div>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <DeleteRatingConfirm
+        open={confirmDelete}
+        venueName={rating.venue_name}
+        deleting={deleting}
+        onDismiss={() => !deleting && setConfirmDelete(false)}
+        onConfirmDelete={handleDelete}
+      />
     </>
   );
 
