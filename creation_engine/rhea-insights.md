@@ -1,6 +1,6 @@
 # Rhea Insights & Process Upgrades
 
-**Last Updated:** 2026-05-10 17:30 CT
+**Last Updated:** 2026-05-10 17:50 CT
 
 This file bookmarks key i² insights, process improvements, and patterns discovered across all creations. 
 The Governance Agent must read this file at the start of every major session.
@@ -10,6 +10,13 @@ The Governance Agent must read this file at the start of every major session.
 ### Bookmarked Insights
 
 #### Product (apps · governance · ops)
+
+**2026-05-10 17:50 CT — Supabase `user_metadata` is the canonical store for small per-user profile fields**
+- **Pattern.** Per-user fields that are small (≤ a few KB), don't need to be queryable from other users' contexts, and travel with the account (username, food prefs, avatar URL, default city, notification flags) live on `auth.users.raw_user_meta_data` — accessed as `user.user_metadata.<field>` and updated via `supabase.auth.updateUser({ data: { … } })`. **Zero migration, zero extra round-trip** (the field arrives on the `user` object that `useAuth` already returns).
+- **When NOT to use it.** Anything queryable from other users (community profiles searchable by name), anything that needs FK semantics, or anything that exceeds a few KB. Those want a real `profiles` table. The line is *"does another user's session need to read this?"* — yes → table; no → metadata.
+- **Hydrate-from-canonical, mirror-locally pattern.** Forms that read these fields (e.g. `/onboarding/profile`) hydrate from `user.user_metadata` for signed-in users (one-shot via a `hydrated` flag, so a slow auth resolution can't clobber in-progress typing) and fall back to localStorage for guests. Saves *always* write the local mirror (fast-path next-visit hydration + guest store) and, when signed in, additionally call `updateUser({ data })`. Additive identity per the established rule — local mirror coexists with the auth-backed canonical value, never replaces it.
+- **Read-site discipline.** Default-display logic shapes the perceived persistence: *username → email local-part → fallback glyph* on the avatar, *username → email* in the identity card. Even a user who hasn't set a screen name gets a sensible greeting; one who has feels the system remember them on first sight.
+- **Compounding rule:** future per-user profile fields (notification toggles, default radius, etc.) compose into this same `user_metadata` store. Do not spawn a `profiles` table until a feature requires cross-user queryability.
 
 **2026-05-10 17:30 CT — PAP candidate (staged): Verification Pass requires `npm run build` on route-touching iterations**
 - **Class of bug.** Next.js prerender-shape errors (`useSearchParams()` without `<Suspense>`, `useParams` / `usePathname` in client-only pages without bailout, dynamic imports without fallbacks, route-segment config drift) compile cleanly under `tsc` + `eslint` and run fine under `next dev`, but **fail at `next build` static-generation time** — i.e. on Vercel, after the user pushes. The "tsc + lint" gate in our Verification Pass misses this entire class.

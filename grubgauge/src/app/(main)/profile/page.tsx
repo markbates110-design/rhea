@@ -89,13 +89,22 @@ export default function ProfilePage() {
 
   // ── Signed in ────────────────────────────────────────────────────────────
 
-  const initial = (user.email ?? "•").trim().charAt(0).toUpperCase() || "•";
+  // Username lives on Supabase user_metadata (cross-device source of truth);
+  // fall back to email's local part if the user hasn't set a screen name
+  // yet, and finally to the bullet glyph so the avatar is never empty.
+  const metaUsername =
+    typeof user.user_metadata?.username === "string" ? user.user_metadata.username.trim() : "";
+  const emailLocal = (user.email ?? "").split("@")[0];
+  const displayName = metaUsername || emailLocal || "there";
+  const initial = (metaUsername || user.email || "•").trim().charAt(0).toUpperCase() || "•";
 
   return (
     <PageShell variant="form" className="pt-lg pb-10">
       <div className="flex flex-col gap-lg">
         <div>
-          <h1 className="font-headline-md text-headline-md font-semibold text-on-surface">Profile</h1>
+          <h1 className="font-headline-md text-headline-md font-semibold text-on-surface">
+            Hey, {displayName}
+          </h1>
           <p className="mt-xs font-body-md text-body-md text-on-surface-variant">
             Account and preferences.
           </p>
@@ -107,8 +116,17 @@ export default function ProfilePage() {
             {initial}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant">Signed in as</p>
-            <p className="mt-1 font-body-md text-body-md font-medium text-on-surface truncate">{user.email}</p>
+            {metaUsername ? (
+              <>
+                <p className="font-title-sm text-title-sm font-semibold text-on-surface truncate">{metaUsername}</p>
+                <p className="mt-0.5 font-label-sm text-label-sm text-on-surface-variant truncate">{user.email}</p>
+              </>
+            ) : (
+              <>
+                <p className="font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant">Signed in as</p>
+                <p className="mt-1 font-body-md text-body-md font-medium text-on-surface truncate">{user.email}</p>
+              </>
+            )}
           </div>
         </div>
 

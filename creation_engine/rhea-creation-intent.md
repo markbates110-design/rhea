@@ -10,11 +10,11 @@
 
 ### Current Creation Intent
 
-**Project:** GrubGauge — Guest vs signed-in flow refinement (History scope + upsell)
-*Intent: 2026-05-09 15:22 CT · Executed: 2026-05-10 15:25 CT*
+**Project:** GrubGauge — Username persistence across sign-ins (Supabase `user_metadata`)
+*Intent: 2026-05-10 17:40 CT · Executed: 2026-05-10 17:50 CT*
 `completed`
 
-Guests retain full rate flow (low friction, device-scoped). Signed-in users' History shows **only their own** ratings (scoped by `user_id`), no device cross-pollination. Guests see a gentle upsell card on History: *"Sign in to save your ratings permanently"* — respectful, dismissible-by-default-style, never blocks reading existing local ratings. Auth = identity layer for personal data; device-scoped guest data stays additive.
+Chosen screen name (and food prefs) now persist on `auth.users.raw_user_meta_data` via `supabase.auth.updateUser({ data: { username, food_prefs } })` — no migration; uses Supabase's built-in metadata field. `/onboarding/profile` hydrates from `user_metadata` for signed-in users (localStorage fallback for guests) and mirrors saves back to local for fast-path hydration. `/profile` greets the user by name and surfaces the screen name above the email when set. Identity stays additive: local mirror never replaces the auth-backed canonical value.
 
 **Next:** Paste next Creation Intent in sticky template when ready (`go`). **Ops (Vercel / Root):** see **`grubgauge-build-assessment.md`** → **Vercel Root Directory canonical**.
 ---
@@ -24,6 +24,11 @@ Guests retain full rate flow (low friction, device-scoped). Signed-in users' His
 ---
 
 #### GrubGauge
+
+**GrubGauge — Guest vs signed-in flow refinement (History scope + upsell)**
+*Intent: 2026-05-09 15:22 CT · Executed: 2026-05-10 15:25 CT*
+`completed`
+Signed-in History/Dashboard scope by `user_id`; guests by `device_id` with `user_id is null`. Canonical `applyRatingsOwnerScope` helper used by reads, updates, deletes. `ratings.user_id` migration (nullable, FK auth.users). Guest upsell card on History. PageShell migration. Follow-ons closed: dual-mode auth + header text-link pair + post-signup loop fix (Error Fixes).
 
 **GrubGauge — Rate-screen venue-type fixes (default + "Change" button)**
 *Intent: 2026-05-09 14:57 CT · Executed: 2026-05-10 15:00 CT*

@@ -571,6 +571,29 @@ Verified: `npx tsc --noEmit` ✓ exit 0, `npm run lint` ✓ exit 0, ReadLints cl
 
 ---
 
+## Assessment — Username persistence across sign-ins (Supabase `user_metadata`)
+**Timestamp: 2026-05-10 17:50 CT** · **Governance ref** — `rhea-governance-agent.md` **v3.12**
+
+**e** — User reported the chosen screen name was being asked for on every sign-in — no cross-device persistence. Three storage options:
+1. *New `profiles` table* (FK to `auth.users`) — most flexible for future community features, but requires a migration, RLS, and a second round-trip on every page load that needs the name.
+2. *Extend `ratings` rows* — wrong shape (per-row, not per-user).
+3. *Supabase built-in `user_metadata`* (JSONB on `auth.users.raw_user_meta_data`) — designed exactly for small profile fields; no migration; available on every `user` object returned by `useAuth`. Selected. The user hypothesized "likely will need a new field in Supabase for storage" — `user_metadata` *is* that field, just built-in.
+
+**s** — Additive, no schema change:
+1. **`grubgauge/src/app/onboarding/profile/page.tsx`** — now reads `useAuth` and hydrates `name` / `food_prefs` from `user.user_metadata` for signed-in users (falls back to localStorage for guests / first signin). Hydration is one-shot via a `hydrated` flag so a slow auth resolution can't clobber a user's in-progress typing. `handleFinish` always writes the local mirror (guest fallback) and, when `user` is present, additionally calls `supabase.auth.updateUser({ data: { username, food_prefs } })` before routing. Save button picks up a `saving` state with a spinner so the Supabase round-trip is visible.
+2. **`grubgauge/src/app/(main)/profile/page.tsx`** — heading becomes *"Hey, {displayName}"* (username → email local-part → "there"); the identity card surfaces `metaUsername` as the primary line with email as the secondary when a screen name is set, otherwise keeps the original "Signed in as / {email}" treatment. Avatar initial uses metaUsername first, falling back to email.
+3. **Header avatar** already reads `user.user_metadata?.username` first (existing `initialFor` helper), so the avatar glyph updates automatically without a code change in `HomeHeader.tsx`.
+
+**Verification Pass** — `npm run build` ✓ (all 11 static pages prerender clean; staged v3.13 rule applied: build gate on a route-touching iteration), `ReadLints` ✓ on both touched files. PageShell + `useAuth` SSOT + typography contracts honored. No new conditional-return root drift.
+
+**i² First** — Username + prefs now travel with the account across devices; local mirror remains as a fast-path hydration source and as the canonical store for guests. **i² Second / compounding rule:** `user_metadata` is the canonical store for small per-user profile fields in this codebase — no parallel `profiles` table until/unless a feature needs queryability we can't satisfy via the auth-row JSON (e.g. community search by name). Reads go through `user.user_metadata.<field>`; writes through `supabase.auth.updateUser({ data: … })`. Future profile fields (avatar URL, default city, notification prefs) compose into the same store rather than spawning new tables.
+
+★★★★★ — Solves the reported bug at the lightest possible layer; preserves the additive-identity discipline (local mirror coexists with auth-backed canonical value); future-compatible with a `profiles` table migration if scope ever demands it.
+
+**Next:** push when ready; smoke-test by signing in, setting a name in /onboarding/profile, signing out / back in — name should persist on /profile and on the header avatar.
+
+---
+
 ## Error Fix — Vercel build failure: `useSearchParams()` outside Suspense on `/onboarding/signup`
 **Timestamp: 2026-05-10 17:30 CT** · **Governance ref** — `rhea-governance-agent.md` **v3.12**
 
