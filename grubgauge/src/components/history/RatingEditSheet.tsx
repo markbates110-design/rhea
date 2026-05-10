@@ -224,7 +224,7 @@ function RatingEditSheetInner({ rating, onClose, onSaved, onDeleted }: InnerProp
       <div className="fixed inset-0 z-[100]">
         <button type="button" aria-label="Close" className="absolute inset-0 bg-black/50" onClick={onClose} />
         <div className="absolute inset-x-0 bottom-0 z-[1] flex max-h-[100dvh] justify-center p-0 sm:inset-0 sm:items-center sm:p-md">
-          <div className="relative flex max-h-[min(92dvh,760px)] w-full max-w-lg shrink-0 flex-col overflow-hidden rounded-t-2xl border border-outline-variant bg-surface-container-high shadow-xl sm:rounded-2xl">
+          <div className="relative flex max-h-[min(92dvh,760px)] w-full min-w-[280px] max-w-lg shrink-0 flex-col overflow-hidden rounded-t-2xl border border-outline-variant bg-surface-container-high shadow-xl sm:min-w-[400px] sm:rounded-2xl">
         <div className="flex shrink-0 items-start justify-between gap-sm border-b border-outline-variant px-md py-sm">
           <div className="min-w-0 flex-1 pr-sm">
             <h2 className="font-title-sm text-title-sm font-semibold text-on-surface">Edit rating</h2>
@@ -265,7 +265,7 @@ function RatingEditSheetInner({ rating, onClose, onSaved, onDeleted }: InnerProp
             </div>
 
             <section className="flex flex-col gap-sm rounded-xl border border-outline-variant bg-surface-container-low p-md">
-              <h3 className="flex items-center gap-xs font-title-sm text-title-sm text-primary">
+              <h3 className="flex min-w-0 items-center gap-xs font-title-sm text-title-sm text-primary">
                 <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>
                   info
                 </span>
@@ -301,7 +301,7 @@ function RatingEditSheetInner({ rating, onClose, onSaved, onDeleted }: InnerProp
             <section className="flex flex-col gap-lg rounded-xl border border-outline-variant bg-surface-container-low p-md">
               <div className="flex min-w-0 items-center justify-between gap-sm">
                 <div className="min-w-0 flex-1">
-                  <h3 className="flex items-center gap-xs font-title-sm text-title-sm text-primary">
+                  <h3 className="flex min-w-0 items-center gap-xs font-title-sm text-title-sm text-primary">
                     <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>
                       tune
                     </span>
@@ -357,7 +357,7 @@ function RatingEditSheetInner({ rating, onClose, onSaved, onDeleted }: InnerProp
             </section>
 
             <section className="flex flex-col gap-sm rounded-xl border border-outline-variant bg-surface-container-low p-md">
-              <h3 className="flex items-center gap-xs font-title-sm text-title-sm text-primary">
+              <h3 className="flex min-w-0 items-center gap-xs font-title-sm text-title-sm text-primary">
                 <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>
                   photo_camera
                 </span>

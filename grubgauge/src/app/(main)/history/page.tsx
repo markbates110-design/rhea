@@ -194,8 +194,8 @@ export default function HistoryPage() {
                 {/* Name + Score */}
                 <div className="flex items-start justify-between gap-sm">
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-start justify-between gap-xs">
-                      <p className="font-title-sm text-title-sm font-semibold text-on-surface truncate">
+                    <div className="flex w-full min-w-0 items-start justify-between gap-xs">
+                      <p className="min-w-0 flex-1 font-title-sm text-title-sm font-semibold text-on-surface truncate">
                         {r.venue_name}
                       </p>
                       <button
