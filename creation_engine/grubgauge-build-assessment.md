@@ -439,3 +439,34 @@ Deployments URLs may appear under **`vercel.com/.../markbates110-designs-project
 
 **Recommended Next Steps:**
 1. When onboarding a collaborator or new agent session, cite this assessment + **`rhea-creation-intent` Next:** for Vercel, not miscellaneous chat memory.
+
+---
+
+## Assessment — GrubGauge “vertical text” troubleshooting (closed)
+**Timestamp: 2026-05-10 23:00 UTC**  
+**Governance ref** — `rhea-governance-agent.md` **v3.9**
+
+**e** — Long arc: UI “vertical” stacking confused at times with **Vercel Root / deploy health**. True defect class was **CSS intrinsic sizing** — flex/grid **`min-w-0`** in the wrong places, **12-column grid** `minmax(0,1fr)` shrink on **Rate**, **History** card title row missing **`min-w-0` on a `truncate` flex child** (Chrome), **modal overlay** flex-row ambiguity, global **`overflow-wrap: break-word`** exaggerating narrow wraps. Iterated until **History + Edit sheet** behaved on **Chrome desktop**.
+
+**s** — **Terminal fixes:** **`history/page.tsx`** — inner title row **`w-full min-w-0`**; venue **`<p className="min-w-0 flex-1 … truncate">`**. **`RatingEditSheet`** — panel **`min-w-[280px] sm:min-w-[400px]`**; section **`h3`** **`min-w-0`**; overlay **fragment**, **absolute** sheet positioning, **`globals` / layout** adjustments per prior commits (**`9c77db8`** area). Deployments were already **green**; validation was **visual/layout**, not build pipeline.
+
+**i²**
+- *First Iteration:* **“One glyph per line”** checklist: **computed width** on the text node → if ≈0, walk **flex/grid parents** before touching infra.
+- *Second Iteration (Protocol Target — triage brevity):* Encode **short troubleshooting** as a **fixed order**: (1) **Reproduction envelope** — route, viewport, **browser**, whether **modal open**, one **screenshot or computed width**. (2) **Classify** — layout collapse vs network vs data. (3) **Single component isolate** — **red outline** / delete children until symptom moves. (4) **Stop after two wrong guesses** — measure, don’t speculate. (5) **`git bisect`** only if regression range is known. (6) **Never** mix **Root Directory** debate with **CSS** symptoms without **build log CWD** evidence.
+
+**Performance Rating: ★★★★☆** — Correct root cause and durable patterns logged; time cost high → process upgrades above.
+
+**Recommended Next Steps — shorten future long troubleshooting runs:**
+
+| Phase | Do | Don’t |
+|-------|-----|--------|
+| **0 — Gate** | Confirm **deploy** matches **commit** (Vercel **Ready** + SHA). | Re-litigate **Root Directory** when **build log** already shows **`next build`** in the right folder. |
+| **1 — Snapshot** | Record **URL**, **browser + version**, **viewport**, **modal on/off**, **DevTools computed width** on the broken text’s parent chain (one paste). | Start multi-file layout “improvements” without **one** failing DOM node named. |
+| **2 — Classify** | **`width` ~0** → flex/grid/`min-w-0` checklist (insights bookmark **2026-05-10 23:00 UTC**). **`fetch` errors** → network/env. | Treat “vertical” as rotation/typography first. |
+| **3 — Edit surface** | **One PR-sized patch** per hypothesis; revert if **no** change in computed width. | Stack 5 CSS theories in one commit. |
+| **4 — Timebox** | **30 min** on layout; then **user** reproduces with **Elements panel** screenshot or **Loom**. | Open-ended multi-session CSS without new **evidence**. |
+| **5 — Close** | **Assessment + 1 bookmark** when fixed (`stop`). | Leave lessons only in chat. |
+
+**Operational summary (one line):** *Evidence order = computed layout → minimal patch → verify same browser; infra order = logs → dashboard → code.*
+
+---

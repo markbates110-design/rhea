@@ -1,6 +1,6 @@
 # Rhea Insights & Process Upgrades
 
-**Last Updated:** 2026-05-10 21:00 UTC
+**Last Updated:** 2026-05-10 23:00 UTC
 
 This file bookmarks key i² insights, process improvements, and patterns discovered across all creations. 
 The Governance Agent must read this file at the start of every major session.
@@ -8,6 +8,11 @@ The Governance Agent must read this file at the start of every major session.
 ---
 
 ### Bookmarked Insights
+
+**2026-05-10 23:00 UTC — GrubGauge vertical text (terminal fix + faster triage next time)**
+- **Confirmed fix (History / Chrome):** venue title row — inner flex needs **`w-full min-w-0`**; **`<p>`** next to **Edit** needs **`min-w-0 flex-1 truncate`**. Edit sheet — **`min-w-[280px] sm:min-w-[400px]`** floor on the panel; section **`h3`** flex rows get **`min-w-0`**. Earlier work: modal overlay **fragment + absolute centering** (not flex-row + two children), **`(main)` layout** drop **`min-w-0`** on shell, **`overflow-wrap: normal`** on `body`, desktop **Rate** flex row vs **12-col grid**, **BrandMark** **`shrink-0`** + **`whitespace-nowrap`**.
+- **Discipline:** classify **“one glyph per line”** as **width-collapse** immediately; verify **computed width** on the text node **before** revisiting Vercel Root or redeploying.
+- **Shorten triage (see assessment):** one reproduction envelope → symptom checklist → isolate one component → then patch.
 
 **2026-05-10 21:00 UTC — Governance v3.9 (approved batch)**
 - **Precedence:** complete **Iteration Close** / **Error & Debug** before substantive reply when due; log opt-outs in the next assessment.
@@ -250,6 +255,15 @@ The Governance Agent must read this file at the start of every major session.
 - **Facts:** **`./`** appears in dashboard/session guidance; **cloned `main`** has **no root `package.json`** — Next app paths are **`grubgauge/next.config.ts`** etc.
 - **`./` vs `grubgauge`:** Resolves only with **successful Vercel build logs** / install path; naive monorepo default for this layout is **`grubgauge`**.
 - **Lesson:** Logs and assistants contradicted → wasted triage until **truth** anchored on **filesystem + deployment output**, not rhetoric.
+
+---
+
+### Session Insights — 2026-05-10 23:00 UTC — GrubGauge vertical text (resolved)
+
+- **Symptom = physics:** “Vertical text” on block copy is almost always **effective width → ~0** (flex/grid **`minmax(0,1fr)`**, misplaced **`min-w-0`**, **`items-center`** starving **`w-full` siblings). Not writing-mode, not deploy **Ready** alone.
+- **Browser truth:** Reproduce in **named browser**; **Chrome** needed **`min-w-0` on the flex child that carries `truncate`** on History cards — generic site pass missed that row.
+- **Modals:** **Backdrop + sheet** should not share a **flex row** with ambiguous shrink; **absolute** centering + **`shrink-0`** panel + **min-width floor** beats iterative CSS whack-a-mole.
+- **Stop rule:** After **two** failed layout hypotheses, **open DevTools → computed width** on the stacking element; if `< ~12px**, stop and fix parents — do not add more `min-w-0` at random.
 
 ---
 
