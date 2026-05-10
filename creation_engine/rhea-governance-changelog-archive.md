@@ -4,6 +4,7 @@
 
 | Version | Changes | Observed Effect |
 |---------|---------|-----------------|
+| v3.7 | Restructured for anti-entropy: Insights & Memory → Session Start/Iteration Close; Self-Audit pointers; Verification Pass section; pre-v3.0 changelog archived; 200-line ceiling | *Pending* |
 | v3.6 | i1 Verification Pass with category checklists; assessment = completion certificate | *Pending* |
 | v3.5 | `**Assessment ↓**` artifact; PAP on 2-failed-fix loops; `stop` trigger; near-miss must self-correct | *Pending* |
 | v3.4 | `Executed:` timestamp; `go` detects completion state | *Pending* |

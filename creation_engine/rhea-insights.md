@@ -1,6 +1,6 @@
 # Rhea Insights & Process Upgrades
 
-**Last Updated:** 2026-05-10 23:00 UTC
+**Last Updated:** 2026-05-10 23:30 UTC
 
 This file bookmarks key i² insights, process improvements, and patterns discovered across all creations. 
 The Governance Agent must read this file at the start of every major session.
@@ -10,6 +10,7 @@ The Governance Agent must read this file at the start of every major session.
 ### Bookmarked Insights
 
 **2026-05-10 23:00 UTC — GrubGauge vertical text (terminal fix + faster triage next time)**
+- **Governance v3.10:** **Visual / layout triage** codified in **`rhea-governance-agent.md`** — classify width-collapse, measure computed width, gate infra, timebox, log (**Error & Debug** triggers expanded).
 - **Confirmed fix (History / Chrome):** venue title row — inner flex needs **`w-full min-w-0`**; **`<p>`** next to **Edit** needs **`min-w-0 flex-1 truncate`**. Edit sheet — **`min-w-[280px] sm:min-w-[400px]`** floor on the panel; section **`h3`** flex rows get **`min-w-0`**. Earlier work: modal overlay **fragment + absolute centering** (not flex-row + two children), **`(main)` layout** drop **`min-w-0`** on shell, **`overflow-wrap: normal`** on `body`, desktop **Rate** flex row vs **12-col grid**, **BrandMark** **`shrink-0`** + **`whitespace-nowrap`**.
 - **Discipline:** classify **“one glyph per line”** as **width-collapse** immediately; verify **computed width** on the text node **before** revisiting Vercel Root or redeploying.
 - **Shorten triage (see assessment):** one reproduction envelope → symptom checklist → isolate one component → then patch.
