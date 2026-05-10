@@ -425,11 +425,11 @@ export default function RatePage() {
   // ── Main ─────────────────────────────────────────────────────────────────
 
   return (
-    <main className="mx-auto min-w-0 w-full pb-10 pt-lg md:pt-xl">
-      <div className="grid min-w-0 grid-cols-1 gap-lg lg:grid-cols-12">
+    <main className="mx-auto w-full min-w-0 pb-10 pt-lg md:pt-xl">
+      <div className="flex flex-col gap-lg lg:flex-row lg:items-start lg:gap-xl">
 
         {/* ── Left: Form ── */}
-        <div className="flex flex-col gap-md lg:col-span-8">
+        <div className="flex min-w-0 flex-1 flex-col gap-md">
 
           {/* Title */}
           <div>
@@ -643,7 +643,7 @@ export default function RatePage() {
         </div>
 
         {/* ── Right: Live score + desktop submit ── */}
-        <div className="hidden flex-col gap-md lg:col-span-4 lg:flex lg:min-w-[220px] lg:sticky lg:top-24 lg:self-start">
+        <div className="hidden w-full flex-col gap-md self-start lg:flex lg:w-[360px] lg:max-w-full lg:shrink-0 lg:sticky lg:top-24">
           <div className="relative flex flex-col items-center overflow-hidden rounded-xl border border-outline-variant bg-surface-container-high p-xl text-center shadow-lg">
             <div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-primary/10 blur-3xl" />
             <p className="relative z-10 mb-xs font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant">
