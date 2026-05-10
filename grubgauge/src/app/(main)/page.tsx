@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { getDeviceId, isOnboarded } from "@/lib/identity/deviceId";
+import { useAuth } from "@/lib/auth/useAuth";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -49,8 +50,13 @@ function formatDate(dateStr: string): string {
 
 export default function DashboardPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [ratings, setRatings] = useState<Rating[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Smart "+ Rate" target: signed-in users + onboarded guests go straight to /rate;
+  // brand-new visitors (no auth, no guest flag) flow through onboarding first.
+  const rateHref = user || (typeof window !== "undefined" && isOnboarded()) ? "/rate" : "/onboarding";
 
   useEffect(() => {
     if (!isOnboarded()) {
@@ -119,7 +125,7 @@ export default function DashboardPage() {
               <p className="mt-xs font-body-md text-body-md text-on-surface-variant">Rate your first spot to start tracking.</p>
             </div>
             <Link
-              href="/rate"
+              href={rateHref}
               className="inline-flex items-center gap-xs rounded-lg bg-primary-container px-md py-xs font-title-sm text-title-sm font-bold text-on-primary-container transition-all hover:bg-primary-fixed active:scale-95"
             >
               <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>add_circle</span>
@@ -146,7 +152,7 @@ export default function DashboardPage() {
             <p className="mt-xs font-body-md text-body-md text-on-surface-variant">Your personal food value tracker.</p>
           </div>
           <Link
-            href="/rate"
+            href={rateHref}
             className="flex items-center gap-xs rounded-lg bg-primary-container px-sm py-xs font-label-sm text-label-sm font-bold text-on-primary-container transition-all hover:bg-primary-fixed active:scale-95 shrink-0"
           >
             <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>add</span>
@@ -158,7 +164,7 @@ export default function DashboardPage() {
         <div className="grid grid-cols-3 gap-sm">
           {/* Total */}
           <div className="flex flex-col items-center gap-base rounded-xl border border-outline-variant bg-surface-container-low p-md text-center">
-            <span className="font-display-lg text-[32px] font-bold leading-none text-primary">
+            <span className="font-display-lg text-[32px] font-bold leading-none tabular-nums text-primary">
               {stats!.total}
             </span>
             <span className="font-label-sm text-label-sm text-on-surface-variant">Spots Rated</span>
@@ -166,7 +172,7 @@ export default function DashboardPage() {
 
           {/* Avg score */}
           <div className="flex flex-col items-center gap-base rounded-xl border border-outline-variant bg-surface-container-low p-md text-center">
-            <span className="font-display-lg text-[32px] font-bold leading-none text-primary">
+            <span className="font-display-lg text-[32px] font-bold leading-none tabular-nums text-primary">
               {stats!.avg.toFixed(1)}
             </span>
             <span className="font-label-sm text-label-sm text-on-surface-variant">Avg Score</span>
@@ -213,7 +219,7 @@ export default function DashboardPage() {
         {/* Quick actions */}
         <div className="grid grid-cols-3 gap-sm">
           {[
-            { href: "/rate",    icon: "add_circle",  label: "Rate a Spot",  filled: true },
+            { href: rateHref,   icon: "add_circle",  label: "Rate a Spot",  filled: true },
             { href: "/explore", icon: "explore",      label: "Explore",      filled: false },
             { href: "/history", icon: "history",      label: "My Ratings",   filled: false },
           ].map((a) => (

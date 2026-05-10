@@ -7,13 +7,14 @@
 *(Paste your new or updated Creation Intent below this line. Then say `go` — the agent will promote and execute automatically.)*
 
 ---
+
 ### Current Creation Intent
 
-**Project:** GrubGauge — Edit & delete own ratings
-*Intent: 2026-05-09 08:14 CT · Executed: 2026-05-11*
+**Project:** GrubGauge — Onboarding / Landing CTA & auth-state polish
+*Intent: 2026-05-09 12:51 CT · Executed: 2026-05-10 13:10 CT*
 `completed`
 
-History / My Ratings: edit sheet (criteria sliders, visit details, notes, meal photo) plus delete with confirmation. Supabase `update` / `delete` scoped with `.eq("id").eq("device_id", …)`; Explore unchanged (read-only).
+Landing/Dashboard CTA logic split by Supabase auth: signed-out → upper-right "Create Account" + body "+ Rate" routes through `/onboarding` (guest or signup) before `/rate`; signed-in → upper-right profile avatar linking to profile/settings, "+ Rate" goes straight to `/rate`. Reactive auth hook (`getSession` + `onAuthStateChange`) for instant switching. No theme/layout drift; typography contract from prior intent preserved.
 
 **Next:** Paste next Creation Intent in sticky template when ready (`go`). **Ops (Vercel / Root):** single source of truth — **`creation_engine/grubgauge-build-assessment.md`** → **Assessment — Vercel Root Directory canonical (`rhea` ↔ GrubGauge)** (confirm **`./`** vs **`grubgauge/`** with **deployment build logs**, not repo layout alone).
 ---
@@ -23,6 +24,16 @@ History / My Ratings: edit sheet (criteria sliders, visit details, notes, meal p
 ---
 
 #### GrubGauge
+
+**GrubGauge — Razor-sharp typography pass**
+*Intent: 2026-05-09 12:11 CT · Executed: 2026-05-10 12:30 CT*
+`completed`
+App-wide font crispness: Work Sans retained; `text-rendering: optimizeLegibility`, `font-feature-settings` (kern + calt + liga), `font-optical-sizing: auto`, `font-synthesis: none`, mobile `-webkit-text-size-adjust: 100%`, full `tabular-nums` coverage on score/stat readouts (Dashboard, Rate preview + sidebar).
+
+**GrubGauge — Edit & delete own ratings**
+*Intent: 2026-05-09 08:14 CT · Executed: 2026-05-11*
+`completed`
+History / My Ratings: edit sheet (criteria sliders, visit details, notes, meal photo) plus delete with confirmation. Supabase `update` / `delete` scoped with `.eq("id").eq("device_id", …)`; Explore unchanged (read-only).
 
 **GrubGauge — Layout & alignment polish**
 *Intent: 2026-05-09 08:04 CT · Executed: 2026-05-11*

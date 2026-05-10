@@ -97,14 +97,36 @@
 html.dark,
 html {
   color-scheme: dark;
+  /* Prevent mobile Safari/Chrome auto-inflating font size on rotate, which softens glyph rasterization. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
   background: var(--color-background);
   color: var(--color-on-background);
+  /* Razor-sharp typography baseline.
+     `antialiased` (html class) supplies -webkit-font-smoothing/-moz-osx-font-smoothing.
+     Layered here: legibility-grade kerning + OpenType features + optical sizing. */
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "kern" 1, "calt" 1, "liga" 1;
+  font-optical-sizing: auto;
+  font-synthesis: none; /* never synthesize bold/italic — keep cuts true to Work Sans */
   /* Prevent pathological one-glyph-per-line wrapping when a flex ancestor briefly resolves zero width */
   overflow-wrap: normal;
   word-break: normal;
+}
+
+/* Score / stat readouts: lock to tabular figures so digits never jitter and kerning stays uniform. */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1, "kern" 1, "calt" 1;
+}
+
+/* Headings: keep optical sizing and full kerning even when components override size with text-[…px]. */
+h1, h2, h3, h4, h5, h6 {
+  font-feature-settings: "kern" 1, "calt" 1, "liga" 1;
+  font-optical-sizing: auto;
 }
 
 /* Range slider — custom track/thumb to match design system */

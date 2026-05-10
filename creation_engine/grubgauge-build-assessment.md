@@ -513,3 +513,69 @@ Deployments URLs may appear under **`vercel.com/.../markbates110-designs-project
 **i²:** **Production verification is the canonical close marker for visual-collapse fixes** — `npm run lint` + `npx tsc --noEmit` are necessary but not sufficient. The signal that converts a "shipped" state into a "resolved" state is the user confirming the fix on the deployed URL in the originally-failing browser. Future **Visual / layout triage** Session Closes should append a `**Verified on prod:**` line; encoded above in the Error Fix entry as the new pattern.
 
 ---
+
+## Assessment — Razor-sharp typography pass
+**Timestamp: 2026-05-10 12:30 CT**
+**Governance ref** — `rhea-governance-agent.md` **v3.10**
+
+**e** — Audited the typography stack: `next/font/google` Work Sans (weights 400/500/600/700, `--font-work-sans` variable) → `<html className="… antialiased">` → `body` typed via `font-body-md`. Considered: swapping fonts (rejected — brief mandates *strict* Work Sans), forcing variable axis fetch (rejected — static cuts rasterize crisper at integer weights), per-component font-feature-settings (rejected — fork risk; better to canonicalize at body root), `text-rendering: geometricPrecision` (rejected — mobile cost without clarity gain over `optimizeLegibility`).
+
+**s** — Three-layer baseline, each at its canonical surface:
+1. **`<html>`** — added `-webkit-text-size-adjust: 100%; text-size-adjust: 100%;` to neutralize mobile Safari/Chrome auto-inflation (the dominant softness source on rotate). Tailwind `antialiased` retained on `<html>` for `-webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;`.
+2. **`body`** — added `text-rendering: optimizeLegibility`, `font-feature-settings: "kern" 1, "calt" 1, "liga" 1`, `font-optical-sizing: auto`, and `font-synthesis: none` (forbids the browser from synthesizing bold/italic from the 400 cut — keeps Work Sans true).
+3. **Headings + `.tabular-nums`** — `h1–h6` re-asserts the OpenType set so per-component `text-[…px]` overrides do not silently drop kerning; `.tabular-nums` gains `font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1, "kern" 1, "calt" 1` so all score readouts share one numeric grid.
+4. **Coverage sweep** — added `tabular-nums` to the four big numeric displays that lacked it: Dashboard *Spots Rated* + *Avg Score*, Rate success-state preview (`text-[64px]`), Rate desktop sticky sidebar (`text-[72px]`). All other score readouts (`/(main)/page.tsx` Best/Recent rows, `/explore`, `/history`, `/rate` per-criterion, `RatingEditSheet`) already had it.
+
+No layout/JSX shell changes; no new colors; no font swap.
+
+**i²**
+- *First Iteration:* Body-rooted render rules + tabular-nums coverage shipped. **Verification Pass:** `npx tsc --noEmit` ✓ exit 0; `npm run lint` ✓ exit 0; root-element pattern unchanged on touched pages (`mx-auto min-w-0 w-full max-w-* …` preserved); Tailwind theme tokens (`--font-*`, `--text-*`) untouched — typography contract is purely **additive** at the `<body>`/utility layer.
+- *Second Iteration (Protocol Target):* Applying two prior insights — **(a) "Canonical palette file"** (`rhea-insights.md`, *2026-05-10 — design_assets palette rollout*): keep brand hex in **one** SSOT and reference via `@theme inline`. Same discipline now extended to typography — render rules live exclusively in `globals.css` (`html` + `body` + `.tabular-nums` + `h1–h6`), never forked into per-component inline `style={{ fontFeatureSettings: … }}`. **(b) Verification Pass — category checklists** (Governance v3.6): generic "does the UI render correctly?" misses the typography class entirely. **Compounding system upgrade:** propose adding a typography row to the Verification Pass table so future UI builds gate on it the way they currently gate on `min-w-0` and conditional-return root-element matching. Drafted as PAP below; not self-applied.
+
+**Performance Rating: ★★★★☆** — Clean, minimal, additive. Withholding the fifth star until a real device A/B confirms perceived sharpness gain (especially on retina mobile in landscape — the `-webkit-text-size-adjust` path).
+
+**Recommended Next Steps:**
+1. User spot-check on iOS Safari (rotate test) + Chrome Android — confirm no regression and visible crispness gain.
+2. Approve / decline the **PAP — Verification Pass: typography row** (below).
+3. If approved, the next UI-build assessment runs the new typography checklist and logs results in its Verification Pass line.
+
+**PAP — Verification Pass (typography row)**
+**Pattern:** Typography render-quality is currently invisible to the Verification Pass table; only `min-w-0` and conditional-return root-element matching gate UI screens. The current intent surfaced an unaddressed protocol gap — there was no checklist row to confirm font-feature-settings, tabular-nums coverage, and `-webkit-text-size-adjust` are wired before declaring a UI build complete.
+**Proposed change:** Add to the **Verification Pass** table in `rhea-governance-agent.md`: `| UI screen / component | … existing checks; Tabular-nums on every numeric readout? Body-level text-rendering + font-feature-settings live in globals only (not forked per component)? |`. One-line addition; no deletion needed (table row, not budget-line text).
+**Compounding impact:** Every future UI build inherits the typography contract with zero per-screen rediscovery. Prevents the slow-fork pattern where individual components start carrying inline `fontFeatureSettings` and the canonical body rule drifts.
+*Approved & applied — 2026-05-10 13:15 CT — `rhea-governance-agent.md` **v3.11**. Verification Pass UI row extended with the typography contract; v3.8 row rolled to `rhea-governance-changelog-archive.md` to keep the active file under the 200-line ceiling.*
+
+---
+
+## Assessment — Onboarding / Landing CTA & auth-state polish
+**Timestamp: 2026-05-10 13:10 CT**
+**Governance ref** — `rhea-governance-agent.md` **v3.10**
+
+**e** — Three axes of "first-time experience":
+1. *State source* — `isOnboarded()` (localStorage, guest-aware) vs Supabase session (`auth.getUser()` / `onAuthStateChange`). Two semantics: *"has the user ever passed through onboarding?"* vs *"is there an authenticated identity?"*
+2. *Header right slot* — single static `ProfileAvatar` button with no link/handler vs auth-aware swap (Create Account ↔ avatar).
+3. *"+ Rate" body CTA* — direct `Link href="/rate"` vs onboarding-gated route. Considered: removing the dashboard's `isOnboarded()` redirect and letting the dashboard be a public landing (rejected for this iteration — bottom nav and header semantics presuppose an onboarded shell; redirect stays as a defensive fallback while CTAs become the primary gate).
+
+**s** — Layered approach, additive only:
+1. New canonical hook **`grubgauge/src/lib/auth/useAuth.ts`** — `{ user, loading }` from `supabase.auth.getSession()` + `onAuthStateChange()`, with mounted-flag cleanup. `loading` lets consumers render a sized placeholder during the first paint to prevent CTA flicker; this is the **single source of truth** for any auth-conditional UI from now on.
+2. **`HomeHeader`** right slot becomes `<AuthSlot />`:
+   - `loading` → `h-8 w-8` placeholder (no CLS)
+   - `user` → `<ProfileAvatar>` (initial from `user_metadata.username` then `email` then `•`) → **`/profile`**
+   - `!user` → `<CreateAccountCTA>` pill (`person_add` icon + "Create Account") → **`/onboarding/signup`**
+3. New **`/(main)/profile/page.tsx`** — three states (loading / guest / signed-in) with identical `<main className="mx-auto min-w-0 w-full max-w-md pt-lg pb-10">` root across returns (matches v3.6 conditional-return checklist). Signed-in: avatar + email + "Update preferences" → `/onboarding/profile` + "Sign out" (`supabase.auth.signOut()` → `router.replace("/")`). Guest: upsell card → "Create Account", plus "Update preferences" link.
+4. **`(main)/page.tsx`** — `rateHref` derived from `user || isOnboarded()`; signed-out + non-onboarded visitors get `/onboarding`, everyone else gets `/rate`. All three body "+ Rate" CTAs (header pill, empty-state CTA, Quick Actions card) read from this single derived value — no per-button branching.
+
+No theme drift, no new Tailwind tokens, no component refactors of unrelated screens. Typography contract from the immediately prior intent preserved (no inline `fontFeatureSettings` forks; new components inherit body-level rules).
+
+**i²**
+- *First Iteration:* Built — auth hook + profile route + auth-aware header + smart Rate CTA. **Verification Pass:** `npx tsc --noEmit` ✓, `npm run lint` ✓, `ReadLints` clean. Conditional-return roots match within `profile/page.tsx`. All Tailwind utility tokens resolved against `globals.css @theme`. No JSX shell changes to other pages.
+- *Second Iteration:* Applying two prior insights — **(a) "Layer auth on top as optional"** (`rhea-insights.md`, *Onboarding Flow*): the new hook does not replace `device_id` or `isOnboarded()`. Guest data model stays intact; auth is *additive* identity. The `rateHref` rule reflects this — `user || isOnboarded()` lets signed-in users *and* onboarded guests pass straight to `/rate`. **(b) "Every exit from onboarding must converge on the same completion marker"** (*Onboarding skip paths*): `handleSignOut` routes to `/`, which keeps the existing `(main)/page.tsx` redirect-to-onboarding fallback active for any localStorage-cleared edge cases — sign-out is not a new exit path; it converges on the existing markers. **Compounding system upgrade:** `useAuth` becomes the canonical source for any future auth-conditional UI (header, profile, route guards). New rule for this codebase — *no component reads `supabase.auth.getSession()` directly; consume `useAuth()` so subscriptions are cleaned up uniformly and `loading` is honored for placeholder sizing.*
+
+**Performance Rating: ★★★★☆** — Clean, additive, follows existing conventions. Withholding the fifth star until live verification on `https://grubgauge.vercel.app` confirms (1) no CTA flicker on first paint, (2) instant swap on sign-out from `/profile`, and (3) brand-new visitors with cleared storage are routed through onboarding via the body CTA.
+
+**Recommended Next Steps:**
+1. User spot-check on prod: sign in → header avatar appears → tap → `/profile` shows email; sign out → header swaps to "Create Account" instantly.
+2. Test brand-new visitor (incognito): `/(main)` redirects to `/onboarding`; after "Continue as Guest" returns to `/`, header shows "Create Account" and "+ Rate" goes to `/rate`.
+3. Optional follow-up: relax the `(main)/page.tsx` redirect so `/` is a true public landing (only if you want to surface the dashboard hero copy to brand-new visitors); otherwise current redirect stays as canonical first-run gate.
+
+---

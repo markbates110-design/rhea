@@ -1,6 +1,6 @@
 # Rhea Insights & Process Upgrades
 
-**Last Updated:** 2026-05-10 11:01 CT
+**Last Updated:** 2026-05-10 13:15 CT
 
 This file bookmarks key i² insights, process improvements, and patterns discovered across all creations. 
 The Governance Agent must read this file at the start of every major session.
@@ -10,6 +10,20 @@ The Governance Agent must read this file at the start of every major session.
 ### Bookmarked Insights
 
 #### Product (apps · governance · ops)
+
+**2026-05-10 13:10 CT — GrubGauge auth-aware CTAs (`useAuth` as canonical session source)**
+- **One hook, one truth:** `grubgauge/src/lib/auth/useAuth.ts` is now the only sanctioned reader of `supabase.auth.getSession()` / `onAuthStateChange()` in client components. Any future header, route guard, or conditional CTA consumes `useAuth()` so subscriptions are cleaned up uniformly and the `loading` state is honored for sized placeholders that prevent first-paint CTA flicker.
+- **Two semantics, kept distinct:** `isOnboarded()` (localStorage, guest-aware) ≠ Supabase auth (`user`). The `rateHref` rule (`user || isOnboarded() ? "/rate" : "/onboarding"`) lets signed-in users *and* onboarded guests pass straight to `/rate` — auth layered *additively* on top of the device-id / guest model, never replacing it. Mirrors the prior insight *"layer auth on top as optional"* and now has a concrete code-level expression.
+- **Header right-slot pattern:** `loading → fixed-size placeholder` → `user → avatar → /profile` → `!user → 'Create Account' pill → /onboarding/signup`. The `loading` placeholder is a `h-8 w-8` shrink-0 div — same footprint as the avatar — so the header never reflows when auth resolves.
+- **Sign-out converges on existing markers:** `supabase.auth.signOut()` then `router.replace("/")`. The dashboard's existing `isOnboarded()` redirect handles any cleared-storage edge case; sign-out is not a new exit path, mirroring *"every exit from onboarding must converge on the same completion marker."*
+- **Conditional-return root match (v3.6 checklist):** `(main)/profile/page.tsx` has three returns (loading / guest / signed-in); all use identical `<main className="mx-auto min-w-0 w-full max-w-md pt-lg pb-10">`. Verification Pass row passed without remediation — the discipline is now habit.
+
+**2026-05-10 12:30 CT — GrubGauge razor-sharp typography (canonical body-level contract)**
+- **One surface, one contract:** All app-wide font-rendering rules — `text-rendering: optimizeLegibility`, `font-feature-settings: "kern" 1, "calt" 1, "liga" 1`, `font-optical-sizing: auto`, `font-synthesis: none`, plus `-webkit-text-size-adjust: 100%` on `<html>` — live **only** in `grubgauge/src/app/globals.css` on `html`/`body`/`h1–h6`/`.tabular-nums`. Never fork into per-component inline `style={{ fontFeatureSettings }}`. Mirrors the `design_assets` palette SSOT discipline — typography tokens belong in `@theme inline` and render rules belong in `globals.css`; everything else inherits.
+- **Mobile softness ≠ smoothing bug:** The dominant softness source on iOS/Chrome mobile is **auto text-size inflation on rotate**, not antialiasing. `-webkit-text-size-adjust: 100%` on `<html>` is a single-line fix that removes the pathology before reaching for `text-rendering` heroics.
+- **`font-synthesis: none`:** When loading specific weight cuts via `next/font/google` (here `[400, 500, 600, 700]`), block synthesized bold/italic — synthesized weights rasterize visibly fuzzier than the true cut. Cheap, universal default for any brand-typography app.
+- **Tabular-nums coverage is a checklist, not a hope:** Score/stat readouts must all carry `tabular-nums` for visual stability across rerenders (Dashboard total/avg + Rate preview + Rate sticky sidebar were missing it; all other readouts already had it). Verification Pass now gates on this.
+- **Protocol Target (approved → applied 2026-05-10 13:15 CT):** PAP accepted; `rhea-governance-agent.md` bumped to **v3.11**; **Verification Pass — UI screen / component** row extended with the typography contract; v3.8 row rolled to `rhea-governance-changelog-archive.md` to keep the active file under the 200-line ceiling.
 
 **2026-05-10 23:00 UTC — GrubGauge vertical text (terminal fix + faster triage next time)**
 - **Governance v3.10:** **Visual / layout triage** codified in **`rhea-governance-agent.md`** — classify width-collapse, measure computed width, gate infra, timebox, log (**Error & Debug** triggers expanded).

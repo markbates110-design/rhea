@@ -4,6 +4,8 @@
 
 | Version | Changes | Observed Effect |
 |---------|---------|-----------------|
+| v3.11 | **Verification Pass — UI typography row**: `tabular-nums` on every numeric readout; body-level `text-rendering` + `font-feature-settings` canonical to `globals.css` only (no per-component fork). Approved from PAP `2026-05-10 12:30 CT` (GrubGauge razor-sharp typography). | *Pending* |
+| v3.8 | **`Insight timestamps`**: **YYYY-MM-DD HH:MM** + **TZ**; grandfather pre-2026-05-10 | *Pending* |
 | v3.7 | Restructured for anti-entropy: Insights & Memory → Session Start/Iteration Close; Self-Audit pointers; Verification Pass section; pre-v3.0 changelog archived; 200-line ceiling | *Pending* |
 | v3.6 | i1 Verification Pass with category checklists; assessment = completion certificate | *Pending* |
 | v3.5 | `**Assessment ↓**` artifact; PAP on 2-failed-fix loops; `stop` trigger; near-miss must self-correct | *Pending* |

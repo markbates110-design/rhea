@@ -385,7 +385,7 @@ export default function RatePage() {
             <p className="mt-1 font-body-md text-body-md text-on-surface-variant">Rating logged successfully.</p>
           </div>
           <div className="flex items-baseline gap-1">
-            <span className="font-display-lg text-[64px] leading-none text-primary">{weightedScore.toFixed(1)}</span>
+            <span className="font-display-lg text-[64px] leading-none tabular-nums text-primary">{weightedScore.toFixed(1)}</span>
             <span className="font-headline-md text-headline-md text-on-surface-variant">/10</span>
           </div>
         </div>
@@ -650,7 +650,7 @@ export default function RatePage() {
               Weighted Value Score
             </p>
             <div className="relative z-10 my-sm flex items-baseline gap-0.5">
-              <span className="font-display-lg text-[72px] leading-none text-primary transition-all duration-300">
+              <span className="font-display-lg text-[72px] leading-none tabular-nums text-primary transition-all duration-300">
                 {spot ? weightedScore.toFixed(1) : "—"}
               </span>
               {spot && <span className="font-headline-md text-headline-md text-on-surface-variant">/10</span>}
