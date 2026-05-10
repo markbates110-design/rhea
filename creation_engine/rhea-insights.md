@@ -1,6 +1,6 @@
 # Rhea Insights & Process Upgrades
 
-**Last Updated:** 2026-05-10 16:55 CT
+**Last Updated:** 2026-05-10 17:15 CT
 
 This file bookmarks key i² insights, process improvements, and patterns discovered across all creations. 
 The Governance Agent must read this file at the start of every major session.
@@ -10,6 +10,11 @@ The Governance Agent must read this file at the start of every major session.
 ### Bookmarked Insights
 
 #### Product (apps · governance · ops)
+
+**2026-05-10 17:15 CT — Session close: auth + scoping run prod-verified (commits `5a1eb8a` → `adbffa6`)**
+- **Prod-verified set:** rate-screen venue-type fixes; guest vs signed-in scoping + History upsell + `ratings.user_id` migration; post-signup loop fix; missing sign-in surface (dual-mode auth); header text-link pair + signin↔signup auto-redirect cycle. All four iterations + two Error Fix entries landed clean on prod with user-confirmed sign-in working end-to-end.
+- **Arc closed:** signup loop → no sign-in path → ambiguous header CTA. Three iterations resolved a single underlying class — *the auth surface must offer both discovery paths at every entry point* — by progressively projecting the dual-mode contract outward (auth page → header → upsell). Same compounding arc the build has hit before: *explicit branch in handler → canonical artifact → projection to all callers*.
+- **Forward bookmark unchanged:** token conservation directive (2026-05-10 13:51 CT) still staged; this close honored it (single consolidated bookmark, no per-iteration prod-verify entries).
 
 **2026-05-10 16:55 CT — Auth entry points render both discovery paths; auto-redirect cycles self-correct**
 - **Header / upsell projections must mirror dual-mode auth.** Once `/onboarding/signup` is dual-mode, *every* discovery surface (header CTA, History upsell, future re-engagement prompts) must offer **both** *Sign in* and *Create account* — a single CTA mis-casts one cohort no matter which label you pick. Two text links separated by a thin divider beat a single pill button for this; the buttonless treatment is more honest to the "neutral entry point" semantic.
