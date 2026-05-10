@@ -20,7 +20,7 @@ export function HomeBottomNav() {
               <Link
                 key={href}
                 href={href}
-                className={`flex min-w-0 flex-1 basis-0 flex-col items-center justify-center rounded-xl px-1 py-1.5 text-center transition-all active:scale-90 ${
+                className={`flex min-w-[3.25rem] flex-1 basis-0 flex-col items-center justify-center rounded-xl px-1 py-1.5 text-center transition-all active:scale-90 ${
                   active
                     ? "bg-primary-container text-on-primary-container"
                     : "text-on-surface-variant hover:text-primary"
@@ -32,7 +32,7 @@ export function HomeBottomNav() {
                 >
                   {icon}
                 </span>
-                <span className="mt-1 max-w-full whitespace-normal break-words font-label-sm text-label-sm leading-tight">
+                <span className="mt-1 max-w-full text-center font-label-sm text-label-sm leading-tight">
                   {label}
                 </span>
               </Link>

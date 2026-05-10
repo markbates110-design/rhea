@@ -148,7 +148,7 @@ function SpotSearch({ onSelect }: { onSelect: (s: SpotSelection) => void }) {
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search for a restaurant or spot…"
           autoComplete="off"
-          className="flex-1 bg-transparent font-body-md text-body-md text-on-surface outline-none placeholder:text-on-surface-variant/50"
+          className="min-w-0 flex-1 bg-transparent font-body-md text-body-md text-on-surface outline-none placeholder:text-on-surface-variant/50"
         />
         {query && (
           <button onClick={() => { setQuery(""); setSuggestions([]); }} className="text-on-surface-variant hover:text-on-surface transition-colors shrink-0">
@@ -429,7 +429,7 @@ export default function RatePage() {
       <div className="grid min-w-0 grid-cols-1 gap-lg lg:grid-cols-12">
 
         {/* ── Left: Form ── */}
-        <div className="flex min-w-0 flex-col gap-md lg:col-span-8">
+        <div className="flex flex-col gap-md lg:col-span-8">
 
           {/* Title */}
           <div>
@@ -643,7 +643,7 @@ export default function RatePage() {
         </div>
 
         {/* ── Right: Live score + desktop submit ── */}
-        <div className="hidden min-w-0 flex-col gap-md lg:col-span-4 lg:flex lg:sticky lg:top-24 lg:self-start">
+        <div className="hidden flex-col gap-md lg:col-span-4 lg:flex lg:min-w-[220px] lg:sticky lg:top-24 lg:self-start">
           <div className="relative flex flex-col items-center overflow-hidden rounded-xl border border-outline-variant bg-surface-container-high p-xl text-center shadow-lg">
             <div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-primary/10 blur-3xl" />
             <p className="relative z-10 mb-xs font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant">
