@@ -224,6 +224,13 @@ The Governance Agent must read this file at the start of every major session.
 
 ---
 
+### Session Close — 2026-05-12 (explicit `stop`)
+
+- **Bookkeeping flush:** Explicit **`stop`** with current intent already **`completed`** + **`Executed:`** set → append session-close reconciliation (assessment tail + intent **Next** note), not a new Iteration Close.
+- **Stale snapshots:** Older **Session Close** rows may reference superseded “current intent”; reconcile by pointer to History + Current, not by rewriting archival blocks.
+
+---
+
 ### Session Close — 2026-05-10 (explicit `stop`)
 
 - Saying **`stop`** together with **“execute iteration close”** ties Session Close to Iteration Close in one instruction: flush assessment backlog, refresh stale cross-references in prior assessment steps, and restate intent file **Next:** with a session boundary — without requiring a new Creation Intent.

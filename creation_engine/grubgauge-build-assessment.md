@@ -389,3 +389,16 @@
 **Intent file:** Current remains **GrubGauge — Design assets palette rollout** · `completed` · `Executed: 2026-05-10`. **Next:** paste new intent → `go` (ops note preserved in file).
 
 **i²:** Pairing **`stop`** with explicit **iteration close** forces file reconciliation in one utterance instead of relying on implicit session end — aligns with avoiding plain-`stop` ambiguity noted in insights.
+
+---
+
+## Session Close — explicit `stop` (bookkeeping)
+**Timestamp: 2026-05-12**
+
+**Flushed:** No pending assessments or insights left from this boundary — width-contract rollup + logs already committed (**`bdae1b5`**); **`min-w-0`** rollout code **`dd742f7`**.
+
+**Intent file:** **Current** — **GrubGauge — Edit & delete own ratings** · `completed` · **Executed: 2026-05-11**. Sticky template empty. **Next:** paste Creation Intent → `go` (**`markbates110-design/rhea`**, Root **`grubgauge`**).
+
+**Reconcile:** The **Session Close — 2026-05-10** block still names palette as “current intent”; that snapshot is **superseded** — use **Creation Intent History** and **Current Creation Intent** as source of truth.
+
+**i²:** Plain **`stop`** after shipped follow-ups is bookkeeping: append a fresh session-close row to reconcile stale snapshots without reopening completed intents.
