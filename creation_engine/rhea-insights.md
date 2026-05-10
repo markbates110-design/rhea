@@ -1,6 +1,6 @@
 # Rhea Insights & Process Upgrades
 
-**Last Updated:** 2026-05-10 17:15 CT
+**Last Updated:** 2026-05-10 17:30 CT
 
 This file bookmarks key i² insights, process improvements, and patterns discovered across all creations. 
 The Governance Agent must read this file at the start of every major session.
@@ -10,6 +10,12 @@ The Governance Agent must read this file at the start of every major session.
 ### Bookmarked Insights
 
 #### Product (apps · governance · ops)
+
+**2026-05-10 17:30 CT — PAP candidate (staged): Verification Pass requires `npm run build` on route-touching iterations**
+- **Class of bug.** Next.js prerender-shape errors (`useSearchParams()` without `<Suspense>`, `useParams` / `usePathname` in client-only pages without bailout, dynamic imports without fallbacks, route-segment config drift) compile cleanly under `tsc` + `eslint` and run fine under `next dev`, but **fail at `next build` static-generation time** — i.e. on Vercel, after the user pushes. The "tsc + lint" gate in our Verification Pass misses this entire class.
+- **Concrete recurrence today:** Three consecutive Vercel deploys failed on `useSearchParams()` in `/onboarding/signup` despite a clean `tsc --noEmit` + `ReadLints`. v3.12 step 5's local-repro gate is scoped to *width/vertical-text* only, so it didn't trigger for an auth-route change that introduced the prerender-shape concern.
+- **Proposed v3.13 amendment (staged with token-conservation batch — not amending governance now):** add to Verification Pass *"Page route"* row: **"`npm run build` succeeds locally for any iteration that touches a route file or adds a client hook affecting prerendering (`useSearchParams`, `useParams`, `usePathname` in client-only pages, dynamic imports without fallback)."** Cheaper than waiting for a Vercel build to fail and roll back; same fail-fast philosophy as v3.12 prevention-over-triage.
+- **Compounding rule for this codebase pending amendment:** treat *"this change touches a route file"* as a build-gate trigger immediately, even before governance v3.13 ships.
 
 **2026-05-10 17:15 CT — Session close: auth + scoping run prod-verified (commits `5a1eb8a` → `adbffa6`)**
 - **Prod-verified set:** rate-screen venue-type fixes; guest vs signed-in scoping + History upsell + `ratings.user_id` migration; post-signup loop fix; missing sign-in surface (dual-mode auth); header text-link pair + signin↔signup auto-redirect cycle. All four iterations + two Error Fix entries landed clean on prod with user-confirmed sign-in working end-to-end.

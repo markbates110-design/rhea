@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -10,7 +10,28 @@ import { isOnboarded, setOnboarded } from "@/lib/identity/deviceId";
 
 type Mode = "signup" | "signin";
 
+/**
+ * Next.js 15 / 16 requires `useSearchParams()` to live inside a
+ * `<Suspense>` boundary so the page can be prerendered. Split the page
+ * into a thin export wrapper + the inner component that owns the search
+ * params hook. The fallback mirrors the form shell so layout doesn't
+ * flicker between SSR and hydration.
+ */
 export default function OnboardingAuthPage() {
+  return (
+    <Suspense
+      fallback={
+        <PageShell variant="form" className="pt-lg pb-10">
+          <div className="h-[420px]" aria-hidden />
+        </PageShell>
+      }
+    >
+      <OnboardingAuthPageInner />
+    </Suspense>
+  );
+}
+
+function OnboardingAuthPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, loading: authLoading } = useAuth();

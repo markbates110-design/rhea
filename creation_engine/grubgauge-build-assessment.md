@@ -571,6 +571,25 @@ Verified: `npx tsc --noEmit` ✓ exit 0, `npm run lint` ✓ exit 0, ReadLints cl
 
 ---
 
+## Error Fix — Vercel build failure: `useSearchParams()` outside Suspense on `/onboarding/signup`
+**Timestamp: 2026-05-10 17:30 CT** · **Governance ref** — `rhea-governance-agent.md` **v3.12**
+
+**Error:** Last three Vercel deploys failed at the *Generating static pages* phase: `⨯ useSearchParams() should be wrapped in a suspense boundary at page "/onboarding/signup"`. The dual-mode auth route compiled cleanly in dev and passed `tsc` + `ReadLints`, but Next.js 15/16 enforces a `<Suspense>` boundary around `useSearchParams()` during prerender — a contract that is **only checked by `next build`**, not by `next dev` or `tsc`.
+
+**Root Cause:** Two compounding gaps:
+1. *Code:* `OnboardingAuthPage` read `useSearchParams()` directly inside the page export — no enclosing `<Suspense>`. Static prerender can't bail out client-side without one.
+2. *Process:* Verification Pass for the dual-mode auth iteration ran `npx tsc --noEmit` + `ReadLints` but *not* `npm run build`. The v3.12 "Repro before redeploy" rule (Visual / layout triage step 5) is scoped to width/vertical-text fixes, so the build gate didn't trigger for this auth-route change despite the fact that the change introduced a new prerender-shape concern.
+
+**Fix:**
+1. **`grubgauge/src/app/onboarding/signup/page.tsx`** — split the default export into a thin `OnboardingAuthPage` wrapper that renders `<OnboardingAuthPageInner />` inside `<Suspense fallback={…}>`. The inner component owns `useSearchParams()`; the fallback is a `<PageShell variant="form">` with a placeholder spacer so layout doesn't flicker between SSR and client hydration.
+2. **Local build confirmed:** `npm run build` → ✓ all 11 static pages generated, no errors.
+
+**i²:**
+- *First iteration:* Build passes locally. No other surfaces use `useSearchParams()` at the page level (grep confirms), so the class is closed for now.
+- *Second iteration / staged PAP candidate:* v3.12 step 5's "local repro before redeploy" rule is scoped too narrowly — *width/vertical-text* only. The build-error class (prerender-shape errors, route-segment config issues, dynamic-import fallbacks) is similarly *only* catchable by `next build`, not `tsc` or dev. **Propose v3.13:** extend Verification Pass "Page route" row to require **a successful local `npm run build` on any iteration that touches a route file or adds a client hook that affects prerendering (`useSearchParams`, `useParams`, `usePathname` in client-only pages, dynamic imports without fallback)**. Stage with the token-conservation batch — not amending governance now per the 2026-05-10 13:51 CT directive.
+
+---
+
 ## Assessment — Header text-link pair (Sign in · Create account) + signin→signup auto-redirect on no-account
 **Timestamp: 2026-05-10 16:55 CT** · **Governance ref** — `rhea-governance-agent.md` **v3.12**
 
