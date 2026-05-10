@@ -381,6 +381,19 @@
 
 ---
 
+## Error Fix — History edit sheet: “Edit rating” vertical glyphs
+**Timestamp: 2026-05-12**
+
+**Error:** Modal header title stacked one character per line; range rows looked collapsed (same width failure class as Feedback vertical text).
+
+**Root Cause:** In a **`flex` row** (`justify-between`), a child with **`min-w-0`** and default **`flex: 0 1 auto`** may **shrink its used width to zero**; text then wraps one character wide. Sitewide **`min-w-0`** added **`min-w-0`** on that cell without **`flex-1`**, so it could collapse. Sheet also rendered under page `<main>`; **`createPortal(..., document.body)`** avoids ancestor containing-block quirks for **`fixed`** overlays.
+
+**Fix:** Title wrapper **`min-w-0 flex-1 pr-sm`**; criteria row label **`min-w-0 flex-1`**; **`createPortal(sheet, document.body)`** with **`useSyncExternalStore`** for SSR-safe client mount; delete dialog panel **`w-full min-w-0`**.
+
+**i²:** **`min-w-0` in flex rows** must pair with **`flex-1`** (or **`shrink-0`**) depending on intent — otherwise the item can shrink to **zero**. Overlays: default to **body portal**.
+
+---
+
 ## Session Close — explicit `stop` + iteration reconcile
 **Timestamp: 2026-05-10**
 

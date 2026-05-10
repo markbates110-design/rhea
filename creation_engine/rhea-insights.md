@@ -221,6 +221,7 @@ The Governance Agent must read this file at the start of every major session.
 - **`min-w-0` everywhere it matters:** On flex/grid children that must host `w-full` paragraphs, inputs, or textareas, set **`min-w-0`** (and keep **`mx-auto min-w-0 w-full`** on page `<main>`) so intrinsic minimum width never traps layout at effectively zero usable width — the “vertical stacking” symptom.
 - **`items-center` + full-width siblings:** Prefer splitting centered hero stacks from **`w-full` cards** (`items-center`-free wrapper for the wide block), *and* add **`min-w-0`** on ancestors so **`w-full`** always resolves correctly.
 - **Regression guard:** Match the **exact `<main>` pattern** across conditional returns **and** propagate **`min-w-0`** up the ancestor chain whenever a screen adds nested flex/grid.
+- **Flex-row nuance:** **`min-w-0` without `flex-1` (or explicit `shrink-0`)** on a sibling in **`justify-between`** can let that item **shrink to zero width** → one-character wrapping; pair **`min-w-0 flex-1`** for text cells that should consume free space. Prefer **`createPortal(..., document.body)`** for modal chrome.
 
 ---
 

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import { createClient } from "@/lib/supabase/client";
 import { getDeviceId } from "@/lib/identity/deviceId";
 import {
@@ -62,6 +63,13 @@ function buildInitialScores(r: EditableRatingRow): Record<string, number> {
   return nextScores;
 }
 
+/** Client-only snapshot for portal target (SSR false / browser true). */
+// useSyncExternalStore requires a subscribe signature; we never notify.
+function subscribeNoop(_onStoreChange: () => void): () => void {
+  void _onStoreChange;
+  return () => {};
+}
+
 /** Mounted with key={rating.id} so hooks initialize from rating without effect sync */
 function RatingEditSheetInner({ rating, onClose, onSaved, onDeleted }: InnerProps) {
   const venueType: VenueType = normalizeVenueType(rating.venue_type);
@@ -80,6 +88,8 @@ function RatingEditSheetInner({ rating, onClose, onSaved, onDeleted }: InnerProp
   const [error, setError] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
+  const portalReady = useSyncExternalStore(subscribeNoop, () => true, () => false);
 
   const weightedScore = useMemo(() => calcWeightedScore(criteria, scores), [criteria, scores]);
   const { label: badge, colorClass } = scoreBadge(weightedScore);
@@ -218,12 +228,12 @@ function RatingEditSheetInner({ rating, onClose, onSaved, onDeleted }: InnerProp
   const displayPhoto =
     mealPhotoPreviewUrl ?? (!photoCleared && rating.meal_photo_url ? rating.meal_photo_url : null);
 
-  return (
+  const sheetMarkup = (
     <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center sm:p-md">
       <button type="button" aria-label="Close" className="absolute inset-0 bg-black/50" onClick={onClose} />
       <div className="relative flex max-h-[min(92dvh,760px)] w-full min-w-0 max-w-lg flex-col overflow-hidden rounded-t-2xl border border-outline-variant bg-surface-container-high shadow-xl sm:rounded-2xl">
         <div className="flex shrink-0 items-start justify-between gap-sm border-b border-outline-variant px-md py-sm">
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1 pr-sm">
             <h2 className="font-title-sm text-title-sm font-semibold text-on-surface">Edit rating</h2>
             <p className="mt-0.5 truncate font-label-sm text-label-sm text-on-surface-variant">
               {rating.venue_name}
@@ -314,9 +324,11 @@ function RatingEditSheetInner({ rating, onClose, onSaved, onDeleted }: InnerProp
               <div className="flex flex-col gap-md">
                 {criteria.map((c) => (
                   <div key={c.key} className="flex flex-col gap-base">
-                    <div className="flex items-center justify-between">
-                      <label className="font-body-md text-body-md font-medium text-on-surface">{c.label}</label>
-                      <span className="font-title-sm text-title-sm tabular-nums text-primary-container">
+                    <div className="flex items-center justify-between gap-sm">
+                      <label className="min-w-0 flex-1 font-body-md text-body-md font-medium text-on-surface">
+                        {c.label}
+                      </label>
+                      <span className="shrink-0 font-title-sm text-title-sm tabular-nums text-primary-container">
                         {getScore(c.key).toFixed(1)}
                       </span>
                     </div>
@@ -460,7 +472,7 @@ function RatingEditSheetInner({ rating, onClose, onSaved, onDeleted }: InnerProp
             className="absolute inset-0 bg-black/60"
             onClick={() => !deleting && setConfirmDelete(false)}
           />
-          <div className="relative max-w-sm rounded-2xl border border-outline-variant bg-surface-container-high p-lg shadow-xl">
+          <div className="relative w-full max-w-sm min-w-0 rounded-2xl border border-outline-variant bg-surface-container-high p-lg shadow-xl">
             <p className="font-title-sm text-title-sm text-on-surface">Delete this rating?</p>
             <p className="mt-sm font-body-md text-body-md text-on-surface-variant">
               This removes your review for {rating.venue_name}. This cannot be undone.
@@ -488,6 +500,12 @@ function RatingEditSheetInner({ rating, onClose, onSaved, onDeleted }: InnerProp
       ) : null}
     </div>
   );
+
+  if (!portalReady) {
+    return null;
+  }
+
+  return createPortal(sheetMarkup, document.body);
 }
 
 export function RatingEditSheet({ rating, onClose, onSaved, onDeleted }: Props) {
