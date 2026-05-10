@@ -280,6 +280,8 @@
 
 **i²:** Monorepos on GitHub must not expose apps as dangling submodule commits — hosts clone shallow/submodules inconsistently → empty app dirs → “No Next.js”. **`stop`** in plain Cursor chat does not auto-run Session Close unless the governance protocol is explicitly invoked.
 
+**Supersedence (*Root Directory wording*):** The **s** line above recommended Vercel **Root Directory `grubgauge`** for this repo layout. After **hours of troubleshooting** (including **Sonnet 4.6** confirmation), **`./`** at repo root is **authoritative** for the **`rhea`** deployment link — see **Assessment — Vercel Root Directory canonical (`rhea` ↔ GrubGauge)** — keep this stale line for traceability only.
+
 ---
 
 ## Assessment — Optional meal photo per rating (+ theme tokens refresh)
@@ -410,8 +412,25 @@
 
 **Flushed:** No pending assessments or insights left from this boundary — width-contract rollup + logs already committed (**`bdae1b5`**); **`min-w-0`** rollout code **`dd742f7`**.
 
-**Intent file:** **Current** — **GrubGauge — Edit & delete own ratings** · `completed` · **Executed: 2026-05-11**. Sticky template empty. **Next:** paste Creation Intent → `go` (**`markbates110-design/rhea`**, Root **`grubgauge`**).
-
+**Intent file:** **Current** — **GrubGauge — Edit & delete own ratings** · `completed` · **Executed: 2026-05-11**. Sticky template empty. **Next:** paste Creation Intent → `go` — repo **`markbates110-design/rhea`**, **Root `./`** (canonical; see **Assessment — Vercel Root Directory canonical (`rhea` ↔ GrubGauge)**).
 **Reconcile:** The **Session Close — 2026-05-10** block still names palette as “current intent”; that snapshot is **superseded** — use **Creation Intent History** and **Current Creation Intent** as source of truth.
 
 **i²:** Plain **`stop`** after shipped follow-ups is bookkeeping: append a fresh session-close row to reconcile stale snapshots without reopening completed intents.
+
+---
+
+## Assessment — Vercel Root Directory canonical (`rhea` ↔ GrubGauge)
+**Timestamp: 2026-05-13**
+
+**e** — Creation Intent **Next:** lines and Session Close notes repeatedly cited **Root Directory `grubgauge`** while the **`rhea`** monorepo on disk nests the Next app under **`grubgauge/`**. Vercel + GitHub wiring drift (`./` vs subdirectory) burned **hours** of triage overnight; resolved with dashboard verification and **Sonnet 4.6** guidance (**Root `./`**).
+
+**s** — **Authoritative:** Vercel project for GrubGauge linked from GitHub **`markbates110-design/rhea`** uses **Root Directory `./`** (repo root as in the Vercel UI). Deployments URLs may appear under **`vercel.com/.../markbates110-designs-projects/rhea/deployments`** — same linkage, alternate org slug. Older log lines that specify **`grubgauge`** as Root are **retained historically** where noted but **must not drive new configuration**.
+
+**i²**
+- *First Iteration:* **Painful deploy incidents** should overwrite assistant-guessed Root paths in **`rhea-creation-intent`** and assessments immediately — ambiguity is recurring entropy.
+- *Second Iteration:* Submodule/gitlink hygiene (prior insight) solves **missing tree** faults; **Root Directory** solves **which folder Vercel builds** — orthogonal; document both explicitly.
+
+**Performance Rating:** N/A — ops documentation.
+
+**Recommended Next Steps:**
+1. When onboarding a collaborator or new agent session, cite this assessment + **`rhea-creation-intent` Next:** for Vercel, not miscellaneous chat memory.

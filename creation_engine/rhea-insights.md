@@ -1,6 +1,6 @@
 # Rhea Insights & Process Upgrades
 
-**Last Updated:** 2026-05-12
+**Last Updated:** 2026-05-13
 
 This file bookmarks key i² insights, process improvements, and patterns discovered across all creations. 
 The Governance Agent must read this file at the start of every major session.
@@ -21,6 +21,10 @@ The Governance Agent must read this file at the start of every major session.
 **2026-05-09 — Songwriting**
 - Starting with emotional core before hook produces stronger lyrics.
 - Negative space phrasing ("You don’t have to fix me") creates more vulnerability than direct pleas.
+
+**2026-05-13 — GrubGauge / Vercel `rhea` Root Directory**
+- **Canonical:** GitHub **`markbates110-design/rhea`** + Vercel **Root Directory `./`** — locked in after **hours** of overnight troubleshooting; **Sonnet 4.6** matched this setting. Deployments UI may show **`markbates110-designs-projects`** — same org/project, different URL slug.
+- **Stale guidance:** Earlier logs said Root **`grubgauge`**; that path **burned time** when the live project actually builds from **`./`**. Update runbooks and **Creation Intent `Next:`** to **`./`**; keep old lines in assessments only with explicit **supersedence** notes.
 
 **2026-05-12 — GrubGauge flex / “vertical text”**
 - Site-wide **`min-w-0`** on shells, page `<main>`, and nested flex/grid columns that host **`w-full`** forms — pair with the existing **`<main> mx-auto w-full max-w-*` contract** so block text never resolves to one-character wrapping.
@@ -175,6 +179,7 @@ The Governance Agent must read this file at the start of every major session.
 ### Session Close - 2026-05-09 (Governance + GrubGauge deploy hygiene)
 - `stop` as Session Close trigger in `rhea-governance-agent.md` is binding **when that protocol is explicitly invoked** in Cursor (e.g. “Session Close per governance”). Plain **`stop`** is otherwise ambiguous — assistants default to ending chatter rather than flushing assessments or intents unless instructed.
 - Monorepo folders recorded as **`160000` gitlinks** without valid `.gitmodules` / submodule fetch cause clones where **`grubgauge/` exists only as an empty pointer** → Vercel “Root Directory does not exist” / “No Next.js detected”. Fix locally with **`git rm --cached`**, remove nested **`.git`**, **`git add`** full trees, push — never rely on submodule shims for single-repo deployments unless CI submodule auth is intentional.
+- **`rhea` ↔ GrubGauge — Vercel Root (2026-05-13):** Gitlink repair and **Root Directory** are different levers. Canonical for the live **`rhea`** project: **`./`** (extended overnight triage; **Sonnet 4.6** alignment). See **`grubgauge-build-assessment.md`** — **Vercel Root Directory canonical** and **`rhea-creation-intent` Next:** — do not copy stale **Root `grubgauge`** into runbooks.
 
 ### Session Insights - 2026-05-09 (GrubGauge Onboarding Flow)
 - When adding auth to an app that already uses device_id, don't replace device_id — layer auth on top as optional. Guest path keeps the existing data model intact. Auth path adds identity without breaking existing records. Migration can happen in a later iteration when there's enough signal that users want it.
@@ -223,6 +228,14 @@ The Governance Agent must read this file at the start of every major session.
 - **Regression guard:** Match the **exact `<main>` pattern** across conditional returns **and** propagate **`min-w-0`** up the ancestor chain whenever a screen adds nested flex/grid.
 - **Flex-row nuance:** **`min-w-0` without `flex-1` (or explicit `shrink-0`)** on a sibling in **`justify-between`** can let that item **shrink to zero width** → one-character wrapping; pair **`min-w-0 flex-1`** for text cells that should consume free space. Prefer **`createPortal(..., document.body)`** for modal chrome.
 - **Modal shell vs inner scroll:** Put **`shrink-0`** (or a **`min-w-[…]`** floor) on the **outer sheet panel** when it is a **`flex` row-only child** (default shrink); keep **`min-w-0`** for **inner** overflow/scroll columns only. **`w-screen`** on fullscreen overlay roots avoids percentage-width ambiguity.
+
+---
+
+### Session Insights — 2026-05-13 (GrubGauge Vercel Root Directory reconciliation)
+
+- **Canonical:** **`markbates110-design/rhea`** builds on Vercel with **Root Directory `./`** — outcome of sustained troubleshooting (**Sonnet 4.6** corroborated). URLs like **`vercel.com/.../markbates110-designs-projects/rhea/deployments`** are the same linkage.
+- **Process failure mode:** Logs and intents said **`Root: grubgauge`** while production used **`./`** — collaborators and assistants burned hours chasing UI/CSS when deploy/config narrative was inconsistent.
+- **Remedy logged:** **`rhea-creation-intent` Next:** + **`grubgauge-build-assessment.md`** canonical assessment + **bookmark** updated; archival **`grubgauge`** Root mentions carry **Supersedence** notes.
 
 ---
 
