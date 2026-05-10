@@ -1,6 +1,6 @@
 # Rhea Insights & Process Upgrades
 
-**Last Updated:** 2026-05-10 14:30 UTC
+**Last Updated:** 2026-05-10 21:00 UTC
 
 This file bookmarks key i² insights, process improvements, and patterns discovered across all creations. 
 The Governance Agent must read this file at the start of every major session.
@@ -8,6 +8,13 @@ The Governance Agent must read this file at the start of every major session.
 ---
 
 ### Bookmarked Insights
+
+**2026-05-10 21:00 UTC — Governance v3.9 (approved batch)**
+- **Precedence:** complete **Iteration Close** / **Error & Debug** before substantive reply when due; log opt-outs in the next assessment.
+- **Canonical clocks:** assessment **Timestamp**, **`Executed:`**, and insight headings share **YYYY-MM-DD HH:MM TZ**.
+- **Governance ref `vX.Y`** in assessments when logging Close / Error & Debug / Session Close / PAP work.
+- **PAP backlog:** one Bookmarked line `**… — PAP pending — [title]**` while blocked; remove when resolved.
+- **Changelog:** at **≥190 lines** in `rhea-governance-agent.md`, add version rows to **`rhea-governance-changelog-archive.md`** first.
 
 **2026-05-10 14:30 UTC — Insight timestamps (governance)**
 - **Effective immediately:** new **Bookmarked Insights** titles and **Session Insights** `###` headings must include **calendar date + 24-hour time + explicit timezone** — e.g. `### Session Insights — 2026-05-10 14:30 UTC — Focus`, or `**2026-05-10 14:30 CT — Title**` under Bookmarked. **TZ:** `CT`, `UTC`, `ET`, `PT`, or `Z` (UTC).
@@ -48,6 +55,7 @@ The Governance Agent must read this file at the start of every major session.
 - Governance Agent must reference relevant insights in every assessment’s i² section.
 - Add new insights here after meaningful sessions.
 - **Timestamps (new entries):** use **YYYY-MM-DD HH:MM** in **24-hour** (military) time plus **TZ** — never date-only for **new** Session or Bookmarked blocks. See **`Insight timestamps`** in `rhea-governance-agent.md`.
+- **PAP pending:** if a PAP blocks work, add one Bookmarked line `**YYYY-MM-DD HH:MM TZ — PAP pending — [short title]**`; delete it when the PAP is approved or withdrawn.
 
 ---
 

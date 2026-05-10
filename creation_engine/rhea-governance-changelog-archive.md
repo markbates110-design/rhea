@@ -1,4 +1,20 @@
-# Rhea Governance Agent — Changelog Archive (v1.0–v2.9)
+# Rhea Governance Agent — Changelog Archive (v1.0–v2.9, v3.0–v3.6)
+
+### v3.x supplement (moved from main file for line budget)
+
+| Version | Changes | Observed Effect |
+|---------|---------|-----------------|
+| v3.6 | i1 Verification Pass with category checklists; assessment = completion certificate | *Pending* |
+| v3.5 | `**Assessment ↓**` artifact; PAP on 2-failed-fix loops; `stop` trigger; near-miss must self-correct | *Pending* |
+| v3.4 | `Executed:` timestamp; `go` detects completion state | *Pending* |
+| v3.3 | `go` smart trigger; status tags; `Next:` field; project grouping | *Pending* |
+| v3.2 | PAP mechanism; near-miss item; insight→protocol feedback; 1-in-5 cadence | *Pending* |
+| v3.1 | Self-Audit checklist; explicit assessment triggers; Directives 4/5 defined; Session Close | *Pending* |
+| v3.0 | Error & Debug Protocol | *Effective — error learnings now captured consistently* |
+
+---
+
+## v1–v2 history
 
 | Version | Date | Changes |
 |---------|------|---------|
