@@ -386,11 +386,11 @@
 
 **Error:** Modal header title stacked one character per line; range rows looked collapsed (same width failure class as Feedback vertical text).
 
-**Root Cause:** In a **`flex` row** (`justify-between`), a child with **`min-w-0`** and default **`flex: 0 1 auto`** may **shrink its used width to zero**; text then wraps one character wide. Sitewide **`min-w-0`** added **`min-w-0`** on that cell without **`flex-1`**, so it could collapse. Sheet also rendered under page `<main>`; **`createPortal(..., document.body)`** avoids ancestor containing-block quirks for **`fixed`** overlays.
+**Root Cause:** Two layers: (1) Header row **`min-w-0`** without **`flex-1`** can collapse to zero width (**`flex: 0 1 auto`**). (2) **`min-w-0`** on the **sheet panel itself** — the panel is the sole flex item of the fullscreen overlay row (**`flex-shrink` defaults to 1**), so **`min-width: 0`** allows the entire modal shell to squeeze to a hairline → all inner text stacks vertically.
 
-**Fix:** Title wrapper **`min-w-0 flex-1 pr-sm`**; criteria row label **`min-w-0 flex-1`**; **`createPortal(sheet, document.body)`** with **`useSyncExternalStore`** for SSR-safe client mount; delete dialog panel **`w-full min-w-0`**.
+**Fix:** Sheet panel **`shrink-0`** (replace **`min-w-0`** on shell); overlay roots **`w-screen`**; header title **`min-w-0 flex-1`**; criteria **`flex-1`** text column; delete dialog **`shrink-0`**; **`createPortal`** to **`document.body`** + **`typeof document`** guard (**`useSyncExternalStore` removed**).
 
-**i²:** **`min-w-0` in flex rows** must pair with **`flex-1`** (or **`shrink-0`**) depending on intent — otherwise the item can shrink to **zero**. Overlays: default to **body portal**.
+**i²:** Never put **`min-w-0`** on a **modal/card flex child** that must keep readable width unless **`shrink-0`** or an explicit **`min-w-[…]`** restores a floor. Reserve **`min-w-0`** for **inner** scroll/overflow regions only.
 
 ---
 
