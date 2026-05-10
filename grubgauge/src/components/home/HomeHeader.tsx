@@ -25,20 +25,30 @@ function ProfileAvatar({ user }: { user: User }) {
   );
 }
 
-function CreateAccountCTA() {
+/**
+ * Two text-only entry points so members aren't pushed through a Create
+ * Account funnel they don't need. Each link deep-links the dual-mode auth
+ * page directly to its mode (`?mode=signin|signup`), bypassing the
+ * isOnboarded() smart-default — explicit intent wins over inference here
+ * because the user clicked a specific link.
+ */
+function SignedOutLinks() {
   return (
-    <Link
-      href="/onboarding/signup"
-      className="flex shrink-0 items-center gap-xs rounded-lg bg-primary-container px-sm py-xs font-label-sm text-label-sm font-bold text-on-primary-container transition-all hover:bg-primary-fixed active:scale-95"
-    >
-      <span
-        className="material-symbols-outlined text-[16px]"
-        style={{ fontVariationSettings: "'FILL' 1" }}
+    <div className="flex shrink-0 items-center gap-sm">
+      <Link
+        href="/onboarding/signup?mode=signin"
+        className="font-label-sm text-label-sm font-semibold text-on-surface-variant hover:text-on-surface transition-colors"
       >
-        person_add
-      </span>
-      Create Account
-    </Link>
+        Sign in
+      </Link>
+      <span aria-hidden className="font-label-sm text-label-sm text-outline-variant">·</span>
+      <Link
+        href="/onboarding/signup?mode=signup"
+        className="font-label-sm text-label-sm font-semibold text-primary hover:brightness-110 transition-all"
+      >
+        Create account
+      </Link>
+    </div>
   );
 }
 
@@ -46,7 +56,8 @@ function CreateAccountCTA() {
  * Auth-aware right slot:
  * - `loading` → fixed-size placeholder (prevents CTA flicker on first paint)
  * - signed-in → profile avatar → /profile
- * - signed-out → "Create Account" pill → /onboarding/signup
+ * - signed-out → text-only "Sign in · Create account" pair (both deep-link
+ *   into the dual-mode auth page at the appropriate mode)
  */
 function AuthSlot() {
   const { user, loading } = useAuth();
@@ -54,7 +65,7 @@ function AuthSlot() {
   if (loading) {
     return <div className="h-8 w-8 shrink-0" aria-hidden />;
   }
-  return user ? <ProfileAvatar user={user} /> : <CreateAccountCTA />;
+  return user ? <ProfileAvatar user={user} /> : <SignedOutLinks />;
 }
 
 export function HomeHeader() {

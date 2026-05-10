@@ -1,6 +1,6 @@
 # Rhea Insights & Process Upgrades
 
-**Last Updated:** 2026-05-10 16:25 CT
+**Last Updated:** 2026-05-10 16:55 CT
 
 This file bookmarks key i² insights, process improvements, and patterns discovered across all creations. 
 The Governance Agent must read this file at the start of every major session.
@@ -10,6 +10,12 @@ The Governance Agent must read this file at the start of every major session.
 ### Bookmarked Insights
 
 #### Product (apps · governance · ops)
+
+**2026-05-10 16:55 CT — Auth entry points render both discovery paths; auto-redirect cycles self-correct**
+- **Header / upsell projections must mirror dual-mode auth.** Once `/onboarding/signup` is dual-mode, *every* discovery surface (header CTA, History upsell, future re-engagement prompts) must offer **both** *Sign in* and *Create account* — a single CTA mis-casts one cohort no matter which label you pick. Two text links separated by a thin divider beat a single pill button for this; the buttonless treatment is more honest to the "neutral entry point" semantic.
+- **Explicit mode wins over smart-default.** When the user picks a specific link (`?mode=signin` vs `?mode=signup`), the auth page honors that choice and does *not* consult `isOnboarded()`. Smart-defaults are for ambiguous entry; explicit clicks are unambiguous.
+- **Auto-redirect cycles self-correct when both sides honor the same handshake.** Signin failure on "Invalid login credentials" auto-switches to signup (preserves email, clears password, surfaces a contextual message). Signup against an existing email auto-switches back to signin ("That email already has an account"). The pair is closed: wrong-password users ping-pong once and then see the right message; no-account users land in signup on the first failure; existing accounts always reach signin. Anti-enumeration is preserved because Supabase still returns the same opaque error to outside observers — the resolution happens entirely in client UX.
+- **Compounding rule:** any failed auth attempt with an opaque provider error should route the user toward the *other* mode with a contextual message and pre-filled inputs — never leave them staring at "Invalid login credentials" with no next step.
 
 **2026-05-10 16:25 CT — Auth surfaces are dual-mode by default; smart-default mode to close the discoverability gap**
 - **Class of bug.** A signup-only route looks like a discoverability bug for the first user, then becomes a rate-limit amplifier (repeated signup attempts against an existing email trigger the provider's email throttle, which the user reads as a code defect). Captured follow-ups from a prior iteration *will* be encountered live before they get scheduled — when the follow-up is "the only known way for a returning user to authenticate," treat it as a hard close, not a backlog item.

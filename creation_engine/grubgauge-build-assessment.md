@@ -571,6 +571,23 @@ Verified: `npx tsc --noEmit` ✓ exit 0, `npm run lint` ✓ exit 0, ReadLints cl
 
 ---
 
+## Assessment — Header text-link pair (Sign in · Create account) + signin→signup auto-redirect on no-account
+**Timestamp: 2026-05-10 16:55 CT** · **Governance ref** — `rhea-governance-agent.md` **v3.12**
+
+**e** — Header carried a single *Create Account* pill button for signed-out visitors, even after the auth page itself became dual-mode. Returning members still landed on a button labeled *Create Account* and (correctly) read that as "this app thinks I need to sign up again." User asked for two text links instead, and for a failed signin (no account) to route into signup automatically.
+
+**s** — Two surgical edits:
+1. **`grubgauge/src/components/home/HomeHeader.tsx`** — replaced `<CreateAccountCTA>` with `<SignedOutLinks>`: two text-only `<Link>` elements, *Sign in · Create account*, separated by a thin divider dot. Each deep-links the dual-mode auth page directly to its mode (`?mode=signin` / `?mode=signup`), bypassing the `isOnboarded()` smart-default — explicit user intent (which link they clicked) wins over device-state inference. Mobile + desktop headers both pick this up via the existing `<AuthSlot />` mount points; no layout changes elsewhere.
+2. **`grubgauge/src/app/onboarding/signup/page.tsx`** — signin error branch detects `"Invalid login credentials"` and **auto-switches mode to `"signup"`** with the email preserved and a contextual message: *"We couldn't find that account. Create one below, or switch back to Sign in."* Password is cleared (force re-entry to avoid leaking it into the signup field's `new-password` autocomplete). Supabase's anti-enumeration response means we can't distinguish "no account" from "wrong password," but the segmented toggle remains visible for one-tap correction — and the existing signup→signin auto-bounce ("That email already has an account") catches the wrong-password user who proceeds with signup. Both directions self-correct.
+
+No theme drift; no new Tailwind tokens; PageShell + `useAuth` SSOT + typography contracts honored.
+
+**i² First** — `npx tsc --noEmit` ✓, `ReadLints` ✓. **i² Second** — applied the prior insight *"auth surfaces are dual-mode by default"*: the header is now a dual-link projection of the same dual-mode page, with explicit mode params overriding the smart-default. **Compounding rule for this codebase:** header / upsell entry points for an authenticated surface render *both* discovery paths (sign in + create account) as side-by-side links, not a single CTA that mis-casts one cohort. Any future header revision is gated on this contract.
+
+★★★★★ — Closes the discoverability gap the user has been reporting across three iterations (signup loop → missing sign-in surface → ambiguous header CTA) without introducing new routes or layout changes.
+
+---
+
 ## Error Fix — Missing sign-in surface (returning user stuck on signup, rate-limit cascade)
 **Timestamp: 2026-05-10 16:25 CT** · **Governance ref** — `rhea-governance-agent.md` **v3.12**
 

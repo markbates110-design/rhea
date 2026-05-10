@@ -49,6 +49,18 @@ export default function OnboardingAuthPage() {
           password,
         });
         if (authError) {
+          // Supabase doesn't distinguish "wrong password" from "no account"
+          // (anti-enumeration), so on `Invalid login credentials` we bounce
+          // into signup mode with the email preserved — per user spec, a
+          // failed signin should route would-be members into account
+          // creation. Password is cleared (force re-entry) and the
+          // segmented toggle remains visible so a typo can be corrected.
+          if (/invalid login credentials/i.test(authError.message)) {
+            setMode("signup");
+            setPassword("");
+            setError("We couldn't find that account. Create one below, or switch back to Sign in.");
+            return;
+          }
           setError(humanizeAuthError(authError.message, "signin"));
           return;
         }
