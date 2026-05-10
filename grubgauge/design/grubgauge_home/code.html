@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>GrubGauge Home</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "tertiary": "#fdbf02",
+                "primary-container": "#00c853",
+                "secondary-fixed": "#e4e2e1",
+                "tertiary-fixed-dim": "#fabd00",
+                "surface-container-low": "#1c1b1b",
+                "on-secondary-container": "#b6b5b4",
+                "tertiary-container": "#dba500",
+                "primary": "#3fe56c",
+                "tertiary-fixed": "#ffdf9e",
+                "background": "#131313",
+                "on-primary-container": "#004c1b",
+                "on-primary-fixed-variant": "#00531e",
+                "surface-container-lowest": "#0e0e0e",
+                "on-surface": "#e5e2e1",
+                "on-error": "#690005",
+                "inverse-on-surface": "#313030",
+                "surface": "#131313",
+                "primary-fixed-dim": "#3ce36a",
+                "on-error-container": "#ffdad6",
+                "inverse-primary": "#006e2a",
+                "on-primary": "#003912",
+                "error": "#ffb4ab",
+                "surface-variant": "#353534",
+                "outline-variant": "#3c4a3c",
+                "secondary": "#c8c6c6",
+                "surface-container-high": "#2a2a2a",
+                "on-surface-variant": "#bbcbb8",
+                "surface-container": "#201f1f",
+                "surface-bright": "#393939",
+                "on-tertiary-fixed-variant": "#5b4300",
+                "outline": "#869583",
+                "on-background": "#e5e2e1",
+                "on-tertiary-fixed": "#261a00",
+                "inverse-surface": "#e5e2e1",
+                "on-tertiary-container": "#543e00",
+                "on-secondary-fixed-variant": "#474747",
+                "secondary-container": "#474747",
+                "surface-dim": "#131313",
+                "on-tertiary": "#3f2e00",
+                "error-container": "#93000a",
+                "surface-tint": "#3ce36a",
+                "on-secondary": "#303030",
+                "on-primary-fixed": "#002108",
+                "primary-fixed": "#69ff87",
+                "secondary-fixed-dim": "#c8c6c6",
+                "surface-container-highest": "#353534",
+                "on-secondary-fixed": "#1b1c1c"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+        },
+        "spacing": {
+                "xs": "8px",
+                "sm": "12px",
+                "xl": "32px",
+                "margin-edge": "20px",
+                "lg": "24px",
+                "gutter": "16px",
+                "md": "16px",
+                "base": "4px"
+        },
+        "fontFamily": {
+                "label-sm": [
+                        "Work Sans"
+                ],
+                "display-lg": [
+                        "Work Sans"
+                ],
+                "headline-md": [
+                        "Work Sans"
+                ],
+                "title-sm": [
+                        "Work Sans"
+                ],
+                "body-md": [
+                        "Work Sans"
+                ]
+        },
+        "fontSize": {
+                "label-sm": [
+                        "12px",
+                        {
+                                "lineHeight": "16px",
+                                "letterSpacing": "0.5px",
+                                "fontWeight": "500"
+                        }
+                ],
+                "display-lg": [
+                        "40px",
+                        {
+                                "lineHeight": "48px",
+                                "letterSpacing": "-1px",
+                                "fontWeight": "700"
+                        }
+                ],
+                "headline-md": [
+                        "24px",
+                        {
+                                "lineHeight": "32px",
+                                "fontWeight": "600"
+                        }
+                ],
+                "title-sm": [
+                        "18px",
+                        {
+                                "lineHeight": "24px",
+                                "fontWeight": "600"
+                        }
+                ],
+                "body-md": [
+                        "16px",
+                        {
+                                "lineHeight": "24px",
+                                "fontWeight": "400"
+                        }
+                ]
+        }
+},
+    },
+  }
+</script>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen pb-24 md:pb-0">
+<!-- TopAppBar -->
+<header class="bg-background dark:bg-background text-primary dark:text-primary top-0 w-full z-40 bg-surface-container-low shadow-sm md:hidden">
+<div class="flex justify-between items-center w-full px-margin-edge h-16">
+<button class="text-primary hover:bg-surface-variant transition-colors p-2 rounded-full active:scale-95 duration-150 ease-in-out">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">restaurant</span>
+</button>
+<div class="text-headline-md font-headline-md font-bold text-primary dark:text-primary">GrubGauge</div>
+<button class="hover:bg-surface-variant transition-colors p-2 rounded-full active:scale-95 duration-150 ease-in-out">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">account_circle</span>
+</button>
+</div>
+</header>
+<header class="bg-background dark:bg-background text-primary dark:text-primary top-0 w-full z-40 bg-surface-container-low hidden md:flex items-center justify-between px-margin-edge h-16 shadow-sm sticky">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 0;">restaurant</span>
+<div class="text-headline-md font-headline-md font-bold text-primary dark:text-primary">GrubGauge</div>
+</div>
+<nav class="flex gap-6">
+<a class="text-primary font-bold hover:bg-surface-variant transition-colors px-4 py-2 rounded-lg active:scale-95 duration-150 ease-in-out" href="{{DATA:SCREEN:SCREEN_41}}">Dashboard</a>
+<a class="text-on-surface-variant hover:bg-surface-variant transition-colors px-4 py-2 rounded-lg active:scale-95 duration-150 ease-in-out" href="{{DATA:SCREEN:SCREEN_19}}">Explore</a>
+<a class="text-on-surface-variant hover:bg-surface-variant transition-colors px-4 py-2 rounded-lg active:scale-95 duration-150 ease-in-out" href="{{DATA:SCREEN:SCREEN_34}}">Rate</a>
+<a class="text-on-surface-variant hover:bg-surface-variant transition-colors px-4 py-2 rounded-lg active:scale-95 duration-150 ease-in-out" href="{{DATA:SCREEN:SCREEN_59}}">History</a>
+</nav>
+<div class="flex items-center gap-4">
+<a class="bg-primary-container text-on-primary-container font-title-sm text-title-sm px-6 py-2 rounded-full hover:bg-primary transition-colors inline-block" href="{{DATA:SCREEN:SCREEN_34}}">Start Rating</a>
+<span class="material-symbols-outlined text-on-surface-variant text-3xl hover:text-primary cursor-pointer transition-colors" style="font-variation-settings: 'FILL' 0;">account_circle</span>
+</div>
+</header>
+<main class="max-w-7xl mx-auto px-margin-edge py-lg md:py-xl">
+<!-- Hero / Value Index Gauge -->
+<section class="flex flex-col md:flex-row items-center justify-between gap-xl mb-xl">
+<div class="w-full md:w-1/2 flex flex-col items-start gap-lg">
+<div class="space-y-4 w-full">
+<h1 class="font-display-lg text-display-lg text-on-background">Find True <span class="text-primary">Culinary Value</span></h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-lg">GrubGauge helps you uncover restaurants that deliver exceptional taste without the premium markup. Your city's overall value index is strong today.</p>
+</div>
+<div class="bg-surface-container rounded-xl p-lg border border-outline-variant w-full flex items-center justify-between shadow-lg shadow-black/20">
+<div>
+<h3 class="font-title-sm text-title-sm text-on-background mb-1">City Value Index</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Based on recent ratings</p>
+</div>
+<div class="relative w-32 h-32 flex items-center justify-center">
+<!-- Decorative SVG Gauge -->
+<svg class="w-full h-full transform -rotate-90" viewbox="0 0 100 100">
+<circle cx="50" cy="50" fill="none" r="45" stroke="#201f1f" stroke-width="10"></circle>
+<circle class="transition-all duration-1000 ease-out" cx="50" cy="50" fill="none" r="45" stroke="#00c853" stroke-dasharray="282.7" stroke-dashoffset="62.19" stroke-width="10"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="font-display-lg text-display-lg text-primary leading-none">78</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">/100</span>
+</div>
+</div>
+</div>
+<a class="w-full md:w-auto bg-primary-container text-on-primary-container font-title-sm text-title-sm px-8 py-4 rounded-full hover:bg-primary transition-colors flex items-center justify-center gap-2 shadow-lg shadow-primary-container/20" href="{{DATA:SCREEN:SCREEN_34}}">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add_circle</span>
+            Start Rating
+        </a>
+</div>
+<div class="w-full md:w-1/2 relative h-[400px] rounded-xl overflow-hidden border border-outline-variant group">
+<img alt="Premium food photography" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida/ADBb0ugB_mU4qzjUQcv3wXXFGKcZ2hkg8jUCBIlfzRs2lExB5xww9_or6OeFm4j9ZBKx15XZNKHmYGLFsXB36PZCx0I1-0RLRr7MsY1DepJ1J0WXZyhIALpxZ-lpSLhhf24Ur4zUBzClwJ2w9NN9BfnLtDuGo14ZzwfsOIvvIvl0rMJuE1412t8FHZiSDz0VHCGZUd_Zu1c__RxZ4HxK39_i7o7Tf0pWo2LFcp4fRxS5kTYmOJXMaz7ebN-PXpivKDiXV6RYfeirgCBgtEE"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background/90 via-background/40 to-transparent"></div>
+<div class="absolute bottom-0 left-0 p-lg w-full">
+<div class="flex items-center gap-2 mb-2">
+<span class="bg-primary/20 text-primary font-label-sm text-label-sm px-3 py-1 rounded-full border border-primary/30 backdrop-blur-sm">Trending Now</span>
+<span class="bg-surface-container/80 text-on-surface font-label-sm text-label-sm px-3 py-1 rounded-full backdrop-blur-sm flex items-center gap-1"><span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span> 4.8</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-background mb-1">The Golden Skillet</h2>
+<p class="font-body-md text-body-md text-on-surface-variant flex items-center gap-2"><span class="material-symbols-outlined text-sm">location_on</span> Downtown • $$</p>
+</div>
+</div>
+</section>
+<!-- Top Value Picks -->
+<section>
+<div class="flex items-center justify-between mb-lg">
+<h2 class="font-headline-md text-headline-md text-on-background">Top Value Picks Near You</h2>
+<button class="text-primary hover:text-primary-fixed transition-colors font-label-sm text-label-sm flex items-center gap-1">View All <span class="material-symbols-outlined text-sm">arrow_forward</span></button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<!-- Card 1 -->
+<div class="bg-surface-container rounded-xl overflow-hidden border border-outline-variant hover:border-primary/50 transition-colors group cursor-pointer">
+<div class="relative h-48 w-full bg-surface-variant">
+<img alt="Gourmet Burger" class="w-full h-full object-cover" data-alt="A close-up shot of a gourmet burger dripping with melted cheese, placed on a dark slate board. The lighting is dramatic and moody, emphasizing the textures of the crispy bun and juicy meat. The background is a deeply out-of-focus charcoal grey, matching a premium dark culinary UI theme. Accents of vibrant green lettuce pop against the dark tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuChQfTU4lMQzA86JTyid5NI0Sb0MmXFBBlfUcwy6I29An9N8LqjAVBlqS7KRFaS5R8-b0gBD-y1gmP6nQCX1X9Pfd_qq4URUowbhMDcx-DrsVMm_vcQMCkfQ_ErQEdKHOFfGCHuTeJQmiqcy2pNSonhn4wk6Qd5ZHAA0ibs4bsn82bjInYY1F-YPyGZW2Fk9n8egYdquCw7X6dCWC96tXHVUMq5kIAqf2Gxk1ospRUGpkBQvywp0a9HfkUMB0lFjukCdWzrGFhsa_b5"/>
+<div class="absolute top-4 right-4 bg-background/80 backdrop-blur-md px-3 py-1 rounded-full border border-outline-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">verified</span>
+<span class="font-label-sm text-label-sm text-primary font-bold">92</span>
+</div>
+</div>
+<div class="p-4">
+<h3 class="font-title-sm text-title-sm text-on-background mb-1 group-hover:text-primary transition-colors">Burger Artisan</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-4 text-sm">Craft burgers with unmatched price-to-taste ratio.</p>
+<div class="flex items-center justify-between mt-auto">
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1"><span class="material-symbols-outlined text-sm">directions_walk</span> 5 min</span>
+<span class="text-primary font-title-sm text-title-sm">$</span>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container rounded-xl overflow-hidden border border-outline-variant hover:border-primary/50 transition-colors group cursor-pointer">
+<div class="relative h-48 w-full bg-surface-variant">
+<img alt="Ramen Bowl" class="w-full h-full object-cover" data-alt="Overhead view of a steaming bowl of rich ramen, featuring a soft-boiled egg, sliced pork, and fresh scallions. The bowl rests on a textured dark wood table under focused spotlighting. The dark, sleek aesthetic is punctuated by the vivid green of the scallions and the warm orange of the egg yolk, creating a highly appetizing, high-contrast image suitable for a modern app." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDozUQIEwatDboJBsspgs8mcv2U8X3IUiIMzkwcKXGimNCK4TJJt6XbQ1o-u3khhhIFUQimkfJZY0GgQtN1JRRC-WFX-xG3Y6HzML5x6Cv5brI7UAZq_dPJvvQ_fIB9sBME2eQQiB5h6rRGGMG0blWDYqIWzciYA86JtMMc264wGWEZ7BoudeTzSbbRA1FTbtTD2d8yTSepmyOzn0NA8KWu4jk0leyJfe5AV9eJYn5EOqKjsro8AM60R_gPTsceznGBlRi-oWrnyTPo"/>
+<div class="absolute top-4 right-4 bg-background/80 backdrop-blur-md px-3 py-1 rounded-full border border-outline-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">verified</span>
+<span class="font-label-sm text-label-sm text-primary font-bold">88</span>
+</div>
+</div>
+<div class="p-4">
+<h3 class="font-title-sm text-title-sm text-on-background mb-1 group-hover:text-primary transition-colors">Neon Noodle</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-4 text-sm">Authentic tonkotsu broth that hits well above its price tier.</p>
+<div class="flex items-center justify-between mt-auto">
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1"><span class="material-symbols-outlined text-sm">directions_car</span> 12 min</span>
+<span class="text-primary font-title-sm text-title-sm">$$</span>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container rounded-xl overflow-hidden border border-outline-variant hover:border-primary/50 transition-colors group cursor-pointer">
+<div class="relative h-48 w-full bg-surface-variant">
+<img alt="Wood Fired Pizza" class="w-full h-full object-cover" data-alt="A rustic wood-fired pizza with blistered crust, fresh basil, and melting mozzarella, photographed against a dark, slate background. Soft, directional lighting highlights the glistening cheese and crisp edges. The vibrant greens and reds of the toppings contrast sharply with the moody, sophisticated dark charcoal setting, perfect for a premium food platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBt0KoiZbSSe9UM9v9fPMn5zl_YiZ1VjP73LRU0qkkMT6INfxHJVHc8YUeTupzer8QaBO8Su3w73O-v-cpbfQ3YcC7h79BeIXVFeuAuAEB-CpkZV86NYPp-7Zot_SxWr5dqWru3FjgHuhOuNhqzEFtXjs_c3tQrAP_IJuRwBGpEVi_8D3PRAT4vqH-QrSzpVycVIiZZ5apf-WSWZ6WCEJo3ZnUtTM4EiZ-dck-3KuK2h5Vj6NLC2mb8F5woxElVQ4pSnTidpCLBatIG"/>
+<div class="absolute top-4 right-4 bg-background/80 backdrop-blur-md px-3 py-1 rounded-full border border-outline-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">verified</span>
+<span class="font-label-sm text-label-sm text-primary font-bold">85</span>
+</div>
+</div>
+<div class="p-4">
+<h3 class="font-title-sm text-title-sm text-on-background mb-1 group-hover:text-primary transition-colors">Slice of Fire</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-4 text-sm">Wood-fired perfection offering incredible value for sharing.</p>
+<div class="flex items-center justify-between mt-auto">
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1"><span class="material-symbols-outlined text-sm">directions_bike</span> 8 min</span>
+<span class="text-primary font-title-sm text-title-sm">$$</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 bg-surface-container shadow-lg border-t border-outline-variant md:hidden rounded-t-xl">
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl px-4 py-1.5 active:scale-90 transition-transform duration-200" href="{{DATA:SCREEN:SCREEN_41}}">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="text-label-sm font-label-sm mt-1">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1.5 hover:text-primary transition-all active:scale-90 duration-200" href="{{DATA:SCREEN:SCREEN_19}}">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">explore</span>
+<span class="text-label-sm font-label-sm mt-1">Explore</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1.5 hover:text-primary transition-all active:scale-90 duration-200" href="{{DATA:SCREEN:SCREEN_34}}">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">add_circle</span>
+<span class="text-label-sm font-label-sm mt-1">Rate</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1.5 hover:text-primary transition-all active:scale-90 duration-200" href="{{DATA:SCREEN:SCREEN_59}}">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">history</span>
+<span class="text-label-sm font-label-sm mt-1">History</span>
+</a>
+</nav>
+</body></html>

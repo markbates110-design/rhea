@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Expert Tier - GrubGauge</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-low": "#1c1b1b",
+                        "primary-fixed": "#69ff87",
+                        "on-secondary-fixed-variant": "#474747",
+                        "on-tertiary-fixed": "#261a00",
+                        "on-background": "#e5e2e1",
+                        "primary-container": "#00c853",
+                        "on-primary": "#003912",
+                        "surface-tint": "#3ce36a",
+                        "surface": "#131313",
+                        "on-surface-variant": "#bbcbb8",
+                        "on-secondary": "#303030",
+                        "on-error-container": "#ffdad6",
+                        "on-secondary-container": "#b6b5b4",
+                        "background": "#131313",
+                        "tertiary-fixed": "#ffdf9e",
+                        "secondary-fixed-dim": "#c8c6c6",
+                        "on-tertiary-container": "#543e00",
+                        "surface-container-high": "#2a2a2a",
+                        "on-tertiary-fixed-variant": "#5b4300",
+                        "on-primary-fixed-variant": "#00531e",
+                        "surface-container": "#201f1f",
+                        "outline-variant": "#3c4a3c",
+                        "error": "#ffb4ab",
+                        "tertiary-container": "#dba500",
+                        "on-tertiary": "#3f2e00",
+                        "tertiary-fixed-dim": "#fabd00",
+                        "tertiary": "#fdbf02",
+                        "primary": "#3fe56c",
+                        "on-error": "#690005",
+                        "secondary-container": "#474747",
+                        "inverse-surface": "#e5e2e1",
+                        "on-primary-fixed": "#002108",
+                        "on-primary-container": "#004c1b",
+                        "surface-variant": "#353534",
+                        "inverse-primary": "#006e2a",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "surface-dim": "#131313",
+                        "surface-container-highest": "#353534",
+                        "secondary": "#c8c6c6",
+                        "surface-container-lowest": "#0e0e0e",
+                        "secondary-fixed": "#e4e2e1",
+                        "on-surface": "#e5e2e1",
+                        "error-container": "#93000a",
+                        "primary-fixed-dim": "#3ce36a",
+                        "outline": "#869583",
+                        "surface-bright": "#393939",
+                        "inverse-on-surface": "#313030"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "lg": "24px",
+                        "gutter": "16px",
+                        "base": "4px",
+                        "sm": "12px",
+                        "margin-edge": "20px",
+                        "md": "16px",
+                        "xl": "32px",
+                        "xs": "8px"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["Work Sans"],
+                        "headline-md": ["Work Sans"],
+                        "body-md": ["Work Sans"],
+                        "title-sm": ["Work Sans"],
+                        "display-lg": ["Work Sans"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.5px", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "title-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-1px", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill-icon {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col font-body-md antialiased">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center w-full px-md py-sm sticky top-0 z-50 bg-surface border-b border-outline-variant">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-primary text-[24px]">analytics</span>
+<span class="text-headline-md font-headline-md font-bold tracking-tight text-primary">GrubGauge</span>
+</div>
+<div>
+<img alt="User profile photo" class="w-8 h-8 rounded-full border border-outline-variant object-cover" data-alt="A small circular profile picture of a modern professional, well-lit, sharp focus, neutral background. Corporate dark mode aesthetic with emerald green accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPMq9Ao3SIsOrUNBM5a-pJADc4D5z1jhrDJV0ck642f73MOIxMKCYhZZwdYB-fOBHmg70RPdcK1nQDBDxfBhsctLKhkoCUWk0oKNEuvZKn_XYG-k9Ymi5PFzfez2NegLFpMOwaA3ai5wAqa_n4oFvjfezBAbeykvBMF7A8Ox2nHnjgEHefhjVIh6IKRMe4JI40Cx3Vndp9Q2FdUCGne4CGnWLmN_Okx8rgY6bmsuUXNw1vCO_Xw3GwHhhPi7DEkooESln9HGZfaXNy"/>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow px-margin-edge py-lg md:py-xl max-w-7xl mx-auto w-full flex flex-col gap-xl pb-[100px] md:pb-lg">
+<!-- Hero Section -->
+<section class="flex flex-col md:flex-row items-center gap-xl rounded-xl bg-surface-container-low overflow-hidden border border-outline-variant relative">
+<div class="flex-1 p-lg md:p-xl z-10 flex flex-col justify-center items-start">
+<h1 class="text-display-lg font-display-lg text-on-surface mb-sm">Elevate Your Culinary Authority</h1>
+<p class="text-title-sm font-title-sm text-on-surface-variant mb-lg max-w-xl">
+                    Unlock exclusive badges, shape the local dining landscape, and join an elite tier of reviewers recognized for their exceptional taste and helpfulness.
+                </p>
+<div class="w-full max-w-md bg-surface border border-outline-variant rounded-lg p-md mb-lg shadow-lg relative overflow-hidden">
+<div class="flex justify-between items-end mb-xs">
+<span class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">Helpfulness Score</span>
+<span class="text-headline-md font-headline-md text-primary">98%</span>
+</div>
+<div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="98" class="bg-primary h-full rounded-full w-[98%]" role="progressbar"></div>
+</div>
+<p class="text-label-sm font-label-sm text-on-surface-variant mt-xs">Top 2% of reviewers in your area.</p>
+</div>
+<button class="bg-primary-container text-on-primary-container text-title-sm font-title-sm py-sm px-lg rounded-full font-bold hover:bg-primary transition-colors flex items-center gap-xs shadow-[0_4px_14px_0_rgba(0,200,83,0.39)]">
+                    Go Premium
+                    <span class="material-symbols-outlined text-[20px]">workspace_premium</span>
+</button>
+</div>
+<div class="w-full md:w-2/5 h-[300px] md:h-auto md:min-h-[400px] relative">
+<div class="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-l from-transparent to-surface-container-low z-10"></div>
+<img alt="Premium Culinary Experience" class="absolute inset-0 w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida/ADBb0ugB_mU4qzjUQcv3wXXFGKcZ2hkg8jUCBIlfzRs2lExB5xww9_or6OeFm4j9ZBKx15XZNKHmYGLFsXB36PZCx0I1-0RLRr7MsY1DepJ1J0WXZyhIALpxZ-lpSLhhf24Ur4zUBzClwJ2w9NN9BfnLtDuGo14ZzwfsOIvvIvl0rMJuE1412t8FHZiSDz0VHCGZUd_Zu1c__RxZ4HxK39_i7o7Tf0pWo2LFcp4fRxS5kTYmOJXMaz7ebN-PXpivKDiXV6RYfeirgCBgtEE"/>
+</div>
+</section>
+<!-- Bento Grid: Badges & Stats -->
+<section class="flex flex-col gap-md">
+<h2 class="text-headline-md font-headline-md text-on-surface">Your Culinary Badges</h2>
+<div class="bento-grid">
+<!-- Badge 1: Unlocked -->
+<div class="bg-surface-container border border-outline-variant rounded-xl p-md flex flex-col items-center text-center gap-sm relative overflow-hidden group hover:bg-surface-container-high transition-colors">
+<div class="w-16 h-16 rounded-full bg-primary-container/20 flex items-center justify-center mb-xs group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined fill-icon text-primary text-[32px]">star</span>
+</div>
+<h3 class="text-title-sm font-title-sm text-on-surface">Tastemaker</h3>
+<p class="text-body-md font-body-md text-on-surface-variant text-sm">Awarded for reviews that consistently influence dining choices.</p>
+<div class="absolute top-sm right-sm text-label-sm font-label-sm bg-primary-container/10 text-primary px-xs py-[2px] rounded border border-primary/30">Unlocked</div>
+</div>
+<!-- Badge 2: Unlocked -->
+<div class="bg-surface-container border border-outline-variant rounded-xl p-md flex flex-col items-center text-center gap-sm relative overflow-hidden group hover:bg-surface-container-high transition-colors">
+<div class="w-16 h-16 rounded-full bg-primary-container/20 flex items-center justify-center mb-xs group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined fill-icon text-primary text-[32px]">local_fire_department</span>
+</div>
+<h3 class="text-title-sm font-title-sm text-on-surface">Local Guide</h3>
+<p class="text-body-md font-body-md text-on-surface-variant text-sm">Contributed extensively to newly opened establishments.</p>
+<div class="absolute top-sm right-sm text-label-sm font-label-sm bg-primary-container/10 text-primary px-xs py-[2px] rounded border border-primary/30">Unlocked</div>
+</div>
+<!-- Badge 3: Locked Premium -->
+<div class="bg-surface-container-low border border-outline-variant/50 rounded-xl p-md flex flex-col items-center text-center gap-sm relative overflow-hidden opacity-80">
+<div class="absolute inset-0 bg-surface/40 z-10 flex items-center justify-center backdrop-blur-[2px] opacity-0 hover:opacity-100 transition-opacity">
+<button class="bg-surface text-primary border border-primary text-label-sm font-label-sm py-xs px-sm rounded-full font-bold">Unlock with Premium</button>
+</div>
+<div class="w-16 h-16 rounded-full bg-surface-variant flex items-center justify-center mb-xs">
+<span class="material-symbols-outlined text-on-surface-variant text-[32px]">lock</span>
+</div>
+<h3 class="text-title-sm font-title-sm text-on-surface-variant">Master Reviewer</h3>
+<p class="text-body-md font-body-md text-on-surface-variant text-sm">Exclusive tier. Requires Premium status and 500+ helpful votes.</p>
+<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden mt-2">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="60" class="bg-on-surface-variant h-full rounded-full w-[60%]" role="progressbar"></div>
+</div>
+</div>
+<!-- Badge 4: Locked Premium -->
+<div class="bg-surface-container-low border border-outline-variant/50 rounded-xl p-md flex flex-col items-center text-center gap-sm relative overflow-hidden opacity-80">
+<div class="absolute inset-0 bg-surface/40 z-10 flex items-center justify-center backdrop-blur-[2px] opacity-0 hover:opacity-100 transition-opacity">
+<button class="bg-surface text-primary border border-primary text-label-sm font-label-sm py-xs px-sm rounded-full font-bold">Unlock with Premium</button>
+</div>
+<div class="w-16 h-16 rounded-full bg-surface-variant flex items-center justify-center mb-xs">
+<span class="material-symbols-outlined text-on-surface-variant text-[32px]">lock</span>
+</div>
+<h3 class="text-title-sm font-title-sm text-on-surface-variant">Global Connoisseur</h3>
+<p class="text-body-md font-body-md text-on-surface-variant text-sm">Reviewed restaurants in over 10 different cities worldwide.</p>
+<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden mt-2">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="25" class="bg-on-surface-variant h-full rounded-full w-[25%]" role="progressbar"></div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-gutter py-sm bg-surface-container border-t border-outline-variant">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-[24px]">home</span>
+<span class="text-label-sm font-label-sm mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-[24px]">explore</span>
+<span class="text-label-sm font-label-sm mt-1">Explore</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-[24px]">add_circle</span>
+<span class="text-label-sm font-label-sm mt-1">Rate</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary font-bold scale-95 transition-transform duration-100" href="#">
+<span class="material-symbols-outlined fill-icon text-[24px]">history</span>
+<span class="text-label-sm font-label-sm mt-1">My Ratings</span>
+</a>
+</nav>
+<!-- Top Navigation Block for Web (Hidden on Mobile) -->
+<div class="hidden md:flex justify-center items-center w-full px-md py-xs sticky top-[64px] z-40 bg-surface/90 backdrop-blur-sm border-b border-outline-variant shadow-sm">
+<div class="flex gap-lg">
+<a class="text-body-md font-body-md text-on-surface-variant hover:text-primary transition-colors py-2 px-4 rounded-full hover:bg-surface-container" href="#">Home</a>
+<a class="text-body-md font-body-md text-on-surface-variant hover:text-primary transition-colors py-2 px-4 rounded-full hover:bg-surface-container" href="#">Explore</a>
+<a class="text-body-md font-body-md text-on-surface-variant hover:text-primary transition-colors py-2 px-4 rounded-full hover:bg-surface-container" href="#">Rate</a>
+<a class="text-body-md font-body-md text-primary font-bold py-2 px-4 rounded-full bg-surface-container-highest" href="#">My Ratings</a>
+</div>
+</div>
+</body></html>

@@ -1,0 +1,643 @@
+"use client";
+
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+import { getDeviceId } from "@/lib/identity/deviceId";
+
+// ── Types ──────────────────────────────────────────────────────────────────
+
+type VenueType = "fast-food" | "casual" | "fine" | "food-truck";
+
+interface Criterion {
+  key: string;
+  label: string;
+  weight: number; // 0–1, must sum to 1 per venue type
+  low: string;
+  high: string;
+}
+
+interface SpotSelection {
+  placeId: string;
+  name: string;
+  address: string;
+  venueType: VenueType;
+}
+
+// ── Venue config ───────────────────────────────────────────────────────────
+
+const VENUE_META: Record<VenueType, { label: string; icon: string; tagline: string }> = {
+  "fast-food":  { label: "Fast Food",    icon: "fastfood",   tagline: "Maximum Value in Minimum Time" },
+  casual:       { label: "Casual Dining", icon: "restaurant", tagline: "Reliable, Enjoyable Experience" },
+  fine:         { label: "Fine Dining",   icon: "dining",     tagline: "Memorable Luxury Experience" },
+  "food-truck": { label: "Food Truck",    icon: "local_shipping", tagline: "Bold Street Experience" },
+};
+
+const VENUE_CRITERIA: Record<VenueType, Criterion[]> = {
+  "fast-food": [
+    { key: "portion",   label: "Portion Size vs Price",      weight: 0.35, low: "Skimpy",      high: "Generous" },
+    { key: "taste",     label: "Taste & Freshness",           weight: 0.25, low: "Bland",       high: "Delicious" },
+    { key: "speed",     label: "Speed of Service",            weight: 0.20, low: "Very Slow",   high: "Lightning Fast" },
+    { key: "accuracy",  label: "Cleanliness & Order Accuracy",weight: 0.10, low: "Poor",        high: "Spotless & Perfect" },
+    { key: "deal",      label: "Deal / Combo Value",          weight: 0.10, low: "No Value",    high: "Excellent Deal" },
+  ],
+  casual: [
+    { key: "quality",   label: "Food Quality & Freshness",    weight: 0.30, low: "Poor",        high: "Exceptional" },
+    { key: "service",   label: "Service & Friendliness",      weight: 0.25, low: "Lacking",     high: "Excellent" },
+    { key: "portion",   label: "Portion Size vs Price",       weight: 0.20, low: "Skimpy",      high: "Generous" },
+    { key: "atmosphere",label: "Atmosphere & Comfort",        weight: 0.15, low: "Unpleasant",  high: "Wonderful" },
+    { key: "value",     label: "Overall Value (full check)",  weight: 0.10, low: "Poor",        high: "Outstanding" },
+  ],
+  fine: [
+    { key: "quality",   label: "Food Quality & Creativity",   weight: 0.35, low: "Disappointing",high: "Extraordinary" },
+    { key: "service",   label: "Service Excellence",          weight: 0.25, low: "Lacking",     high: "Impeccable" },
+    { key: "ambiance",  label: "Ambiance & Atmosphere",       weight: 0.20, low: "Poor",        high: "Sublime" },
+    { key: "detail",    label: "Attention to Detail",         weight: 0.10, low: "Careless",    high: "Flawless" },
+    { key: "value",     label: "Value Perception",            weight: 0.10, low: "Overpriced",  high: "Worth Every Cent" },
+  ],
+  "food-truck": [
+    { key: "taste",     label: "Taste & Creativity",          weight: 0.35, low: "Generic",     high: "Outstanding" },
+    { key: "portion",   label: "Portion Size vs Price",       weight: 0.25, low: "Skimpy",      high: "Generous" },
+    { key: "freshness", label: "Freshness & Quality",         weight: 0.15, low: "Poor",        high: "Exceptional" },
+    { key: "vibes",     label: "Truck Vibes & Cleanliness",   weight: 0.15, low: "Grimy",       high: "Great Energy" },
+    { key: "speed",     label: "Speed & Friendliness",        weight: 0.10, low: "Slow & Cold", high: "Fast & Warm" },
+  ],
+};
+
+// Google Places type → VenueType mapping
+const PLACE_TYPE_MAP: Record<string, VenueType> = {
+  fast_food_restaurant: "fast-food",
+  hamburger_restaurant: "fast-food",
+  sandwich_shop: "fast-food",
+  pizza_restaurant: "fast-food",
+  meal_takeaway: "fast-food",
+  meal_delivery: "fast-food",
+  fine_dining_restaurant: "fine",
+  american_restaurant: "casual",
+  restaurant: "casual",
+  casual_dining_restaurant: "casual",
+  bar: "casual",
+  pub: "casual",
+  food_truck: "food-truck",
+  food_stall: "food-truck",
+  street_food: "food-truck",
+};
+
+function inferVenueType(types: string[]): VenueType {
+  for (const t of types) {
+    if (t in PLACE_TYPE_MAP) return PLACE_TYPE_MAP[t];
+  }
+  return "casual";
+}
+
+// ── Scoring ────────────────────────────────────────────────────────────────
+
+const DEFAULT_SCORE = 7.5; // out of 10
+
+function calcWeightedScore(criteria: Criterion[], scores: Record<string, number>): number {
+  return criteria.reduce((total, c) => {
+    const raw = scores[c.key] ?? DEFAULT_SCORE;
+    return total + raw * c.weight;
+  }, 0);
+}
+
+function scoreBadge(score: number): { label: string; colorClass: string } {
+  if (score >= 9.0) return { label: "Exceptional", colorClass: "text-primary" };
+  if (score >= 7.5) return { label: "Great Value", colorClass: "text-primary" };
+  if (score >= 6.0) return { label: "Good",        colorClass: "text-tertiary" };
+  if (score >= 4.5) return { label: "Fair",        colorClass: "text-tertiary" };
+  return                   { label: "Poor",        colorClass: "text-error" };
+}
+
+function today(): string {
+  return new Date().toISOString().split("T")[0];
+}
+
+// ── Spot Search ────────────────────────────────────────────────────────────
+
+function SpotSearch({ onSelect }: { onSelect: (s: SpotSelection) => void }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const mapDivRef = useRef<HTMLDivElement>(null);
+  const autocompleteRef = useRef<google.maps.places.AutocompleteService | null>(null);
+  const placesRef = useRef<google.maps.places.PlacesService | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const [query, setQuery] = useState("");
+  const [suggestions, setSuggestions] = useState<google.maps.places.AutocompletePrediction[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [searchError, setSearchError] = useState("");
+
+  useEffect(() => {
+    autocompleteRef.current = new google.maps.places.AutocompleteService();
+    if (mapDivRef.current) {
+      placesRef.current = new google.maps.places.PlacesService(mapDivRef.current);
+    }
+  }, []);
+
+  const fetchSuggestions = useCallback((input: string) => {
+    if (!input.trim() || input.length < 2) { setSuggestions([]); return; }
+    if (!autocompleteRef.current) return;
+    setLoading(true);
+    setSearchError("");
+    autocompleteRef.current.getPlacePredictions(
+      { input, types: ["establishment"] },
+      (predictions, status) => {
+        setLoading(false);
+        if (status === google.maps.places.PlacesServiceStatus.OK && predictions) {
+          setSuggestions(predictions);
+        } else if (status === google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
+          setSuggestions([]);
+        } else {
+          setSearchError(`Search error: ${status}`);
+          setSuggestions([]);
+        }
+      }
+    );
+  }, []);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => fetchSuggestions(query), 300);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [query, fetchSuggestions]);
+
+  function handleSelect(prediction: google.maps.places.AutocompletePrediction) {
+    setSuggestions([]);
+    if (!placesRef.current) return;
+    placesRef.current.getDetails(
+      { placeId: prediction.place_id, fields: ["name", "formatted_address", "types", "place_id"] },
+      (place, status) => {
+        if (status === google.maps.places.PlacesServiceStatus.OK && place) {
+          onSelect({
+            placeId: place.place_id ?? prediction.place_id,
+            name: place.name ?? prediction.structured_formatting.main_text,
+            address: place.formatted_address ?? prediction.structured_formatting.secondary_text ?? "",
+            venueType: inferVenueType(place.types ?? []),
+          });
+        } else {
+          onSelect({
+            placeId: prediction.place_id,
+            name: prediction.structured_formatting.main_text,
+            address: prediction.structured_formatting.secondary_text ?? "",
+            venueType: "casual",
+          });
+        }
+      }
+    );
+  }
+
+  return (
+    <div className="relative">
+      <div ref={mapDivRef} style={{ display: "none" }} />
+      <div className="flex items-center gap-xs rounded-xl border border-outline-variant bg-surface-container px-sm py-xs focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-colors">
+        <span className="material-symbols-outlined text-[20px] text-on-surface-variant shrink-0">
+          {loading ? "progress_activity" : "search"}
+        </span>
+        <input
+          ref={inputRef}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search for a restaurant or spot…"
+          autoComplete="off"
+          className="flex-1 bg-transparent font-body-md text-body-md text-on-surface outline-none placeholder:text-on-surface-variant/50"
+        />
+        {query && (
+          <button onClick={() => { setQuery(""); setSuggestions([]); }} className="text-on-surface-variant hover:text-on-surface transition-colors shrink-0">
+            <span className="material-symbols-outlined text-[18px]">close</span>
+          </button>
+        )}
+      </div>
+
+      {searchError && (
+        <p className="mt-1 rounded-lg border border-error-container bg-error-container/20 px-sm py-xs font-label-sm text-label-sm text-error">
+          {searchError}
+        </p>
+      )}
+
+      {suggestions.length > 0 && (
+        <div className="absolute z-50 mt-1 w-full rounded-xl border border-outline-variant bg-surface-container-high shadow-lg overflow-hidden">
+          {suggestions.map((pred, i) => (
+            <button
+              key={i}
+              onClick={() => handleSelect(pred)}
+              className="flex w-full items-start gap-sm px-sm py-xs text-left hover:bg-surface-container-highest transition-colors border-b border-outline-variant/50 last:border-0"
+            >
+              <span className="material-symbols-outlined text-[18px] text-on-surface-variant mt-0.5 shrink-0">
+                restaurant
+              </span>
+              <div className="min-w-0">
+                <p className="font-body-md text-body-md font-medium text-on-surface truncate">
+                  {pred.structured_formatting.main_text}
+                </p>
+                {pred.structured_formatting.secondary_text && (
+                  <p className="font-label-sm text-label-sm text-on-surface-variant truncate">
+                    {pred.structured_formatting.secondary_text}
+                  </p>
+                )}
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Rate Page ──────────────────────────────────────────────────────────────
+
+export default function RatePage() {
+  const router = useRouter();
+  const [mapsReady, setMapsReady] = useState(false);
+  const [mapsError, setMapsError] = useState(false);
+
+  const [spot, setSpot] = useState<SpotSelection | null>(null);
+  const [visitDate, setVisitDate] = useState(today());
+  const [mealType, setMealType] = useState("dinner");
+  const [scores, setScores] = useState<Record<string, number>>({});
+  const [notes, setNotes] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState("");
+  const [feedback, setFeedback] = useState("");
+  const [feedbackSent, setFeedbackSent] = useState(false);
+
+  // Load Google Maps / Places
+  useEffect(() => {
+    const key = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    if (!key) { setMapsError(true); return; }
+
+    // Already fully loaded
+    if (window.google?.maps?.places) { setMapsReady(true); return; }
+
+    // Script tag already injected (still loading) — attach to its events
+    const existing = document.querySelector('script[src*="maps.googleapis.com/maps/api/js"]');
+    if (existing) {
+      existing.addEventListener("load", () => setMapsReady(true));
+      existing.addEventListener("error", () => setMapsError(true));
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=places`;
+    script.async = true;
+    script.defer = true;
+    script.onload = () => setMapsReady(true);
+    script.onerror = () => setMapsError(true);
+    document.head.appendChild(script);
+  }, []);
+
+  const criteria = spot ? VENUE_CRITERIA[spot.venueType] : [];
+  const meta = spot ? VENUE_META[spot.venueType] : null;
+
+  const weightedScore = useMemo(
+    () => (spot ? calcWeightedScore(criteria, scores) : 0),
+    [criteria, scores, spot]
+  );
+
+  const { label: badge, colorClass } = scoreBadge(weightedScore);
+
+  function getScore(key: string) { return scores[key] ?? DEFAULT_SCORE; }
+  function setScore(key: string, value: number) {
+    setScores((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function handleSpotSelect(s: SpotSelection) {
+    setSpot(s);
+    setScores({});
+    setError("");
+  }
+
+  async function handleSubmit() {
+    if (!spot) { setError("Please select a spot first."); return; }
+    setError("");
+    setSubmitting(true);
+    try {
+      const supabase = createClient();
+      const criteriaScores = Object.fromEntries(criteria.map((c) => [c.key, getScore(c.key)]));
+      await supabase.from("ratings").insert({
+        place_id: spot.placeId,
+        venue_name: spot.name,
+        venue_address: spot.address,
+        venue_type: spot.venueType,
+        meal_type: mealType,
+        visit_date: visitDate,
+        criteria_scores: criteriaScores,
+        weighted_score: parseFloat(weightedScore.toFixed(1)),
+        notes: notes.trim() || null,
+        device_id: getDeviceId(),
+      });
+      setSubmitted(true);
+    } catch (err) {
+      console.error(err);
+      setError("Could not save. Check your connection and try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function handleFeedback(skip = false) {
+    if (!skip && feedback.trim()) {
+      try {
+        const supabase = createClient();
+        await supabase.from("feedback").insert({
+          device_id: getDeviceId(),
+          place_id: spot?.placeId ?? null,
+          message: feedback.trim(),
+        });
+      } catch {
+        // feedback is best-effort — never block navigation
+      }
+    }
+    setFeedbackSent(true);
+    router.push("/history");
+  }
+
+  // ── Success ──────────────────────────────────────────────────────────────
+
+  if (submitted && spot) {
+    return (
+      <main className="mx-auto w-full max-w-2xl px-margin-edge pt-lg pb-10">
+        {/* Score confirmation */}
+        <div className="mb-6 flex flex-col items-center gap-3 text-center">
+          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary-container/20">
+            <span className="material-symbols-outlined text-[48px] text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>
+              check_circle
+            </span>
+          </div>
+          <div>
+            <p className="font-title-sm text-title-sm text-on-surface">{spot.name}</p>
+            <p className="mt-1 font-body-md text-body-md text-on-surface-variant">Rating logged successfully.</p>
+          </div>
+          <div className="flex items-baseline gap-1">
+            <span className="font-display-lg text-[64px] leading-none text-primary">{weightedScore.toFixed(1)}</span>
+            <span className="font-headline-md text-headline-md text-on-surface-variant">/10</span>
+          </div>
+        </div>
+
+        {/* Feedback prompt */}
+        <div className="rounded-xl border border-outline-variant bg-surface-container-low p-md">
+          <p className="mb-1 font-title-sm text-title-sm text-on-surface">Anything we should add or improve?</p>
+          <p className="mb-3 font-body-md text-body-md text-on-surface-variant">Optional — takes 10 seconds.</p>
+          <textarea
+            value={feedback}
+            onChange={(e) => setFeedback(e.target.value)}
+            placeholder="Share a thought…"
+            rows={3}
+            className="mb-3 block w-full resize-none rounded-lg border border-outline-variant bg-surface-container px-sm py-xs font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/40"
+          />
+          <div className="flex gap-sm">
+            <button
+              onClick={() => handleFeedback(false)}
+              disabled={feedbackSent}
+              className="flex-1 rounded-xl bg-primary px-md py-sm font-label-sm text-label-sm text-on-primary transition-opacity hover:opacity-90 disabled:opacity-50"
+            >
+              Send
+            </button>
+            <button
+              onClick={() => handleFeedback(true)}
+              disabled={feedbackSent}
+              className="rounded-xl border border-outline-variant px-md py-sm font-label-sm text-label-sm text-on-surface-variant transition-colors hover:bg-surface-container disabled:opacity-50"
+            >
+              Skip
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  // ── Main ─────────────────────────────────────────────────────────────────
+
+  return (
+    <main className="mx-auto w-full max-w-5xl px-margin-edge pb-10 pt-lg md:pt-xl">
+      <div className="grid grid-cols-1 gap-lg lg:grid-cols-12">
+
+        {/* ── Left: Form ── */}
+        <div className="flex flex-col gap-md lg:col-span-8">
+
+          {/* Title */}
+          <div>
+            <h1 className="font-display-lg text-[32px] font-bold leading-[40px] text-on-surface">Rate a Spot</h1>
+            <p className="mt-xs font-body-md text-body-md text-on-surface-variant">
+              Find your spot — we'll load the right scoring criteria automatically.
+            </p>
+          </div>
+
+          {/* Spot search */}
+          <section className="flex flex-col gap-sm rounded-xl border border-outline-variant bg-surface-container-low p-md">
+            <h2 className="flex items-center gap-xs font-title-sm text-title-sm text-primary">
+              <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+                location_on
+              </span>
+              Find a Spot
+            </h2>
+
+            {mapsError && (
+              <p className="rounded-lg border border-error-container bg-error-container/20 px-sm py-xs font-label-sm text-label-sm text-error">
+                Google Places could not be loaded. Check your API key.
+              </p>
+            )}
+
+            {mapsReady ? (
+              <SpotSearch onSelect={handleSpotSelect} />
+            ) : !mapsError ? (
+              <div className="flex items-center gap-xs text-on-surface-variant font-body-md text-body-md">
+                <span className="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
+                Loading search…
+              </div>
+            ) : null}
+
+            {/* Selected spot chip */}
+            {spot && (
+              <div className="flex items-start justify-between gap-sm rounded-xl border border-primary/30 bg-primary/5 px-sm py-xs mt-1">
+                <div className="flex items-start gap-xs min-w-0">
+                  <span className="material-symbols-outlined text-[18px] text-primary mt-0.5 shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>
+                    {meta?.icon}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="font-body-md text-body-md font-medium text-on-surface truncate">{spot.name}</p>
+                    <p className="font-label-sm text-label-sm text-on-surface-variant truncate">{spot.address}</p>
+                  </div>
+                </div>
+                <div className="flex flex-col items-end gap-base shrink-0">
+                  <span className="inline-flex items-center gap-xs rounded-full bg-primary-container px-xs py-0.5 font-label-sm text-label-sm font-bold text-on-primary-container whitespace-nowrap">
+                    {meta?.label}
+                  </span>
+                  <button onClick={() => { setSpot(null); setScores({}); }} className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors">
+                    Change
+                  </button>
+                </div>
+              </div>
+            )}
+          </section>
+
+          {/* Visit details */}
+          <section className="flex flex-col gap-sm rounded-xl border border-outline-variant bg-surface-container-low p-md">
+            <h2 className="flex items-center gap-xs font-title-sm text-title-sm text-primary">
+              <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>info</span>
+              Visit Details
+            </h2>
+            <div className="grid grid-cols-2 gap-md">
+              <div className="flex flex-col gap-base">
+                <label className="font-label-sm text-label-sm text-on-surface-variant">Date of Visit</label>
+                <input
+                  type="date"
+                  value={visitDate}
+                  onChange={(e) => setVisitDate(e.target.value)}
+                  className="rounded-lg border border-outline-variant bg-surface-container px-sm py-xs font-body-md text-body-md text-on-surface outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary [color-scheme:dark]"
+                />
+              </div>
+              <div className="flex flex-col gap-base">
+                <label className="font-label-sm text-label-sm text-on-surface-variant">Meal Type</label>
+                <select
+                  value={mealType}
+                  onChange={(e) => setMealType(e.target.value)}
+                  className="appearance-none rounded-lg border border-outline-variant bg-surface-container px-sm py-xs font-body-md text-body-md text-on-surface outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
+                >
+                  {["Dinner", "Lunch", "Breakfast", "Brunch"].map((m) => (
+                    <option key={m} value={m.toLowerCase()}>{m}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </section>
+
+          {/* Dynamic criteria — only shown once a spot is selected */}
+          {spot && criteria.length > 0 && (
+            <section className="flex flex-col gap-lg rounded-xl border border-outline-variant bg-surface-container-low p-md">
+              <div>
+                <h2 className="flex items-center gap-xs font-title-sm text-title-sm text-primary">
+                  <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>tune</span>
+                  {meta?.label} — Value Metrics
+                </h2>
+                <p className="mt-base font-label-sm text-label-sm text-on-surface-variant italic">{meta?.tagline}</p>
+              </div>
+              <div className="flex flex-col gap-md">
+                {criteria.map((c) => (
+                  <div key={c.key} className="flex flex-col gap-base">
+                    <div className="flex items-center justify-between">
+                      <label className="font-body-md text-body-md font-medium text-on-surface">{c.label}</label>
+                      <span className="tabular-nums font-title-sm text-title-sm text-primary-container">
+                        {getScore(c.key).toFixed(1)}
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min={0}
+                      max={10}
+                      step={0.1}
+                      value={getScore(c.key)}
+                      onChange={(e) => setScore(c.key, parseFloat(e.target.value))}
+                      className="grub-slider w-full"
+                    />
+                    <div className="flex justify-between font-label-sm text-label-sm text-on-surface-variant">
+                      <span>{c.low}</span>
+                      <span>{c.high}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Notes */}
+          <section className="flex flex-col gap-xs rounded-xl border border-outline-variant bg-surface-container-low p-md">
+            <label className="font-label-sm text-label-sm text-on-surface-variant">
+              What did you eat? <span className="text-on-surface-variant/50">(optional)</span>
+            </label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Note standout dishes, what to order next time, or anything memorable…"
+              rows={3}
+              className="resize-none rounded-lg border border-outline-variant bg-surface-container px-sm py-xs font-body-md text-body-md text-on-surface outline-none placeholder:text-on-surface-variant/50 transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
+            />
+          </section>
+
+          {/* Mobile submit */}
+          <div className="flex flex-col gap-xs lg:hidden">
+            {error && (
+              <p className="rounded-lg border border-error-container bg-error-container/20 px-sm py-xs font-label-sm text-label-sm text-error">{error}</p>
+            )}
+            <button
+              onClick={handleSubmit}
+              disabled={submitting || !spot}
+              className="flex w-full items-center justify-center gap-xs rounded-lg bg-primary-container py-sm font-title-sm text-title-sm font-bold text-on-primary-container transition-all duration-150 hover:bg-primary-fixed active:scale-95 disabled:opacity-40"
+            >
+              <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
+                {submitting ? "hourglass_top" : "check_circle"}
+              </span>
+              {submitting ? "Saving…" : "Log Rating"}
+            </button>
+          </div>
+        </div>
+
+        {/* ── Right: Live score + desktop submit ── */}
+        <div className="hidden flex-col gap-md lg:col-span-4 lg:flex lg:sticky lg:top-24 lg:self-start">
+          <div className="relative flex flex-col items-center overflow-hidden rounded-xl border border-outline-variant bg-surface-container-high p-xl text-center shadow-lg">
+            <div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-primary/10 blur-3xl" />
+            <p className="relative z-10 mb-xs font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant">
+              Weighted Value Score
+            </p>
+            <div className="relative z-10 my-sm flex items-baseline gap-0.5">
+              <span className="font-display-lg text-[72px] leading-none text-primary transition-all duration-300">
+                {spot ? weightedScore.toFixed(1) : "—"}
+              </span>
+              {spot && <span className="font-headline-md text-headline-md text-on-surface-variant">/10</span>}
+            </div>
+            {spot ? (
+              <div className="relative z-10 inline-flex items-center gap-xs rounded-full bg-surface-variant px-sm py-1 font-label-sm text-label-sm text-on-surface">
+                <span className="material-symbols-outlined text-[16px] text-tertiary" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                <span className={colorClass}>{badge}</span>
+              </div>
+            ) : (
+              <p className="relative z-10 font-label-sm text-label-sm text-on-surface-variant">Select a spot to begin</p>
+            )}
+            {spot && meta && (
+              <div className="relative z-10 mt-sm flex items-center gap-xs rounded-lg bg-surface-container px-sm py-xs">
+                <span className="material-symbols-outlined text-[16px] text-primary">{meta.icon}</span>
+                <span className="font-label-sm text-label-sm text-on-surface-variant">{meta.label}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Criteria weight breakdown */}
+          {spot && criteria.length > 0 && (
+            <div className="rounded-xl border border-outline-variant bg-surface-container-low p-md flex flex-col gap-xs">
+              <p className="font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant mb-xs">Score Breakdown</p>
+              {criteria.map((c) => (
+                  <div key={c.key} className="flex items-center gap-xs">
+                    <span className="font-label-sm text-label-sm text-on-surface-variant w-32 truncate shrink-0">{c.label}</span>
+                    <div className="flex-1 h-1 bg-surface-variant rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-primary rounded-full transition-all duration-300"
+                        style={{ width: `${getScore(c.key) * 10}%` }}
+                      />
+                    </div>
+                    <span className="font-label-sm text-label-sm text-on-surface-variant tabular-nums w-8 text-right shrink-0">
+                      {getScore(c.key).toFixed(1)}
+                    </span>
+                  </div>
+              ))}
+            </div>
+          )}
+
+          {error && (
+            <p className="rounded-lg border border-error-container bg-error-container/20 px-sm py-xs font-label-sm text-label-sm text-error">{error}</p>
+          )}
+
+          <button
+            onClick={handleSubmit}
+            disabled={submitting || !spot}
+            className="flex w-full items-center justify-center gap-xs rounded-lg bg-primary-container py-sm font-title-sm text-title-sm font-bold text-on-primary-container transition-all duration-150 hover:bg-primary-fixed active:scale-95 disabled:opacity-40"
+          >
+            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
+              {submitting ? "hourglass_top" : "check_circle"}
+            </span>
+            {submitting ? "Saving…" : "Log Rating"}
+          </button>
+        </div>
+      </div>
+    </main>
+  );
+}

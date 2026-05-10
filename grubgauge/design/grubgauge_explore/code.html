@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>GrubGauge - Explore</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary": "#fdbf02",
+                        "primary-container": "#00c853",
+                        "secondary-fixed": "#e4e2e1",
+                        "tertiary-fixed-dim": "#fabd00",
+                        "surface-container-low": "#1c1b1b",
+                        "on-secondary-container": "#b6b5b4",
+                        "tertiary-container": "#dba500",
+                        "primary": "#3fe56c",
+                        "tertiary-fixed": "#ffdf9e",
+                        "background": "#131313",
+                        "on-primary-container": "#004c1b",
+                        "on-primary-fixed-variant": "#00531e",
+                        "surface-container-lowest": "#0e0e0e",
+                        "on-surface": "#e5e2e1",
+                        "on-error": "#690005",
+                        "inverse-on-surface": "#313030",
+                        "surface": "#131313",
+                        "primary-fixed-dim": "#3ce36a",
+                        "on-error-container": "#ffdad6",
+                        "inverse-primary": "#006e2a",
+                        "on-primary": "#003912",
+                        "error": "#ffb4ab",
+                        "surface-variant": "#353534",
+                        "outline-variant": "#3c4a3c",
+                        "secondary": "#c8c6c6",
+                        "surface-container-high": "#2a2a2a",
+                        "on-surface-variant": "#bbcbb8",
+                        "surface-container": "#201f1f",
+                        "surface-bright": "#393939",
+                        "on-tertiary-fixed-variant": "#5b4300",
+                        "outline": "#869583",
+                        "on-background": "#e5e2e1",
+                        "on-tertiary-fixed": "#261a00",
+                        "inverse-surface": "#e5e2e1",
+                        "on-tertiary-container": "#543e00",
+                        "on-secondary-fixed-variant": "#474747",
+                        "secondary-container": "#474747",
+                        "surface-dim": "#131313",
+                        "on-tertiary": "#3f2e00",
+                        "error-container": "#93000a",
+                        "surface-tint": "#3ce36a",
+                        "on-secondary": "#303030",
+                        "on-primary-fixed": "#002108",
+                        "primary-fixed": "#69ff87",
+                        "secondary-fixed-dim": "#c8c6c6",
+                        "surface-container-highest": "#353534",
+                        "on-secondary-fixed": "#1b1c1c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "8px",
+                        "sm": "12px",
+                        "xl": "32px",
+                        "margin-edge": "20px",
+                        "lg": "24px",
+                        "gutter": "16px",
+                        "md": "16px",
+                        "base": "4px"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["Work Sans"],
+                        "display-lg": ["Work Sans"],
+                        "headline-md": ["Work Sans"],
+                        "title-sm": ["Work Sans"],
+                        "body-md": ["Work Sans"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.5px", "fontWeight": "500" }],
+                        "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-1px", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "title-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen pb-24 md:pb-0">
+<!-- TopAppBar -->
+<header class="bg-background dark:bg-background text-primary dark:text-primary docked full-width top-0 bg-surface-container-low border-b border-outline-variant flat no shadows flex justify-between items-center w-full px-margin-edge h-16 sticky z-50">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-[24px]">restaurant</span>
+<span class="text-headline-md font-headline-md font-bold text-primary dark:text-primary">GrubGauge</span>
+</div>
+<div>
+<div class="w-8 h-8 rounded-full bg-surface-variant flex items-center justify-center text-on-surface-variant overflow-hidden">
+<span class="material-symbols-outlined">person</span>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="px-margin-edge pt-lg max-w-7xl mx-auto">
+<!-- Search Bar -->
+<div class="relative w-full mb-lg">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full bg-surface-container-high border border-outline-variant rounded-full py-sm pl-12 pr-4 text-on-background focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors h-12" placeholder="Search venues or specific items..." type="text"/>
+<button class="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">tune</span>
+</button>
+</div>
+<!-- Filter Chips -->
+<div class="flex gap-sm overflow-x-auto no-scrollbar mb-xl pb-2">
+<button class="whitespace-nowrap px-md py-xs rounded-full bg-primary-container text-on-primary-container text-label-sm font-label-sm flex items-center gap-base border border-transparent">
+<span class="material-symbols-outlined text-[16px] fill">star</span>
+                Top Rated
+            </button>
+<button class="whitespace-nowrap px-md py-xs rounded-full bg-surface-container-high text-on-background text-label-sm font-label-sm border border-outline-variant hover:border-primary transition-colors flex items-center gap-base">
+<span class="material-symbols-outlined text-[16px]">near_me</span>
+                Nearby
+            </button>
+<button class="whitespace-nowrap px-md py-xs rounded-full bg-surface-container-high text-on-background text-label-sm font-label-sm border border-outline-variant hover:border-primary transition-colors flex items-center gap-base">
+<span class="material-symbols-outlined text-[16px]">payments</span>
+                Cheap Eats
+            </button>
+<button class="whitespace-nowrap px-md py-xs rounded-full bg-surface-container-high text-on-background text-label-sm font-label-sm border border-outline-variant hover:border-primary transition-colors flex items-center gap-base">
+<span class="material-symbols-outlined text-[16px]">local_fire_department</span>
+                High Cal/$
+            </button>
+<button class="whitespace-nowrap px-md py-xs rounded-full bg-surface-container-high text-on-background text-label-sm font-label-sm border border-outline-variant hover:border-primary transition-colors flex items-center gap-base">
+<span class="material-symbols-outlined text-[16px]">bolt</span>
+                Fastest
+            </button>
+</div>
+<!-- Venue Grid -->
+<h2 class="text-title-sm font-title-sm mb-md text-on-background">Trending Value Bets</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md mb-xl">
+<!-- Card 1 -->
+<div class="bg-surface-container border border-outline-variant rounded-xl overflow-hidden flex flex-col group cursor-pointer hover:border-primary transition-colors">
+<div class="h-40 relative w-full overflow-hidden">
+<img alt="Food Image" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" src="https://lh3.googleusercontent.com/aida/ADBb0ugB_mU4qzjUQcv3wXXFGKcZ2hkg8jUCBIlfzRs2lExB5xww9_or6OeFm4j9ZBKx15XZNKHmYGLFsXB36PZCx0I1-0RLRr7MsY1DepJ1J0WXZyhIALpxZ-lpSLhhf24Ur4zUBzClwJ2w9NN9BfnLtDuGo14ZzwfsOIvvIvl0rMJuE1412t8FHZiSDz0VHCGZUd_Zu1c__RxZ4HxK39_i7o7Tf0pWo2LFcp4fRxS5kTYmOJXMaz7ebN-PXpivKDiXV6RYfeirgCBgtEE"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent"></div>
+<div class="absolute top-sm right-sm bg-background/80 backdrop-blur-sm px-xs py-base rounded-lg border border-outline-variant flex items-center gap-base">
+<span class="material-symbols-outlined text-primary text-[16px] fill">star</span>
+<span class="text-label-sm font-label-sm font-bold text-on-background">9.4</span>
+</div>
+</div>
+<div class="p-md flex-1 flex flex-col">
+<div class="flex justify-between items-start mb-xs">
+<h3 class="text-title-sm font-title-sm font-bold text-on-background">Taco Bell</h3>
+<span class="text-label-sm font-label-sm text-on-surface-variant flex items-center gap-base">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+                            0.8 mi
+                        </span>
+</div>
+<p class="text-label-sm font-label-sm text-on-surface-variant mb-md flex-1">Mexican Fast Food • Late Night</p>
+<div class="grid grid-cols-2 gap-sm border-t border-surface-variant pt-md mt-auto">
+<div>
+<p class="text-label-sm font-label-sm text-on-surface-variant mb-base">Efficiency</p>
+<p class="text-body-md font-body-md text-primary font-bold">280 Cal/$</p>
+</div>
+<div>
+<p class="text-label-sm font-label-sm text-on-surface-variant mb-base">Avg. Spend</p>
+<p class="text-body-md font-body-md text-on-background">$7.50</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container border border-outline-variant rounded-xl overflow-hidden flex flex-col group cursor-pointer hover:border-primary transition-colors">
+<div class="h-40 relative w-full overflow-hidden bg-surface-container-high">
+<div class="absolute inset-0 bg-gradient-to-br from-surface-variant to-background opacity-50"></div>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-display-lg text-on-surface-variant">fastfood</span>
+</div>
+<div class="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent"></div>
+<div class="absolute top-sm right-sm bg-background/80 backdrop-blur-sm px-xs py-base rounded-lg border border-outline-variant flex items-center gap-base">
+<span class="material-symbols-outlined text-primary text-[16px] fill">star</span>
+<span class="text-label-sm font-label-sm font-bold text-on-background">8.8</span>
+</div>
+</div>
+<div class="p-md flex-1 flex flex-col">
+<div class="flex justify-between items-start mb-xs">
+<h3 class="text-title-sm font-title-sm font-bold text-on-background">McDonald's</h3>
+<span class="text-label-sm font-label-sm text-on-surface-variant flex items-center gap-base">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+                            1.2 mi
+                        </span>
+</div>
+<p class="text-label-sm font-label-sm text-on-surface-variant mb-md flex-1">Burgers • Fries</p>
+<div class="grid grid-cols-2 gap-sm border-t border-surface-variant pt-md mt-auto">
+<div>
+<p class="text-label-sm font-label-sm text-on-surface-variant mb-base">Efficiency</p>
+<p class="text-body-md font-body-md text-primary font-bold">210 Cal/$</p>
+</div>
+<div>
+<p class="text-label-sm font-label-sm text-on-surface-variant mb-base">Avg. Spend</p>
+<p class="text-body-md font-body-md text-on-background">$9.00</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container border border-outline-variant rounded-xl overflow-hidden flex flex-col group cursor-pointer hover:border-primary transition-colors">
+<div class="h-40 relative w-full overflow-hidden bg-surface-container-high">
+<div class="absolute inset-0 bg-gradient-to-br from-surface-variant to-background opacity-50"></div>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-display-lg text-on-surface-variant">local_pizza</span>
+</div>
+<div class="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent"></div>
+<div class="absolute top-sm right-sm bg-background/80 backdrop-blur-sm px-xs py-base rounded-lg border border-outline-variant flex items-center gap-base">
+<span class="material-symbols-outlined text-primary text-[16px] fill">star</span>
+<span class="text-label-sm font-label-sm font-bold text-on-background">8.5</span>
+</div>
+</div>
+<div class="p-md flex-1 flex flex-col">
+<div class="flex justify-between items-start mb-xs">
+<h3 class="text-title-sm font-title-sm font-bold text-on-background">Domino's</h3>
+<span class="text-label-sm font-label-sm text-on-surface-variant flex items-center gap-base">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+                            2.5 mi
+                        </span>
+</div>
+<p class="text-label-sm font-label-sm text-on-surface-variant mb-md flex-1">Pizza • Delivery</p>
+<div class="grid grid-cols-2 gap-sm border-t border-surface-variant pt-md mt-auto">
+<div>
+<p class="text-label-sm font-label-sm text-on-surface-variant mb-base">Efficiency</p>
+<p class="text-body-md font-body-md text-primary font-bold">350 Cal/$</p>
+</div>
+<div>
+<p class="text-label-sm font-label-sm text-on-surface-variant mb-base">Avg. Spend</p>
+<p class="text-body-md font-body-md text-on-background">$14.00</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="md:hidden bg-surface-container dark:bg-surface-container text-primary dark:text-primary docked full-width bottom-0 rounded-t-xl bg-surface-container border-t border-outline-variant shadow-lg fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3">
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1.5 hover:text-primary transition-all active:scale-90 duration-200" href="{{DATA:SCREEN:SCREEN_41}}">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-label-sm font-label-sm mt-1">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl px-4 py-1.5 hover:text-primary transition-all active:scale-90 duration-200" href="{{DATA:SCREEN:SCREEN_19}}">
+<span class="material-symbols-outlined fill">explore</span>
+<span class="text-label-sm font-label-sm mt-1">Explore</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1.5 hover:text-primary transition-all active:scale-90 duration-200" href="{{DATA:SCREEN:SCREEN_34}}">
+<span class="material-symbols-outlined">add_circle</span>
+<span class="text-label-sm font-label-sm mt-1">Rate</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1.5 hover:text-primary transition-all active:scale-90 duration-200" href="{{DATA:SCREEN:SCREEN_59}}">
+<span class="material-symbols-outlined">history</span>
+<span class="text-label-sm font-label-sm mt-1">History</span>
+</a>
+</nav>
+</body></html>

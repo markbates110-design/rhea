@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>The Golden Skillet - GrubGauge</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-container": "#474747",
+                        "on-surface-variant": "#bbcbb8",
+                        "error-container": "#93000a",
+                        "surface-tint": "#3ce36a",
+                        "surface-container-highest": "#353534",
+                        "inverse-on-surface": "#313030",
+                        "outline": "#869583",
+                        "on-primary-fixed-variant": "#00531e",
+                        "primary": "#3fe56c",
+                        "surface-container-lowest": "#0e0e0e",
+                        "primary-fixed-dim": "#3ce36a",
+                        "on-secondary": "#303030",
+                        "surface": "#131313",
+                        "primary-container": "#00c853",
+                        "on-tertiary-fixed-variant": "#5b4300",
+                        "on-secondary-container": "#b6b5b4",
+                        "tertiary": "#fdbf02",
+                        "tertiary-fixed": "#ffdf9e",
+                        "surface-dim": "#131313",
+                        "surface-variant": "#353534",
+                        "surface-container": "#201f1f",
+                        "on-error-container": "#ffdad6",
+                        "on-background": "#e5e2e1",
+                        "outline-variant": "#3c4a3c",
+                        "inverse-surface": "#e5e2e1",
+                        "on-tertiary-fixed": "#261a00",
+                        "on-error": "#690005",
+                        "background": "#131313",
+                        "secondary-fixed-dim": "#c8c6c6",
+                        "on-primary": "#003912",
+                        "secondary": "#c8c6c6",
+                        "error": "#ffb4ab",
+                        "tertiary-fixed-dim": "#fabd00",
+                        "on-secondary-fixed-variant": "#474747",
+                        "on-tertiary-container": "#543e00",
+                        "surface-container-low": "#1c1b1b",
+                        "primary-fixed": "#69ff87",
+                        "on-primary-container": "#004c1b",
+                        "on-surface": "#e5e2e1",
+                        "inverse-primary": "#006e2a",
+                        "secondary-fixed": "#e4e2e1",
+                        "surface-container-high": "#2a2a2a",
+                        "on-tertiary": "#3f2e00",
+                        "surface-bright": "#393939",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "tertiary-container": "#dba500",
+                        "on-primary-fixed": "#002108"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "8px",
+                        "sm": "12px",
+                        "md": "16px",
+                        "margin-edge": "20px",
+                        "lg": "24px",
+                        "xl": "32px",
+                        "gutter": "16px",
+                        "base": "4px"
+                    },
+                    "fontFamily": {
+                        "title-sm": ["Work Sans"],
+                        "label-sm": ["Work Sans"],
+                        "headline-md": ["Work Sans"],
+                        "display-lg": ["Work Sans"],
+                        "body-md": ["Work Sans"]
+                    },
+                    "fontSize": {
+                        "title-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.5px", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-1px", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md min-h-screen pb-24 md:pb-0 pt-16 md:pt-20">
+<!-- TopAppBar (Web) -->
+<header class="hidden md:flex justify-between items-center w-full px-margin-edge h-16 bg-surface-container-low border-b border-outline-variant fixed top-0 z-50">
+<div class="flex items-center gap-xs text-primary dark:text-primary">
+<span class="material-symbols-outlined" data-icon="restaurant">restaurant</span>
+<span class="text-headline-md font-headline-md font-bold">GrubGauge</span>
+</div>
+<nav class="flex gap-lg">
+<a class="text-on-surface-variant font-label-sm text-label-sm hover:text-primary transition-colors" href="#">Dashboard</a>
+<a class="text-primary font-bold font-label-sm text-label-sm hover:text-primary transition-colors" href="#">Explore</a>
+<a class="text-on-surface-variant font-label-sm text-label-sm hover:text-primary transition-colors" href="#">Rate</a>
+<a class="text-on-surface-variant font-label-sm text-label-sm hover:text-primary transition-colors" href="#">History</a>
+</nav>
+<div class="flex items-center justify-center w-10 h-10 rounded-full bg-surface-variant text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+</div>
+</header>
+<!-- TopAppBar (Mobile) -->
+<header class="md:hidden flex justify-between items-center w-full px-margin-edge h-16 bg-surface-container-low fixed top-0 z-50 shadow-md">
+<button class="text-on-surface-variant active:scale-95 duration-150 ease-in-out hover:bg-surface-variant rounded-full p-2">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<span class="text-headline-md font-headline-md font-bold text-primary dark:text-primary">GrubGauge</span>
+<div class="w-10 h-10 rounded-full bg-surface-variant text-on-surface-variant flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+</div>
+</header>
+<main class="max-w-5xl mx-auto px-margin-edge md:px-lg space-y-xl">
+<!-- Hero Section -->
+<section class="relative rounded-xl overflow-hidden shadow-lg h-[353px] md:h-[442px]">
+<img alt="Restaurant Interior" class="w-full h-full object-cover" data-alt="A high-quality, atmospheric shot of a modern, upscale restaurant interior. The scene features warm, dim lighting contrasting with deep charcoal grey and black tones of the furniture and walls. Emerald green accent lighting or vibrant green plants subtly frame the composition. The setting evokes a premium culinary experience suitable for a sophisticated dining review app." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2rWpMNfxVwFjtn04aQGYYgUazBluuKQ1HuskIQ_ZjATx1uid44JyDurUyh1exf28AKuv7IqJkpRu756tVIoDZ5uJNuYYlC6hACBA92iaX0PlV7C46-YVMqR2zAjL9766uMAo66NhGAwTMT_-nxC8VAJSVM11iI1dKpwgAwydOAOBRBObEsXXoIcfq7MUKMNUzH83vQkB9BC2wrVTabWvU95IyTP68hOIACc_uxA8FZoPAXDqZkye1UYhsmIsI7SxV_Y2b8jI5Z_5X"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent"></div>
+<div class="absolute bottom-0 left-0 w-full p-lg flex flex-col md:flex-row md:items-end justify-between gap-md">
+<div>
+<h1 class="text-display-lg font-display-lg text-white mb-xs">The Golden Skillet</h1>
+<div class="flex items-center text-on-surface-variant font-body-md text-body-md gap-xs">
+<span class="material-symbols-outlined text-[18px]" data-icon="location_on">location_on</span>
+<span>123 Downtown St.</span>
+</div>
+</div>
+<div class="bg-primary-container text-on-primary-container rounded-lg px-md py-sm flex items-center gap-sm shadow-xl border border-primary/20">
+<span class="material-symbols-outlined text-[32px] fill" data-icon="workspace_premium" data-weight="fill">workspace_premium</span>
+<div>
+<div class="text-headline-md font-headline-md font-bold leading-none">88/100</div>
+<div class="text-label-sm font-label-sm uppercase tracking-wider opacity-90">Value Score</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Description & Metrics -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-lg">
+<div class="md:col-span-1 space-y-md">
+<h2 class="text-title-sm font-title-sm text-on-surface">About</h2>
+<p class="text-body-md font-body-md text-on-surface-variant leading-relaxed">
+                    A modern take on classic comfort food, focusing on high-quality ingredients and generous portions. The atmosphere is industrial-chic with a lively buzz, perfect for group dinners or a hearty solo meal. Known for their incredible protein-to-cost ratio.
+                </p>
+<div class="flex flex-wrap gap-xs pt-xs">
+<span class="px-sm py-1 rounded-full bg-primary/10 text-primary text-label-sm font-label-sm border border-primary/20">Comfort Food</span>
+<span class="px-sm py-1 rounded-full bg-primary/10 text-primary text-label-sm font-label-sm border border-primary/20">High Protein</span>
+<span class="px-sm py-1 rounded-full bg-secondary-container text-on-surface-variant text-label-sm font-label-sm border border-outline-variant">Casual</span>
+</div>
+</div>
+<!-- Metric Cards (Bento Grid Style) -->
+<div class="md:col-span-2 grid grid-cols-2 md:grid-cols-3 gap-sm">
+<!-- Card 1 -->
+<div class="bg-surface-container rounded-xl p-md border border-outline-variant flex flex-col justify-between">
+<div class="flex items-center gap-xs text-on-surface-variant mb-md">
+<span class="material-symbols-outlined text-[20px]" data-icon="bolt">bolt</span>
+<span class="text-label-sm font-label-sm uppercase tracking-wider">Efficiency</span>
+</div>
+<div>
+<div class="text-headline-md font-headline-md text-primary mb-1">320 Cal/$</div>
+<div class="text-label-sm font-label-sm text-on-surface-variant">Top 15% in area</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container rounded-xl p-md border border-outline-variant flex flex-col justify-between">
+<div class="flex items-center gap-xs text-on-surface-variant mb-md">
+<span class="material-symbols-outlined text-[20px]" data-icon="payments">payments</span>
+<span class="text-label-sm font-label-sm uppercase tracking-wider">Avg. Spend</span>
+</div>
+<div>
+<div class="text-headline-md font-headline-md text-on-surface mb-1">$24.50</div>
+<div class="text-label-sm font-label-sm text-on-surface-variant">Per person</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container rounded-xl p-md border border-outline-variant flex flex-col justify-between col-span-2 md:col-span-1">
+<div class="flex items-center gap-xs text-on-surface-variant mb-md">
+<span class="material-symbols-outlined text-[20px]" data-icon="fitness_center">fitness_center</span>
+<span class="text-label-sm font-label-sm uppercase tracking-wider">Protein Index</span>
+</div>
+<div>
+<div class="text-headline-md font-headline-md text-primary mb-1">Excellent</div>
+<div class="w-full bg-surface-container-highest rounded-full h-2 mt-xs">
+<div class="bg-primary h-2 rounded-full" style="width: 85%"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Menu Highlights (Horizontal Scroll) -->
+<section class="space-y-md">
+<div class="flex justify-between items-end">
+<h2 class="text-title-sm font-title-sm text-on-surface">Top Value Highlights</h2>
+<a class="text-primary text-label-sm font-label-sm hover:underline" href="#">View Full Menu</a>
+</div>
+<div class="flex overflow-x-auto pb-sm gap-md scrollbar-hide -mx-margin-edge px-margin-edge md:mx-0 md:px-0">
+<!-- Item 1 -->
+<div class="min-w-[240px] w-[240px] bg-surface-container rounded-xl overflow-hidden border border-outline-variant shadow-sm shrink-0">
+<div class="h-32 w-full bg-surface-container-high relative">
+<img alt="Ironclad Burger" class="w-full h-full object-cover" data-alt="A close-up, high-contrast photograph of a thick, juicy gourmet burger on a dark wooden table. The burger is loaded with melted cheese, bacon, and fresh greens. The lighting is moody and directional, highlighting the textures of the food against a deep charcoal background, fitting a premium dark-mode culinary app style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3vxjbwbdbM91KZ87qxPUYApUtE2fkOi9lssBupNRPbccWSkYeFz3udchl5ewvS_TKQZ4w2UvujvqcwDJTH4zrWbxQN9qYXfzN-uXZLvUYJPuRrHjOouP7W5CfdKXe1Q8yucQHOraLW2-VYPJHg8c3051-7gGtq36xZ9dx4K917I6BeqS5-dkc39r2XknBXuvEwqvjdixEXUgnpoVMpGoiJJ9klzHQdrL3pCl6KDjRsygXCNM6hPmfOh1O6aZ_kVzG46b8HA8xtlTy"/>
+<div class="absolute top-sm right-sm bg-background/80 backdrop-blur-sm rounded-lg px-2 py-1 flex items-center gap-1 border border-outline-variant">
+<span class="material-symbols-outlined text-[14px] text-tertiary fill" data-icon="star" data-weight="fill">star</span>
+<span class="text-label-sm font-label-sm text-on-surface">4.8</span>
+</div>
+</div>
+<div class="p-sm">
+<h3 class="text-title-sm font-title-sm text-on-surface mb-xs truncate">The Ironclad Burger</h3>
+<div class="flex justify-between items-center">
+<span class="text-body-md font-body-md text-on-surface-variant">$16.00</span>
+<span class="text-primary text-label-sm font-label-sm bg-primary/10 px-2 py-1 rounded-md border border-primary/20">High Value</span>
+</div>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="min-w-[240px] w-[240px] bg-surface-container rounded-xl overflow-hidden border border-outline-variant shadow-sm shrink-0">
+<div class="h-32 w-full bg-surface-container-high relative">
+<img alt="Protein Bowl" class="w-full h-full object-cover" data-alt="A vibrant, healthy protein bowl featuring grilled chicken, quinoa, dark leafy greens, and bright avocado slices. The bowl sits on a sleek, dark stone surface. The lighting is crisp and highlights the fresh colors of the ingredients, creating a striking contrast against the dark background, perfectly aligned with a modern dark-mode aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDcJno6qMyLsVRTHRY33EKMqELX0chbquRfe2W3p4gbN_pDfFbO2qEgS7GhedKL_6Hvw0v1OdE7Gba83WjQgyUV6RpMP0uj1qQggYWIa6CoWDgEiS53k2OeFuNpgBBjvwAX78wbxsf5OB1eyiH95C2lxd6kCRoPBndMOp0uq_aOddE7bu_CIHJ-ldkeMemLAz7kmnN6NmbwPwlSAJjwQDf4W7VjcqSFyJYJbxdDCeHE34Qxv41_NTwQVU7Jpume_wlHRzWCi_qg5J98"/>
+</div>
+<div class="p-sm">
+<h3 class="text-title-sm font-title-sm text-on-surface mb-xs truncate">Mammoth Protein Bowl</h3>
+<div class="flex justify-between items-center">
+<span class="text-body-md font-body-md text-on-surface-variant">$18.50</span>
+<span class="text-primary text-label-sm font-label-sm bg-primary/10 px-2 py-1 rounded-md border border-primary/20">Lean Choice</span>
+</div>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="min-w-[240px] w-[240px] bg-surface-container rounded-xl overflow-hidden border border-outline-variant shadow-sm shrink-0">
+<div class="h-32 w-full bg-surface-container-high relative">
+<img alt="Steak Frites" class="w-full h-full object-cover" data-alt="A premium plate of steak frites, featuring a perfectly seared slice of beef alongside crispy, golden french fries. The dish is presented on a minimalist dark ceramic plate, resting on a matte black table. The lighting emphasizes the savory glaze on the meat, fitting the sleek, high-end culinary theme." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGfgSiQ011fBZcajBXW6NRIHZibhElib-_ULqTfi03ouFsvtJYtdrVlbI71Py8K9YD7vYHSe7mO0Twcaif2FHYSgoWc0O6F53ehLp4DkaZc5-cEvPi3_Xkxd3V2A_jeaQ49SpqPyJnqj8b6LFTshss-INrQWdlFbwuBOTeLeozzPpw67z3ynSfp6xXs17AL19gjaJ2zVO9yHITyGKm6LPjFwVB9kOrlj3i5LTTsv2gWVgLNjrRH6-TOvAWBfU0RY81z9h9414L2pna"/>
+</div>
+<div class="p-sm">
+<h3 class="text-title-sm font-title-sm text-on-surface mb-xs truncate">Skillet Steak Frites</h3>
+<div class="flex justify-between items-center">
+<span class="text-body-md font-body-md text-on-surface-variant">$28.00</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Reviews & Info -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-lg pb-lg">
+<!-- Reviews -->
+<section class="space-y-sm">
+<h2 class="text-title-sm font-title-sm text-on-surface mb-sm">Recent Ratings</h2>
+<div class="bg-surface-container rounded-xl p-md border border-outline-variant space-y-xs">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-surface-variant flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]" data-icon="person">person</span>
+</div>
+<div>
+<div class="text-label-sm font-label-sm text-on-surface">Alex M.</div>
+<div class="flex text-tertiary">
+<span class="material-symbols-outlined text-[14px] fill" data-icon="star" data-weight="fill">star</span>
+<span class="material-symbols-outlined text-[14px] fill" data-icon="star" data-weight="fill">star</span>
+<span class="material-symbols-outlined text-[14px] fill" data-icon="star" data-weight="fill">star</span>
+<span class="material-symbols-outlined text-[14px] fill" data-icon="star" data-weight="fill">star</span>
+<span class="material-symbols-outlined text-[14px] fill" data-icon="star_half" data-weight="fill">star_half</span>
+</div>
+</div>
+</div>
+<p class="text-body-md font-body-md text-on-surface-variant">"Huge portions for the price. The Ironclad Burger kept me full all day. Great value score is accurate."</p>
+</div>
+<div class="bg-surface-container rounded-xl p-md border border-outline-variant space-y-xs">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-surface-variant flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]" data-icon="person">person</span>
+</div>
+<div>
+<div class="text-label-sm font-label-sm text-on-surface">Sam T.</div>
+<div class="flex text-tertiary">
+<span class="material-symbols-outlined text-[14px] fill" data-icon="star" data-weight="fill">star</span>
+<span class="material-symbols-outlined text-[14px] fill" data-icon="star" data-weight="fill">star</span>
+<span class="material-symbols-outlined text-[14px] fill" data-icon="star" data-weight="fill">star</span>
+<span class="material-symbols-outlined text-[14px] fill" data-icon="star" data-weight="fill">star</span>
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant" data-icon="star">star</span>
+</div>
+</div>
+</div>
+<p class="text-body-md font-body-md text-on-surface-variant">"Solid protein options. A bit loud on Friday nights, but the food quality makes up for it."</p>
+</div>
+</section>
+<!-- Info -->
+<section class="space-y-sm">
+<h2 class="text-title-sm font-title-sm text-on-surface mb-sm">Information</h2>
+<div class="bg-surface-container rounded-xl p-md border border-outline-variant space-y-md">
+<div class="flex items-start gap-md">
+<span class="material-symbols-outlined text-on-surface-variant mt-1" data-icon="schedule">schedule</span>
+<div>
+<div class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider mb-xs">Hours</div>
+<div class="text-body-md font-body-md text-on-surface space-y-1">
+<div class="flex justify-between w-48"><span class="text-on-surface-variant">Mon-Thu:</span> <span>11AM - 10PM</span></div>
+<div class="flex justify-between w-48"><span class="text-on-surface-variant">Fri-Sat:</span> <span>11AM - 11PM</span></div>
+<div class="flex justify-between w-48"><span class="text-on-surface-variant">Sunday:</span> <span>10AM - 9PM</span></div>
+</div>
+</div>
+</div>
+<div class="h-px w-full bg-outline-variant"></div>
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="call">call</span>
+<span class="text-body-md font-body-md text-on-surface">(555) 123-4567</span>
+</div>
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="language">language</span>
+<span class="text-body-md font-body-md text-primary hover:underline cursor-pointer">goldenskillet.com</span>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- BottomNavBar (Mobile) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 bg-surface-container border-t border-outline-variant rounded-t-xl shadow-lg">
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1.5 hover:text-primary transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="dashboard">dashboard</span>
+<span class="text-label-sm font-label-sm">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl px-4 py-1.5 hover:text-primary transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="explore">explore</span>
+<span class="text-label-sm font-label-sm font-bold">Explore</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1.5 hover:text-primary transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="add_circle">add_circle</span>
+<span class="text-label-sm font-label-sm">Rate</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1.5 hover:text-primary transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="history">history</span>
+<span class="text-label-sm font-label-sm">History</span>
+</a>
+</nav>
+</body></html>

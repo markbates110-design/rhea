@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>GrubGauge - Rate a Spot</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Custom Range Slider Styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: theme('colors.primary');
+            cursor: pointer;
+            margin-top: -10px;
+            box-shadow: 0 0 10px rgba(63, 229, 108, 0.5);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: theme('colors.surface-variant');
+            border-radius: 4px;
+        }
+        input[type=range]:focus {
+            outline: none;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary": "#fdbf02",
+                        "primary-container": "#00c853",
+                        "secondary-fixed": "#e4e2e1",
+                        "tertiary-fixed-dim": "#fabd00",
+                        "surface-container-low": "#1c1b1b",
+                        "on-secondary-container": "#b6b5b4",
+                        "tertiary-container": "#dba500",
+                        "primary": "#3fe56c",
+                        "tertiary-fixed": "#ffdf9e",
+                        "background": "#131313",
+                        "on-primary-container": "#004c1b",
+                        "on-primary-fixed-variant": "#00531e",
+                        "surface-container-lowest": "#0e0e0e",
+                        "on-surface": "#e5e2e1",
+                        "on-error": "#690005",
+                        "inverse-on-surface": "#313030",
+                        "surface": "#131313",
+                        "primary-fixed-dim": "#3ce36a",
+                        "on-error-container": "#ffdad6",
+                        "inverse-primary": "#006e2a",
+                        "on-primary": "#003912",
+                        "error": "#ffb4ab",
+                        "surface-variant": "#353534",
+                        "outline-variant": "#3c4a3c",
+                        "secondary": "#c8c6c6",
+                        "surface-container-high": "#2a2a2a",
+                        "on-surface-variant": "#bbcbb8",
+                        "surface-container": "#201f1f",
+                        "surface-bright": "#393939",
+                        "on-tertiary-fixed-variant": "#5b4300",
+                        "outline": "#869583",
+                        "on-background": "#e5e2e1",
+                        "on-tertiary-fixed": "#261a00",
+                        "inverse-surface": "#e5e2e1",
+                        "on-tertiary-container": "#543e00",
+                        "on-secondary-fixed-variant": "#474747",
+                        "secondary-container": "#474747",
+                        "surface-dim": "#131313",
+                        "on-tertiary": "#3f2e00",
+                        "error-container": "#93000a",
+                        "surface-tint": "#3ce36a",
+                        "on-secondary": "#303030",
+                        "on-primary-fixed": "#002108",
+                        "primary-fixed": "#69ff87",
+                        "secondary-fixed-dim": "#c8c6c6",
+                        "surface-container-highest": "#353534",
+                        "on-secondary-fixed": "#1b1c1c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "8px",
+                        "sm": "12px",
+                        "xl": "32px",
+                        "margin-edge": "20px",
+                        "lg": "24px",
+                        "gutter": "16px",
+                        "md": "16px",
+                        "base": "4px"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["Work Sans"],
+                        "display-lg": ["Work Sans"],
+                        "headline-md": ["Work Sans"],
+                        "title-sm": ["Work Sans"],
+                        "body-md": ["Work Sans"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.5px", "fontWeight": "500" }],
+                        "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-1px", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "title-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface font-body-md min-h-screen pb-24 md:pb-0">
+<!-- TopAppBar (Web) -->
+<header class="hidden md:flex justify-between items-center w-full px-margin-edge h-16 bg-background dark:bg-background text-primary dark:text-primary docked full-width top-0 bg-surface-container-low border-b border-outline-variant flat no shadows active:scale-95 duration-150 ease-in-out sticky z-50">
+<div class="flex items-center gap-xs hover:bg-surface-variant transition-colors rounded-lg p-1 cursor-pointer">
+<span class="material-symbols-outlined text-headline-md">restaurant</span>
+<span class="text-headline-md font-headline-md font-bold text-primary dark:text-primary tracking-tight">GrubGauge</span>
+</div>
+<div class="flex items-center gap-md">
+<nav class="flex gap-md">
+<a class="text-on-surface-variant font-label-sm text-label-sm hover:text-primary transition-colors" href="{{DATA:SCREEN:SCREEN_41}}">Dashboard</a>
+<a class="text-on-surface-variant font-label-sm text-label-sm hover:text-primary transition-colors" href="{{DATA:SCREEN:SCREEN_19}}">Explore</a>
+<a class="text-primary font-bold font-label-sm text-label-sm relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-full after:h-0.5 after:bg-primary" href="{{DATA:SCREEN:SCREEN_34}}">Rate</a>
+<a class="text-on-surface-variant font-label-sm text-label-sm hover:text-primary transition-colors" href="{{DATA:SCREEN:SCREEN_59}}">History</a>
+</nav>
+<div aria-label="User Profile" class="w-8 h-8 rounded-full bg-surface-container-high border border-outline-variant overflow-hidden cursor-pointer hover:border-primary transition-colors flex items-center justify-center">
+<img alt="User Avatar" class="w-full h-full object-cover" data-alt="A closely cropped, high-quality photograph of an elegant professional person with short dark hair, slightly smiling, illuminated by soft studio lighting with a subtle cinematic teal and orange grade, set against a dark, moody background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA9LwZiyIXIQCffVsZUcL7HHIheDAQ90ve37yLlU44CYds8YBt15WJ1znQJtB7nCL9V6O5gCskTyk9UDzjPeOPvBEcvWBronSNOg-JVCsClz0ow4JzNmOZ_LtvEvj6woCCWPtE3jk-odTdk6C2AoHNocrht9Kc7Dju1CmotpQ_4NCF_JVdtu4OzpdPMUi1CFLY50IwbCg-qH8gwkeYkLwOjIJUOuo17iR-NSz6R3LNbwwEFTGNrsoMVJzatqwB7fBFDQqgHBngXAGea"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="container mx-auto px-margin-edge pt-lg md:pt-xl max-w-5xl">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-lg">
+<!-- Left Column: Form -->
+<div class="lg:col-span-8 flex flex-col gap-lg">
+<!-- Hero / Venue Image Header -->
+<div class="relative w-full h-48 md:h-64 rounded-xl overflow-hidden shadow-lg border border-outline-variant">
+<img alt="Venue Hero Image" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida/ADBb0ugB_mU4qzjUQcv3wXXFGKcZ2hkg8jUCBIlfzRs2lExB5xww9_or6OeFm4j9ZBKx15XZNKHmYGLFsXB36PZCx0I1-0RLRr7MsY1DepJ1J0WXZyhIALpxZ-lpSLhhf24Ur4zUBzClwJ2w9NN9BfnLtDuGo14ZzwfsOIvvIvl0rMJuE1412t8FHZiSDz0VHCGZUd_Zu1c__RxZ4HxK39_i7o7Tf0pWo2LFcp4fRxS5kTYmOJXMaz7ebN-PXpivKDiXV6RYfeirgCBgtEE"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent flex flex-col justify-end p-lg">
+<h1 class="text-display-lg font-display-lg text-on-surface mb-xs">Rate a Spot</h1>
+<p class="text-body-md font-body-md text-on-surface-variant">Log your latest culinary experience to build your personalized value metrics.</p>
+</div>
+</div>
+<!-- Bento Grid Form Sections -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+<!-- The Basics -->
+<div class="bg-surface-container-low rounded-xl p-md border border-outline-variant flex flex-col gap-sm md:col-span-2">
+<h2 class="text-title-sm font-title-sm text-primary flex items-center gap-xs">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">info</span>
+                            The Basics
+                        </h2>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-md mt-xs">
+<div class="flex flex-col gap-base">
+<label class="text-label-sm font-label-sm text-on-surface-variant">Venue Name</label>
+<input class="bg-surface-container text-on-surface text-body-md font-body-md border border-outline-variant rounded-lg px-sm py-xs focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-colors placeholder:text-on-surface-variant/50" placeholder="e.g., The Emerald Grill" type="text"/>
+</div>
+<div class="flex flex-col gap-base">
+<label class="text-label-sm font-label-sm text-on-surface-variant">Date of Visit</label>
+<input class="bg-surface-container text-on-surface text-body-md font-body-md border border-outline-variant rounded-lg px-sm py-xs focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-colors [color-scheme:dark]" type="date"/>
+</div>
+<div class="flex flex-col gap-base">
+<label class="text-label-sm font-label-sm text-on-surface-variant">Meal Type</label>
+<select class="bg-surface-container text-on-surface text-body-md font-body-md border border-outline-variant rounded-lg px-sm py-xs focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-colors appearance-none">
+<option value="dinner">Dinner</option>
+<option value="lunch">Lunch</option>
+<option value="breakfast">Breakfast</option>
+<option value="brunch">Brunch</option>
+</select>
+</div>
+</div>
+</div>
+<!-- The Metrics -->
+<div class="bg-surface-container-low rounded-xl p-md border border-outline-variant flex flex-col gap-lg md:col-span-2">
+<h2 class="text-title-sm font-title-sm text-primary flex items-center gap-xs">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">tune</span>
+                            Value Metrics
+                        </h2>
+<div class="flex flex-col gap-md">
+<!-- Slider 1 -->
+<div class="flex flex-col gap-base">
+<div class="flex justify-between items-center">
+<label class="text-body-md font-body-md text-on-surface font-medium">Portion / Cost Ratio</label>
+<span class="text-title-sm font-title-sm text-primary-container">8.0</span>
+</div>
+<input class="w-full" max="10" min="0" step="0.5" type="range" value="8"/>
+<div class="flex justify-between text-label-sm font-label-sm text-on-surface-variant mt-1">
+<span>Skimpy</span>
+<span>Generous</span>
+</div>
+</div>
+<!-- Slider 2 -->
+<div class="flex flex-col gap-base">
+<div class="flex justify-between items-center">
+<label class="text-body-md font-body-md text-on-surface font-medium">Quality &amp; Freshness</label>
+<span class="text-title-sm font-title-sm text-primary-container">9.5</span>
+</div>
+<input class="w-full" max="10" min="0" step="0.5" type="range" value="9.5"/>
+<div class="flex justify-between text-label-sm font-label-sm text-on-surface-variant mt-1">
+<span>Poor</span>
+<span>Exceptional</span>
+</div>
+</div>
+<!-- Slider 3 -->
+<div class="flex flex-col gap-base">
+<div class="flex justify-between items-center">
+<label class="text-body-md font-body-md text-on-surface font-medium">Service &amp; Cleanliness</label>
+<span class="text-title-sm font-title-sm text-primary-container">7.5</span>
+</div>
+<input class="w-full" max="10" min="0" step="0.5" type="range" value="7.5"/>
+<div class="flex justify-between text-label-sm font-label-sm text-on-surface-variant mt-1">
+<span>Lacking</span>
+<span>Impeccable</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Live Score & Submit -->
+<div class="lg:col-span-4 flex flex-col gap-md">
+<!-- Live Score Preview Card -->
+<div class="bg-surface-container-high rounded-xl p-xl border border-outline-variant flex flex-col items-center justify-center text-center shadow-lg relative overflow-hidden">
+<!-- Decorative glowing orb background -->
+<div class="absolute w-48 h-48 bg-primary/10 rounded-full blur-3xl -top-10 -right-10 pointer-events-none"></div>
+<span class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-widest mb-xs relative z-10">Calculated Value Ratio</span>
+<div class="flex items-baseline gap-1 relative z-10 my-sm">
+<span class="text-[72px] leading-none font-display-lg text-primary">8.3</span>
+<span class="text-headline-md font-headline-md text-on-surface-variant">/10</span>
+</div>
+<div class="inline-flex items-center gap-xs px-sm py-1 bg-surface-variant rounded-full text-label-sm font-label-sm text-on-surface relative z-10">
+<span class="material-symbols-outlined text-[16px] text-tertiary" style="font-variation-settings: 'FILL' 1;">star</span>
+                        Excellent Rating
+                    </div>
+</div>
+<!-- Additional Notes -->
+<div class="bg-surface-container-low rounded-xl p-md border border-outline-variant flex flex-col gap-xs">
+<label class="text-label-sm font-label-sm text-on-surface-variant">Private Notes</label>
+<textarea class="bg-surface-container text-on-surface text-body-md font-body-md border border-outline-variant rounded-lg px-sm py-xs focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-colors resize-none placeholder:text-on-surface-variant/50" placeholder="Add specific dishes loved, or things to avoid next time..." rows="3"></textarea>
+</div>
+<!-- Submit Action -->
+<a class="w-full py-sm bg-primary-container hover:bg-primary-fixed text-on-primary-container text-title-sm font-title-sm font-bold rounded-lg transition-colors flex items-center justify-center gap-xs mt-auto active:scale-95 duration-150" href="{{DATA:SCREEN:SCREEN_59}}"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span>Log Rating</a>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 bg-surface-container dark:bg-surface-container text-primary dark:text-primary docked full-width bottom-0 rounded-t-xl border-t border-outline-variant shadow-lg">
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1.5 hover:text-primary transition-all active:scale-90 duration-200 group" href="{{DATA:SCREEN:SCREEN_41}}">
+<span class="material-symbols-outlined group-hover:text-primary">dashboard</span>
+<span class="text-label-sm font-label-sm mt-1">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1.5 hover:text-primary transition-all active:scale-90 duration-200 group" href="{{DATA:SCREEN:SCREEN_19}}">
+<span class="material-symbols-outlined group-hover:text-primary">explore</span>
+<span class="text-label-sm font-label-sm mt-1">Explore</span>
+</a>
+<!-- Active Tab -->
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl px-4 py-1.5 active:scale-90 transition-transform duration-200" href="{{DATA:SCREEN:SCREEN_34}}">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add_circle</span>
+<span class="text-label-sm font-label-sm mt-1 font-bold">Rate</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1.5 hover:text-primary transition-all active:scale-90 duration-200 group" href="{{DATA:SCREEN:SCREEN_59}}">
+<span class="material-symbols-outlined group-hover:text-primary">history</span>
+<span class="text-label-sm font-label-sm mt-1">History</span>
+</a>
+</nav>
+</body></html>
