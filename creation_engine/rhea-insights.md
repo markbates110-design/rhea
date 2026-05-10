@@ -1,6 +1,6 @@
 # Rhea Insights & Process Upgrades
 
-**Last Updated:** 2026-05-13
+**Last Updated:** 2026-05-10 14:30 UTC
 
 This file bookmarks key i² insights, process improvements, and patterns discovered across all creations. 
 The Governance Agent must read this file at the start of every major session.
@@ -8,6 +8,10 @@ The Governance Agent must read this file at the start of every major session.
 ---
 
 ### Bookmarked Insights
+
+**2026-05-10 14:30 UTC — Insight timestamps (governance)**
+- **Effective immediately:** new **Bookmarked Insights** titles and **Session Insights** `###` headings must include **calendar date + 24-hour time + explicit timezone** — e.g. `### Session Insights — 2026-05-10 14:30 UTC — Focus`, or `**2026-05-10 14:30 CT — Title**` under Bookmarked. **TZ:** `CT`, `UTC`, `ET`, `PT`, or `Z` (UTC).
+- Older date-only headings stay as-is unless a section is already being revised.
 
 **2026-05-09 — Governance Agent Behavior**
 - Mandatory i² Focus section significantly improves process visibility.
@@ -43,6 +47,7 @@ The Governance Agent must read this file at the start of every major session.
 **How to Use This File:**
 - Governance Agent must reference relevant insights in every assessment’s i² section.
 - Add new insights here after meaningful sessions.
+- **Timestamps (new entries):** use **YYYY-MM-DD HH:MM** in **24-hour** (military) time plus **TZ** — never date-only for **new** Session or Bookmarked blocks. See **`Insight timestamps`** in `rhea-governance-agent.md`.
 
 ---
 
