@@ -1,6 +1,7 @@
 # Daily Anchor — Build Assessment
 **Rhea Governance Agent · c = e s i² Review**
-*Protocol: rhea-governance-agent.md v2.9*
+
+*Historical — entries below cite `rhea-governance-agent.md` **v2.9** as printed at write time. For **current** protocol see **`creation_engine/rhea-governance-agent.md`** (header version, e.g. **v3.10+**).*
 
 ---
 

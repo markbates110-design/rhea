@@ -1,6 +1,6 @@
 # Rhea Insights & Process Upgrades
 
-**Last Updated:** 2026-05-10 23:30 UTC
+**Last Updated:** 2026-05-10 23:45 UTC
 
 This file bookmarks key i² insights, process improvements, and patterns discovered across all creations. 
 The Governance Agent must read this file at the start of every major session.
@@ -8,6 +8,8 @@ The Governance Agent must read this file at the start of every major session.
 ---
 
 ### Bookmarked Insights
+
+#### Product (apps · governance · ops)
 
 **2026-05-10 23:00 UTC — GrubGauge vertical text (terminal fix + faster triage next time)**
 - **Governance v3.10:** **Visual / layout triage** codified in **`rhea-governance-agent.md`** — classify width-collapse, measure computed width, gate infra, timebox, log (**Error & Debug** triggers expanded).
@@ -35,10 +37,6 @@ The Governance Agent must read this file at the start of every major session.
 - Sticky Template system is effective for clean intent updates.
 - Separating Creation Intent from Governance Agent reduces file bloat and improves focus.
 
-**2026-05-09 — Songwriting**
-- Starting with emotional core before hook produces stronger lyrics.
-- Negative space phrasing ("You don’t have to fix me") creates more vulnerability than direct pleas.
-
 **2026-05-13 — GrubGauge / Vercel `rhea` Root Directory**
 - **Dashboard vs repo:** Vercel UI + session notes cited **Root `./`** (**Sonnet 4.6** aligned). **On `main` this repo has no `package.json` at `./`** — GrubGauge Next.js lives only under **`grubgauge/`**. **`./` is not inferable from filesystem alone**; **`grubgauge`** matches vanilla “app in subfolder” wiring. **Truth test:** latest **Deployment → Building** log (`npm ci`, `next build` working directory).
 - **Stale agent copy** alternated **`grubgauge`** vs **`./`** — either can be valid per project; **trust logs + dashboard**, not chat. See **`grubgauge-build-assessment.md`** — **Vercel Root Directory canonical**.
@@ -46,6 +44,12 @@ The Governance Agent must read this file at the start of every major session.
 
 **2026-05-12 — GrubGauge flex / “vertical text”**
 - Site-wide **`min-w-0`** on shells, page `<main>`, and nested flex/grid columns that host **`w-full`** forms — pair with the existing **`<main> mx-auto w-full max-w-*` contract** so block text never resolves to one-character wrapping.
+
+#### Creative (songwriting · lyrical process)
+
+**2026-05-09 — Songwriting**
+- Starting with emotional core before hook produces stronger lyrics.
+- Negative space phrasing ("You don’t have to fix me") creates more vulnerability than direct pleas.
 
 ---
 

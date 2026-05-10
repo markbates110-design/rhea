@@ -1,6 +1,19 @@
 # GrubGauge — Build Assessment
 **Rhea Governance Agent · c = e s i² Review**
-*Protocol: rhea-governance-agent.md v3.7*
+*Protocol: rhea-governance-agent.md v3.10*
+
+---
+
+## Canonical rollup *(read first)*
+
+| Topic | Where in this file |
+|-------|---------------------|
+| **Vercel Root** (`./` vs `grubgauge/`, monorepo, build logs) | **Assessment — Vercel Root Directory canonical (`rhea` ↔ GrubGauge)** |
+| **Width / “vertical text”** (flex, `min-w-0`, modals, History/Chrome fix) | **Assessment — Width contract (`min-w-0` rollout)**; **Error Fix** (Feedback card, Feedback screen, History edit sheet); **Assessment — GrubGauge “vertical text” troubleshooting (closed)** |
+| **Deploy / env / CI** | **Error Fix** (NODE_OPTIONS, missing env vars); **Assessment — Polish, Identity & Deploy** |
+| **Feature chronology** | Rate → History → Explore → Dashboard → onboarding → layout shell → edit/delete → palette / photos — assessments below in time order |
+
+Do **not** infer **Root Directory** from filesystem alone; confirm with **Vercel Deployment → Building** log paths.
 
 ---
 
