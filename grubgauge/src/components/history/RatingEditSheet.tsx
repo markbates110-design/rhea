@@ -220,9 +220,11 @@ function RatingEditSheetInner({ rating, onClose, onSaved, onDeleted }: InnerProp
     mealPhotoPreviewUrl ?? (!photoCleared && rating.meal_photo_url ? rating.meal_photo_url : null);
 
   const sheetMarkup = (
-    <div className="fixed inset-0 z-[100] flex w-screen max-w-none items-end justify-center sm:items-center sm:p-md">
-      <button type="button" aria-label="Close" className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative flex max-h-[min(92dvh,760px)] w-full max-w-lg shrink-0 flex-col overflow-hidden rounded-t-2xl border border-outline-variant bg-surface-container-high shadow-xl sm:rounded-2xl">
+    <>
+      <div className="fixed inset-0 z-[100]">
+        <button type="button" aria-label="Close" className="absolute inset-0 bg-black/50" onClick={onClose} />
+        <div className="absolute inset-x-0 bottom-0 z-[1] flex max-h-[100dvh] justify-center p-0 sm:inset-0 sm:items-center sm:p-md">
+          <div className="relative flex max-h-[min(92dvh,760px)] w-full max-w-lg shrink-0 flex-col overflow-hidden rounded-t-2xl border border-outline-variant bg-surface-container-high shadow-xl sm:rounded-2xl">
         <div className="flex shrink-0 items-start justify-between gap-sm border-b border-outline-variant px-md py-sm">
           <div className="min-w-0 flex-1 pr-sm">
             <h2 className="font-title-sm text-title-sm font-semibold text-on-surface">Edit rating</h2>
@@ -453,22 +455,25 @@ function RatingEditSheetInner({ rating, onClose, onSaved, onDeleted }: InnerProp
             </div>
           </div>
         </div>
+        </div>
       </div>
+    </div>
 
       {confirmDelete ? (
-        <div className="fixed inset-0 z-[110] flex w-screen items-center justify-center p-md">
+        <div className="fixed inset-0 z-[110]">
           <button
             type="button"
             aria-label="Dismiss"
             className="absolute inset-0 bg-black/60"
             onClick={() => !deleting && setConfirmDelete(false)}
           />
-          <div className="relative w-full max-w-sm shrink-0 rounded-2xl border border-outline-variant bg-surface-container-high p-lg shadow-xl">
-            <p className="font-title-sm text-title-sm text-on-surface">Delete this rating?</p>
-            <p className="mt-sm font-body-md text-body-md text-on-surface-variant">
-              This removes your review for {rating.venue_name}. This cannot be undone.
-            </p>
-            <div className="mt-md flex justify-end gap-xs">
+          <div className="absolute inset-0 z-[1] flex items-center justify-center p-md">
+            <div className="relative w-full max-w-sm shrink-0 rounded-2xl border border-outline-variant bg-surface-container-high p-lg shadow-xl">
+              <p className="font-title-sm text-title-sm text-on-surface">Delete this rating?</p>
+              <p className="mt-sm font-body-md text-body-md text-on-surface-variant">
+                This removes your review for {rating.venue_name}. This cannot be undone.
+              </p>
+              <div className="mt-md flex justify-end gap-xs">
               <button
                 type="button"
                 disabled={deleting}
@@ -486,10 +491,11 @@ function RatingEditSheetInner({ rating, onClose, onSaved, onDeleted }: InnerProp
                 {deleting ? "Removing…" : "Delete"}
               </button>
             </div>
+            </div>
           </div>
         </div>
       ) : null}
-    </div>
+    </>
   );
 
   if (typeof document === "undefined") {
