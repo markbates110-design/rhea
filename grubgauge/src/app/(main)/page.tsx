@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { PageShell } from "@/components/layout/PageShell";
 import { getDeviceId, isOnboarded } from "@/lib/identity/deviceId";
 import { useAuth } from "@/lib/auth/useAuth";
 
@@ -97,12 +98,12 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <main className="mx-auto min-w-0 w-full max-w-2xl pt-lg pb-10">
+      <PageShell variant="feed" className="pt-lg pb-10">
         <div className="flex items-center gap-xs text-on-surface-variant">
           <span className="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
           <span className="font-body-md text-body-md">Loading…</span>
         </div>
-      </main>
+      </PageShell>
     );
   }
 
@@ -110,7 +111,7 @@ export default function DashboardPage() {
 
   if (ratings.length === 0) {
     return (
-      <main className="mx-auto min-w-0 w-full max-w-2xl pt-lg pb-10">
+      <PageShell variant="feed" className="pt-lg pb-10">
         <div className="flex flex-col gap-lg">
           <div>
             <h1 className="font-display-lg text-[32px] font-bold leading-[40px] text-on-surface">GrubGauge</h1>
@@ -133,7 +134,7 @@ export default function DashboardPage() {
             </Link>
           </div>
         </div>
-      </main>
+      </PageShell>
     );
   }
 
@@ -142,7 +143,7 @@ export default function DashboardPage() {
   const favMeta = VENUE_META[stats!.favType] ?? VENUE_META.casual;
 
   return (
-    <main className="mx-auto min-w-0 w-full max-w-2xl pt-lg pb-10">
+    <PageShell variant="feed" className="pt-lg pb-10">
       <div className="flex flex-col gap-lg">
 
         {/* Header */}
@@ -284,6 +285,6 @@ export default function DashboardPage() {
         </div>
 
       </div>
-    </main>
+    </PageShell>
   );
 }

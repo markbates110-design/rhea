@@ -1,6 +1,6 @@
 # Rhea Insights & Process Upgrades
 
-**Last Updated:** 2026-05-10 13:15 CT
+**Last Updated:** 2026-05-10 13:35 CT
 
 This file bookmarks key i² insights, process improvements, and patterns discovered across all creations. 
 The Governance Agent must read this file at the start of every major session.
@@ -10,6 +10,14 @@ The Governance Agent must read this file at the start of every major session.
 ### Bookmarked Insights
 
 #### Product (apps · governance · ops)
+
+**2026-05-10 13:35 CT — GrubGauge `<PageShell>` (prevention over triage for vertical-text class)**
+- **Root learning (6+ recurrences):** Reactive triage (v3.10) is necessary but not sufficient — width-collapse kept resurfacing on new routes because each page re-invented its own outer-wrapper width contract. The cure is a **canonical artifact**, not a sharper checklist.
+- **`<PageShell variant=…>`** (`grubgauge/src/components/layout/PageShell.tsx`) carries the audited contract by construction. **`form`** → `min-w-[280px] max-w-md` (floor so text cannot collapse to one-glyph-per-line even when an ancestor briefly resolves zero width). **`feed`** → `min-w-0 max-w-2xl` (allows internal flex/grid with `truncate` to behave correctly). **`wide`** → `min-w-0 max-w-5xl` for full app shell.
+- **Layout SSOT, not page-SSOT:** Horizontal gutters + viewport-shell live in a **route-group `layout.tsx`** (`(main)/layout.tsx` for the app; new `onboarding/layout.tsx` for onboarding). Pages contribute *only* the content column (`PageShell`) + vertical rhythm. Eliminates the duplicated `mx-auto max-w-5xl px-margin-edge` wrappers that each page used to re-declare.
+- **Verification Pass — Page route** row (new, v3.12): "Wraps content in `<PageShell variant=…>` (or matches its width contract exactly)?" — gates every UI build going forward.
+- **Vercel is a release substrate, not a triage substrate** (v3.12 visual-triage step 5): vertical-text fixes must reproduce in `npm run dev` (Chrome desktop + mobile emulation) before any redeploy. Stops the deploy-loop-as-debug-API failure mode that surfaced this week.
+- **Migration scope this turn:** `/onboarding/{welcome, signup, profile}` + `(main)/{page, profile}` (six conditional returns total, all matched). `/rate`, `/history`, `/explore` already match the contract and are eligible for incremental migration the next time they're touched.
 
 **2026-05-10 13:10 CT — GrubGauge auth-aware CTAs (`useAuth` as canonical session source)**
 - **One hook, one truth:** `grubgauge/src/lib/auth/useAuth.ts` is now the only sanctioned reader of `supabase.auth.getSession()` / `onAuthStateChange()` in client components. Any future header, route guard, or conditional CTA consumes `useAuth()` so subscriptions are cleaned up uniformly and the `loading` state is honored for sized placeholders that prevent first-paint CTA flicker.

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { PageShell } from "@/components/layout/PageShell";
 import { useAuth } from "@/lib/auth/useAuth";
 import { getUsername } from "@/lib/identity/deviceId";
 
@@ -27,12 +28,12 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <main className="mx-auto min-w-0 w-full max-w-md pt-lg pb-10">
+      <PageShell variant="form" className="pt-lg pb-10">
         <div className="flex items-center gap-xs text-on-surface-variant">
           <span className="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
           <span className="font-body-md text-body-md">Loading…</span>
         </div>
-      </main>
+      </PageShell>
     );
   }
 
@@ -41,7 +42,7 @@ export default function ProfilePage() {
   if (!user) {
     const guestName = typeof window !== "undefined" ? getUsername() : "";
     return (
-      <main className="mx-auto min-w-0 w-full max-w-md pt-lg pb-10">
+      <PageShell variant="form" className="pt-lg pb-10">
         <div className="flex flex-col gap-lg">
           <div>
             <h1 className="font-headline-md text-headline-md font-semibold text-on-surface">Profile</h1>
@@ -82,7 +83,7 @@ export default function ProfilePage() {
             <span className="material-symbols-outlined text-[20px] text-on-surface-variant">chevron_right</span>
           </Link>
         </div>
-      </main>
+      </PageShell>
     );
   }
 
@@ -91,7 +92,7 @@ export default function ProfilePage() {
   const initial = (user.email ?? "•").trim().charAt(0).toUpperCase() || "•";
 
   return (
-    <main className="mx-auto min-w-0 w-full max-w-md pt-lg pb-10">
+    <PageShell variant="form" className="pt-lg pb-10">
       <div className="flex flex-col gap-lg">
         <div>
           <h1 className="font-headline-md text-headline-md font-semibold text-on-surface">Profile</h1>
@@ -141,6 +142,6 @@ export default function ProfilePage() {
           </button>
         </div>
       </div>
-    </main>
+    </PageShell>
   );
 }

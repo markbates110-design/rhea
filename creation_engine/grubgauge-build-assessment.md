@@ -547,6 +547,28 @@ No layout/JSX shell changes; no new colors; no font swap.
 
 ---
 
+## Error Fix — Vertical-text class: prevention by construction (`<PageShell>`)
+**Timestamp: 2026-05-10 13:35 CT**
+**Governance ref** — `rhea-governance-agent.md` **v3.12**
+
+**Error:** Vertical-text / width-collapse surfaced **a 6th time** on `/onboarding/signup` after the new header **Create Account** CTA was wired in (commit `13fa13e`). User flagged the cumulative recurrence count and the deploy-loop cost — declared the class itself the bug, not any single instance.
+
+**Root Cause:** Each route was carrying its own ad-hoc width contract via copy-pasted outer wrappers (`mx-auto min-h-screen min-w-0 w-full max-w-5xl px-margin-edge` + nested `<main class="mx-auto min-w-0 w-full max-w-md…">`). With six surfaces and no central artifact, every new route was a new opportunity to drift from the audited contract. The v3.10 **Visual / layout triage** protocol was *reactive*; the failure mode was a missing *prevention* layer.
+
+**Fix:** Three artifacts + a governance rule:
+1. **`grubgauge/src/components/layout/PageShell.tsx`** — canonical content-column with three variants: `form` (`min-w-[280px] max-w-md` floor, so text cannot collapse to one-glyph-per-line even when an ancestor flex briefly resolves zero width), `feed` (`min-w-0 max-w-2xl`), `wide` (`min-w-0 max-w-5xl`). One artifact replaces every inline width-contract copy.
+2. **`grubgauge/src/app/onboarding/layout.tsx`** — new shared route-group shell carrying horizontal gutters + viewport-cap + `min-w-0` once. Onboarding pages now contribute only their content column.
+3. **Migrated** `/onboarding/{welcome, signup, profile}` + `(main)/{page, profile}` to `<PageShell variant=…>`. Six conditional returns total, all matched by construction (Verification Pass *New conditional return* row trivially satisfied). `/rate`, `/history`, `/explore` already conform; migrate incrementally on next touch.
+4. **Governance v3.12** — new **Verification Pass — Page route** row ("Wraps content in `<PageShell variant=…>` or matches contract exactly?") + **Visual / layout triage step 5** ("Repro before redeploy — local `npm run dev` Chrome desktop + mobile emulation before any Vercel redeploy"). v3.9 row rolled to `rhea-governance-changelog-archive.md` to keep active file at ≤200 lines (currently 199).
+
+Verified: `npx tsc --noEmit` ✓ exit 0, `npm run lint` ✓ exit 0, ReadLints clean across all seven touched files.
+
+**Audit exception (v3.12 step 5 override — 2026-05-10 13:40 CT):** User explicitly waived local-repro-before-redeploy ("I have not done local testing. Proceed with deployment.") for this push. Static checks (tsc + lint + ReadLints) clean; PageShell contract verified by construction at the source level. Vercel build itself becomes the next verification gate. If a width-collapse surfaces post-deploy, the targeted fix branches off with screenshot + computed-width evidence per v3.10 step 2.
+
+**i²:** When the same bug *class* (not the same instance) recurs **2+ times across different routes**, the fix is to **codify the contract as an artifact, not as a checklist**. v3.10's triage protocol was the right *reaction*; v3.12's `<PageShell>` is the right *prevention*. The two layers are complementary — triage tells you what to do when a new class appears, `<PageShell>` ensures known classes never reappear. **Compounding rule for this codebase:** every new page route renders through `<PageShell>` (or matches its contract exactly) — *no exceptions, gated by Verification Pass*.
+
+---
+
 ## Assessment — Onboarding / Landing CTA & auth-state polish
 **Timestamp: 2026-05-10 13:10 CT**
 **Governance ref** — `rhea-governance-agent.md` **v3.10**

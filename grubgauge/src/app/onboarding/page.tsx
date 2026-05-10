@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { BrandMark } from "@/components/brand/BrandMark";
+import { PageShell } from "@/components/layout/PageShell";
 import { isOnboarded, setOnboarded } from "@/lib/identity/deviceId";
 
 const VALUE_PROPS = [
@@ -37,12 +38,11 @@ export default function OnboardingWelcomePage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      {/* Top spacer */}
+    <>
+      {/* Top spacer (vertical centering within the onboarding layout's flex column) */}
       <div className="flex-1" />
 
-      <div className="mx-auto min-w-0 w-full max-w-5xl px-margin-edge pb-10">
-        <main className="mx-auto min-w-0 w-full max-w-2xl">
+      <PageShell variant="feed" className="pb-10">
         {/* Brand */}
         <div className="flex flex-col items-center gap-sm text-center">
           <div className="mb-xs flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/30 bg-primary/10">
@@ -111,11 +111,10 @@ export default function OnboardingWelcomePage() {
             </span>
           </div>
         </div>
-      </main>
-      </div>
+      </PageShell>
 
       {/* Bottom spacer */}
       <div className="flex-1" />
-    </div>
+    </>
   );
 }

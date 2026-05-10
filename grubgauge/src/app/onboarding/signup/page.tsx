@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { PageShell } from "@/components/layout/PageShell";
 import { setOnboarded } from "@/lib/identity/deviceId";
 
 export default function OnboardingSignupPage() {
@@ -38,8 +39,7 @@ export default function OnboardingSignupPage() {
   }
 
   return (
-    <div className="mx-auto min-h-screen min-w-0 w-full max-w-5xl px-margin-edge">
-    <main className="mx-auto min-w-0 w-full max-w-md pt-lg pb-10">
+    <PageShell variant="form" className="pt-lg pb-10">
       {/* Back */}
       <Link
         href="/onboarding"
@@ -131,7 +131,6 @@ export default function OnboardingSignupPage() {
       >
         Skip, continue as guest
       </button>
-    </main>
-    </div>
+    </PageShell>
   );
 }
