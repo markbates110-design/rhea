@@ -1,6 +1,6 @@
 # Rhea Insights & Process Upgrades
 
-**Last Updated:** 2026-05-10 16:05 CT
+**Last Updated:** 2026-05-10 16:25 CT
 
 This file bookmarks key i² insights, process improvements, and patterns discovered across all creations. 
 The Governance Agent must read this file at the start of every major session.
@@ -10,6 +10,14 @@ The Governance Agent must read this file at the start of every major session.
 ### Bookmarked Insights
 
 #### Product (apps · governance · ops)
+
+**2026-05-10 16:25 CT — Auth surfaces are dual-mode by default; smart-default mode to close the discoverability gap**
+- **Class of bug.** A signup-only route looks like a discoverability bug for the first user, then becomes a rate-limit amplifier (repeated signup attempts against an existing email trigger the provider's email throttle, which the user reads as a code defect). Captured follow-ups from a prior iteration *will* be encountered live before they get scheduled — when the follow-up is "the only known way for a returning user to authenticate," treat it as a hard close, not a backlog item.
+- **Canonical pattern.** Auth surfaces in this codebase are dual-mode (sign in ⇄ create account) on a single canonical route (`/onboarding/signup`). New auth flows (password reset, magic-link, OAuth callback) compose as additional modes on the same route — never parallel routes that fragment the entry point and force the header/upsell to choose one.
+- **Smart-default the mode.** Seed mode from `?mode=…` URL param, then `isOnboarded()` (or equivalent returning-user signal), then a sensible fallback. Returning devices default to *sign in*; brand-new visitors default to *create account*. Closes the discoverability gap for the largest cohort without forcing every user through a toggle.
+- **Auto-switch on "already registered" responses.** Both *"User already registered"* (confirmation off) and `data.user.identities.length === 0` (confirmation on, anti-enumeration) mean "this email already has an account." Bounce the user into signin mode with a contextual message — that's the single biggest deflection for the rate-limit cascade pattern.
+- **Humanize provider error strings.** A single `humanizeAuthError(message, mode)` helper maps raw provider errors (rate limit, email not confirmed, invalid credentials, weak password) to user-readable copy. Keeps error UX consistent across modes and gives future auth-related additions a one-line extension point.
+- **Compounding rule:** any auth-related screen renders both create + signin paths (or a clear toggle), branches on `data.session`, and humanizes errors. Three-question Verification-Pass scrutiny for the class.
 
 **2026-05-10 16:05 CT — Auth methods can succeed without producing a session — branch on `data.session`, not just `error`**
 - **Class of bug.** `supabase.auth.signUp()` returns `{ data: { user, session: null }, error: null }` when the Supabase project has "Confirm email" enabled — a successful return *without* an authenticated session. The same shape applies to `signInWithOtp` (magic-link), `signInWithOAuth` (redirect flow), and `resetPasswordForEmail`. Branching only on `error` causes the app to push the user into authenticated routes while `useAuth.user` is still `null` — every downstream auth-gated decision (header CTA, `rateHref`, History scope) silently treats them as a guest, producing a "stuck in signup loop / not recognized as member" class of bug.

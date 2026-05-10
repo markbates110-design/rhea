@@ -1,39 +1,72 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/lib/auth/useAuth";
 import { PageShell } from "@/components/layout/PageShell";
-import { setOnboarded } from "@/lib/identity/deviceId";
+import { isOnboarded, setOnboarded } from "@/lib/identity/deviceId";
 
-export default function OnboardingSignupPage() {
+type Mode = "signup" | "signin";
+
+export default function OnboardingAuthPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, loading: authLoading } = useAuth();
+  // Default mode: returning user (onboarded device) → sign in; new visitor →
+  // create account. URL param `?mode=signin|signup` overrides for deep-links
+  // (e.g. the History upsell card). isOnboarded() is localStorage-backed and
+  // safe to call here because the route is client-rendered.
+  const [mode, setMode] = useState<Mode>(() => {
+    const param = searchParams?.get("mode");
+    if (param === "signin" || param === "signup") return param;
+    if (typeof window !== "undefined" && isOnboarded()) return "signin";
+    return "signup";
+  });
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // When Supabase project has "Confirm email" enabled, signUp returns success
-  // with `session: null`. Surface a "check your inbox" state instead of
-  // silently routing the user into a flow that assumes they're authenticated
-  // — that path was the source of the post-signup loop on prod.
+  // Set when a signUp succeeded with no session (Supabase project has
+  // "Confirm email" enabled). Drives the inline "Check your inbox" state
+  // — never silently redirect into authenticated flows when session is null.
   const [pendingEmail, setPendingEmail] = useState<string | null>(null);
 
-  // If the user lands here already signed in (e.g. clicked an old CTA after
-  // a successful verification), bounce them to /profile — never re-show
-  // the signup form to an authenticated account.
   useEffect(() => {
     if (!authLoading && user) router.replace("/profile");
   }, [authLoading, user, router]);
 
-  async function handleSignUp(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setLoading(true);
     try {
       const supabase = createClient();
+      if (mode === "signin") {
+        const { data, error: authError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (authError) {
+          setError(humanizeAuthError(authError.message, "signin"));
+          return;
+        }
+        if (!data.session) {
+          // Defensive: signInWithPassword normally creates a session on
+          // success. If it doesn't (account not yet confirmed, etc.),
+          // surface that explicitly rather than redirecting blind.
+          setError(
+            "Signed in but no session was created. Your email may not be verified yet — check your inbox.",
+          );
+          return;
+        }
+        setOnboarded();
+        router.push("/profile");
+        return;
+      }
+
+      // mode === "signup"
       const emailRedirectTo =
         typeof window !== "undefined" ? `${window.location.origin}/profile` : undefined;
       const { data, error: authError } = await supabase.auth.signUp({
@@ -42,18 +75,29 @@ export default function OnboardingSignupPage() {
         options: { emailRedirectTo },
       });
       if (authError) {
-        setError(authError.message);
+        // Supabase returns "User already registered" when confirmation is
+        // off and the email exists. Nudge into signin mode automatically.
+        const msg = authError.message ?? "";
+        if (/already (registered|exists)/i.test(msg)) {
+          setMode("signin");
+          setError("That email already has an account. Sign in below to continue.");
+          return;
+        }
+        setError(humanizeAuthError(msg, "signup"));
+        return;
+      }
+      // Supabase confirmation-on response shape: when an email already
+      // exists with confirmation pending, `data.user.identities` is empty
+      // (anti-enumeration). Treat that as "already has an account."
+      if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+        setMode("signin");
+        setError("That email already has an account. Sign in below to continue.");
         return;
       }
       if (data.session) {
-        // Email confirmation disabled (or already auto-confirmed) → real
-        // session in hand, proceed to the quick preferences setup.
         router.push("/onboarding/profile");
         return;
       }
-      // Email confirmation required → no session yet. Mark device as
-      // onboarded so the welcome gate doesn't re-trap them, and show the
-      // "check your inbox" state on this page.
       setOnboarded();
       setPendingEmail(email);
     } catch {
@@ -66,6 +110,11 @@ export default function OnboardingSignupPage() {
   function handleGuest() {
     setOnboarded();
     router.push("/");
+  }
+
+  function switchMode(next: Mode) {
+    setMode(next);
+    setError(null);
   }
 
   // ── Awaiting email verification ───────────────────────────────────────────
@@ -109,19 +158,21 @@ export default function OnboardingSignupPage() {
             type="button"
             onClick={() => {
               setPendingEmail(null);
-              setEmail("");
+              setMode("signin");
               setPassword("");
             }}
             className="w-full text-center font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-colors"
           >
-            Use a different email
+            I already verified — sign in
           </button>
         </div>
       </PageShell>
     );
   }
 
-  // ── Default signup form ───────────────────────────────────────────────────
+  // ── Auth form (signup ⇄ signin) ──────────────────────────────────────────
+
+  const isSignup = mode === "signup";
 
   return (
     <PageShell variant="form" className="pt-lg pb-10">
@@ -135,17 +186,45 @@ export default function OnboardingSignupPage() {
       </Link>
 
       {/* Heading */}
-      <div className="mb-xl">
+      <div className="mb-lg">
         <h1 className="font-headline-md text-headline-md font-semibold text-on-surface">
-          Create your account
+          {isSignup ? "Create your account" : "Welcome back"}
         </h1>
         <p className="mt-xs font-body-md text-body-md text-on-surface-variant">
-          Save your ratings and access your history from any device.
+          {isSignup
+            ? "Save your ratings and access your history from any device."
+            : "Sign in to access your ratings from any device."}
         </p>
       </div>
 
+      {/* Mode toggle (segmented) */}
+      <div className="mb-lg grid grid-cols-2 gap-base rounded-xl border border-outline-variant bg-surface-container-low p-[3px]">
+        <button
+          type="button"
+          onClick={() => switchMode("signin")}
+          className={`rounded-lg py-xs font-label-sm text-label-sm font-semibold transition-colors ${
+            !isSignup
+              ? "bg-primary-container text-on-primary-container"
+              : "text-on-surface-variant hover:text-on-surface"
+          }`}
+        >
+          Sign in
+        </button>
+        <button
+          type="button"
+          onClick={() => switchMode("signup")}
+          className={`rounded-lg py-xs font-label-sm text-label-sm font-semibold transition-colors ${
+            isSignup
+              ? "bg-primary-container text-on-primary-container"
+              : "text-on-surface-variant hover:text-on-surface"
+          }`}
+        >
+          Create account
+        </button>
+      </div>
+
       {/* Form */}
-      <form onSubmit={handleSignUp} className="flex flex-col gap-md">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-md">
         <div className="flex flex-col gap-xs">
           <label htmlFor="email" className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">
             Email
@@ -170,11 +249,11 @@ export default function OnboardingSignupPage() {
             id="password"
             type="password"
             required
-            autoComplete="new-password"
-            minLength={6}
+            autoComplete={isSignup ? "new-password" : "current-password"}
+            minLength={isSignup ? 6 : undefined}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Min. 6 characters"
+            placeholder={isSignup ? "Min. 6 characters" : "Your password"}
             className="w-full rounded-xl border border-outline-variant bg-surface-container-low px-md py-[13px] font-body-md text-body-md text-on-surface placeholder-on-surface-variant/50 outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
           />
         </div>
@@ -193,10 +272,12 @@ export default function OnboardingSignupPage() {
           {loading ? (
             <>
               <span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
-              Creating account…
+              {isSignup ? "Creating account…" : "Signing in…"}
             </>
-          ) : (
+          ) : isSignup ? (
             "Create Account"
+          ) : (
+            "Sign In"
           )}
         </button>
       </form>
@@ -218,4 +299,23 @@ export default function OnboardingSignupPage() {
       </button>
     </PageShell>
   );
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+function humanizeAuthError(message: string, mode: Mode): string {
+  const m = message.toLowerCase();
+  if (m.includes("email rate limit")) {
+    return "Too many verification emails sent recently. Please wait a few minutes and try again, or use a different email.";
+  }
+  if (m.includes("email not confirmed")) {
+    return "Your email isn't verified yet. Check your inbox for the verification link, then try signing in again.";
+  }
+  if (m.includes("invalid login credentials")) {
+    return "Email or password is incorrect.";
+  }
+  if (mode === "signup" && /weak password|password should be/i.test(message)) {
+    return "Password is too weak — use at least 6 characters.";
+  }
+  return message || "Something went wrong. Please try again.";
 }

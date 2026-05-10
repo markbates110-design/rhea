@@ -571,6 +571,31 @@ Verified: `npx tsc --noEmit` ✓ exit 0, `npm run lint` ✓ exit 0, ReadLints cl
 
 ---
 
+## Error Fix — Missing sign-in surface (returning user stuck on signup, rate-limit cascade)
+**Timestamp: 2026-05-10 16:25 CT** · **Governance ref** — `rhea-governance-agent.md` **v3.12**
+
+**Error:** Returning user with an existing account could not sign in — `/onboarding/signup` was signup-only, so every auth attempt re-ran `supabase.auth.signUp` against an email already in `auth.users`. With "Confirm email" enabled, repeated signup attempts triggered Supabase's default SMTP rate limit (~3 emails/hour), surfacing as *"email rate limit exceeded"* and blocking the user from authenticating at all.
+
+**Root Cause:** This was a captured follow-up from the *Guest vs signed-in flow refinement* assessment (*"sign-in route — `/onboarding/signup` is signup-only today, returning users need a sign-in surface"*) that landed on a real user before the follow-up was scheduled. The header CTA ("Create Account") and History upsell ("Sign up") both pointed at a signup-only route, so a returning user had no alternative discovery path. The rate-limit error was a downstream symptom — Supabase throttle, not a code defect — but it would not have been encountered if the sign-in path existed.
+
+**Fix:** `/onboarding/signup` becomes a **dual-mode auth surface** (sign in ⇄ create account), no new route, no header changes:
+1. **Mode state** seeded from URL param `?mode=signin|signup` first; otherwise `isOnboarded()` → returning device defaults to `signin`, brand-new visitor to `signup`. Smart-default eliminates the discovery problem for the largest cohort (returning users).
+2. **Segmented toggle** at the top of the form for explicit user override; both modes share the same email/password inputs and styling.
+3. **`signInWithPassword`** wired for signin mode. On success → `setOnboarded()` + `router.push("/profile")`. On `data.session === null` (defensive — e.g. unverified email) → explicit error instead of blind redirect, matching the v3.12 *"branch on `data.session`, not just `error`"* discipline.
+4. **Auto-mode switching from signup errors** — "User already registered" (confirmation off) and `data.user.identities.length === 0` (confirmation on, anti-enumeration response) both bounce the user into signin mode with a contextual message: *"That email already has an account. Sign in below to continue."* Removes the rate-limit cascade by replacing repeated signup attempts with a single signin path.
+5. **`humanizeAuthError`** maps Supabase's raw error strings to user-readable copy for the four common cases (rate limit, email not confirmed, invalid credentials, weak password). Single helper, easy to extend.
+6. **History upsell** now deep-links `?mode=signin` and reads *"Sign in"* (was *"Sign up"*); supporting copy widened to *"sign in or create an account"* so neither cohort feels mis-cast.
+
+No theme drift; no new Tailwind tokens; PageShell + `useAuth` SSOT + typography contracts honored.
+
+**i²:**
+- *First iteration:* `npx tsc --noEmit` ✓, `ReadLints` ✓ on both touched files. Pending-email and form states share the same `<PageShell variant="form" className="pt-lg pb-10">` root (conditional-return parity preserved). Defensive useAuth-redirect to `/profile` for authenticated visitors retained from the prior fix.
+- *Second iteration / compounding rule:* **Auth surfaces are dual-mode by default in this codebase.** A "signup-only" route is a discoverability bug for returning users and an indirect rate-limit amplifier. Future auth-related surfaces (password reset, magic-link, OAuth callback) should compose into this same `/onboarding/signup` route as additional modes — single canonical auth shell, never parallel routes that fragment the entry point.
+
+**Supabase config note for the user:** the rate limit is project-side throttle, not a code issue — auto-clears in ~1 hour. To unblock immediately during testing: **Supabase Dashboard → Authentication → Sign In / Up → "Confirm email" = OFF**. That lets the existing (unconfirmed) account sign in directly; the new signin path then works against it without further emails. Re-enable "Confirm email" before prod hardening.
+
+---
+
 ## Error Fix — Post-signup loop (email-confirmation gating + missing post-signup destination)
 **Timestamp: 2026-05-10 16:05 CT** · **Governance ref** — `rhea-governance-agent.md` **v3.12**
 

@@ -66,14 +66,14 @@ function GuestUpsellCard() {
           Sign in to save your ratings permanently
         </p>
         <p className="mt-0.5 font-label-sm text-label-sm text-on-surface-variant">
-          Your ratings stay on this device until you create an account — then they live with you across devices.
+          Your ratings stay on this device until you sign in or create an account — then they live with you across devices.
         </p>
       </div>
       <Link
-        href="/onboarding/signup"
+        href="/onboarding/signup?mode=signin"
         className="shrink-0 inline-flex items-center gap-xs rounded-lg bg-primary-container px-sm py-xs font-label-sm text-label-sm font-bold text-on-primary-container transition-all hover:bg-primary-fixed active:scale-95"
       >
-        Sign up
+        Sign in
       </Link>
     </div>
   );
