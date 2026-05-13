@@ -29,6 +29,27 @@ function initialOf(name: string): string {
   return ch || "•";
 }
 
+/**
+ * Pulls the username out of `useParams()` and decodes it. Next.js's
+ * `useParams` returns the *undecoded* path segment for client components,
+ * so a username like "mark grout" arrives here as "mark%20grout" and
+ * lookups against `public.profiles.username` (which stores "mark grout")
+ * miss — surfaces as a spurious 404. See vercel/next.js#64952.
+ *
+ * `decodeURIComponent` throws on malformed sequences (e.g., a lone `%`),
+ * so we fall back to the raw value rather than the empty string — that
+ * way a malformed URL still lookups by something, and the existing
+ * not-found path handles a genuine miss.
+ */
+function decodeParam(value: unknown): string {
+  if (typeof value !== "string") return "";
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
 // ── Public profile page ────────────────────────────────────────────────────
 
 /**
@@ -50,7 +71,7 @@ function initialOf(name: string): string {
  */
 export default function PublicProfilePage() {
   const params = useParams<{ username: string }>();
-  const username = typeof params?.username === "string" ? params.username : "";
+  const username = decodeParam(params?.username);
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [ratings, setRatings] = useState<Rating[]>([]);

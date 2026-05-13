@@ -20,6 +20,12 @@ Paste a task under `## sticky` and say `go`. The agent moves it to `## current`,
 
 *(completed tasks with retrospectives, most recent first)*
 
+### grubgauge — fix /u/[username] 404 for usernames with URL-encoded characters — 2026-05-12
+worked: one-line root cause once the symptom was identified — Next's useParams() returns the undecoded path segment in client components (vercel/next.js#64952), so "mark grout" arrived at the lookup as "mark%20grout" and the .eq("username", ...) missed; added a `decodeParam` helper around the useParams read with a try/catch fallback for malformed sequences; typecheck + build clean
+didn't: didn't constrain username chars at the input layer (onboarding profile screen accepts any text) — defensive read-side decode covers all existing rows without a schema/UX change, but a future iteration should validate usernames against `^[A-Za-z0-9_]{3,30}$` so the encode-decode round-trip becomes a non-issue
+lesson: Next.js client-side useParams returns the *undecoded* URL segment — wrap with `decodeURIComponent` (try/catch for malformed) before using as a DB key
+status: shipped (pending push)
+
 ### grubgauge — public profile route `/u/[username]` — 2026-05-12
 worked: extracted the Explore inline card into `<RatingCard>` with `rank?` + `hideRater?` props (Explore behaves identically — same key-on-hydration trick, same indent, same render order); added `getProfileByUsername` to `lib/profile/profile.ts` (maybeSingle, returns null on miss); built the route as a client page mirroring Explore's fetch shape (useEffect + Promise.all for likes); used `notFound()` from render guarded behind `!loading` so the 404 only fires once after resolution; skipped `attachRaters` on this page (rater is always the page subject, badge is hidden, so the field is `null` — one round-trip saved); header total computed from `countMap` with an inline comment documenting the post-load drift trade-off (intentional, not bug)
 didn't: didn't introduce a custom `not-found.tsx` — the framework's `/_not-found` is fine until there's something profile-specific to show there; didn't refactor History/Dashboard to use `<RatingCard>` (their card shapes diverge — History has an edit affordance, Dashboard has a "Top Rated" callout variant) — left a top-of-file note on Explore so a future convergence pass has the spec
