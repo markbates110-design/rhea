@@ -24,6 +24,12 @@ interface Rating {
   meal_photo_url: string | null;
   criteria_scores: Record<string, number> | null;
   created_at: string;
+  // History is the signed-in user's own ratings (or device-scoped guest
+  // rows), so rater attribution would be redundant in the UI — but the
+  // field is part of the rating shape across the app, so we select it
+  // here for type consistency and future use (e.g. a public profile
+  // page reusing this query).
+  user_id: string | null;
 }
 
 // ── Venue config ───────────────────────────────────────────────────────────
@@ -100,7 +106,7 @@ export default function HistoryPage() {
         const base = supabase
           .from("ratings")
           .select(
-            "id, place_id, venue_name, venue_address, venue_type, meal_type, visit_date, weighted_score, notes, meal_photo_url, criteria_scores, created_at"
+            "id, place_id, venue_name, venue_address, venue_type, meal_type, visit_date, weighted_score, notes, meal_photo_url, criteria_scores, created_at, user_id"
           );
         const { data, error } = await applyRatingsOwnerScope(base, {
           user,

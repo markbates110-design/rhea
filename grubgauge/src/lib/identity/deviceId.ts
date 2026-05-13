@@ -50,9 +50,9 @@ export function setFoodPrefs(prefs: string[]): void {
 
 /**
  * Avatar URL local mirror — fast-path hydration for signed-in users so the
- * header / profile avatar paints instantly before `user_metadata.avatar_url`
- * resolves. Canonical store is Supabase; the mirror is additive (never
- * replaces the auth-backed value) and is cleared on sign-out by the
+ * header / profile avatar paints instantly before the `public.profiles`
+ * row resolves. Canonical store is Supabase; the mirror is additive
+ * (never replaces the canonical value) and is cleared on sign-out by the
  * consumer when desirable.
  */
 export function getAvatarUrl(): string {

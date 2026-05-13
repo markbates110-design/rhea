@@ -6,7 +6,7 @@ import { AvatarError, deleteAvatar, uploadAvatar } from "@/lib/storage/avatar";
 import { setAvatarUrl as setLocalAvatarUrl } from "@/lib/identity/deviceId";
 
 interface AvatarUploaderProps {
-  /** Current canonical avatar URL (from `user_metadata.avatar_url`). */
+  /** Current canonical avatar URL (from `public.profiles.avatar_url`). */
   currentUrl: string;
   /** Fallback initial when no avatar set. */
   initial: string;
@@ -17,16 +17,17 @@ interface AvatarUploaderProps {
 /**
  * Reusable avatar upload surface — used by `/onboarding/profile` and
  * `/profile`. Owns the upload/remove lifecycle (Storage write + mirror to
- * localStorage); persistence to `user_metadata` is the caller's job so the
- * parent screen can batch saves (e.g. onboarding screen saves avatar +
- * username + food_prefs in one `updateUser` call).
+ * localStorage); persistence to `public.profiles.avatar_url` is the
+ * caller's job so the parent screen can batch saves alongside other
+ * profile fields (e.g. the onboarding screen upserts the avatar + username
+ * in one `upsertProfile` call).
  *
  * Identity discipline:
  *   - Storage write happens immediately (so the user sees the image),
  *     mirrors to localStorage for fast-path hydration.
- *   - Caller must persist `nextUrl` to `user_metadata.avatar_url` —
- *     otherwise the local mirror falls out of sync with the canonical
- *     store on the next cross-device login.
+ *   - Caller must persist `nextUrl` to `public.profiles.avatar_url` via
+ *     `upsertProfile({ avatar_url })` — otherwise the local mirror falls
+ *     out of sync with the canonical store on the next cross-device login.
  */
 export function AvatarUploader({ currentUrl, initial, onChange }: AvatarUploaderProps) {
   const inputRef = useRef<HTMLInputElement>(null);

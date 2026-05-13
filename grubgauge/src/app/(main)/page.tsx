@@ -22,6 +22,11 @@ interface Rating {
   notes: string | null;
   meal_photo_url: string | null;
   created_at: string;
+  // Dashboard renders only the current user's own ratings (stats + recent
+  // list + "Top Rated" callout), so rater attribution would be redundant
+  // in the UI — but the field is part of the rating shape across the app,
+  // so we select it here for type consistency.
+  user_id: string | null;
 }
 
 // ── Config ─────────────────────────────────────────────────────────────────
@@ -77,7 +82,7 @@ export default function DashboardPage() {
         const supabase = createClient();
         const base = supabase
           .from("ratings")
-          .select("id, venue_name, venue_address, venue_type, meal_type, visit_date, weighted_score, notes, meal_photo_url, created_at");
+          .select("id, venue_name, venue_address, venue_type, meal_type, visit_date, weighted_score, notes, meal_photo_url, created_at, user_id");
         const { data } = await applyRatingsOwnerScope(base, {
           user,
           deviceId: getDeviceId(),

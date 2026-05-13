@@ -7,17 +7,24 @@ import { createClient } from "@/lib/supabase/client";
 import { PageShell } from "@/components/layout/PageShell";
 import { AvatarUploader } from "@/components/profile/AvatarUploader";
 import { useAuth } from "@/lib/auth/useAuth";
+import { useProfile } from "@/lib/profile/useProfile";
+import { upsertProfile } from "@/lib/profile/profile";
 import { getAvatarUrl, getUsername, setAvatarUrl } from "@/lib/identity/deviceId";
 
 export default function ProfilePage() {
   const router = useRouter();
   const { user, loading } = useAuth();
+  // Profile fields (username, avatar_url) now live in public.profiles —
+  // useProfile fetches the row and refetches on `profile:updated` events
+  // so a handleAvatarChange in this same component re-hydrates the header
+  // avatar via useProfile elsewhere.
+  const { profile, loading: profileLoading } = useProfile();
   const [signingOut, setSigningOut] = useState(false);
   // Local override — set only after the uploader settles, so we can show
-  // the new URL before `user_metadata.avatar_url` resolves through the
-  // useAuth refresh. `null` means "use canonical". Computing the displayed
-  // URL in render (rather than mirroring user_metadata into state via
-  // useEffect) keeps us inside the react-hooks/set-state-in-effect rule.
+  // the new URL before useProfile refetches. `null` means "use canonical".
+  // Computing the displayed URL in render (rather than mirroring server
+  // state into local state via useEffect) keeps us inside the
+  // react-hooks/set-state-in-effect rule.
   const [localOverride, setLocalOverride] = useState<string | null>(null);
   const [persisting, setPersisting] = useState(false);
   const [persistError, setPersistError] = useState<string | null>(null);
@@ -29,12 +36,19 @@ export default function ProfilePage() {
     setPersisting(true);
     try {
       const supabase = createClient();
-      // Persist to user_metadata so the avatar travels with the account.
+      // Persist to public.profiles so the avatar travels with the account.
       // The uploader already wrote the Storage object + local mirror —
-      // this is the canonical commit.
-      const { error } = await supabase.auth.updateUser({ data: { avatar_url: nextUrl } });
-      if (error) {
-        setPersistError(error.message || "Couldn't save photo to your profile.");
+      // this is the canonical commit. upsertProfile also dispatches a
+      // `profile:updated` window event so the header re-fetches.
+      const result = await upsertProfile(supabase, {
+        avatar_url: nextUrl || null,
+      });
+      if (!result.ok) {
+        const message =
+          result.code === "unauthenticated"
+            ? "You need to be signed in to save a photo."
+            : result.message || "Couldn't save photo to your profile.";
+        setPersistError(message);
       }
     } catch (err) {
       setPersistError(err instanceof Error ? err.message : "Couldn't save photo.");
@@ -59,7 +73,9 @@ export default function ProfilePage() {
 
   // ── Loading ──────────────────────────────────────────────────────────────
 
-  if (loading) {
+  // Wait for both auth and profile so the greeting / identity card don't
+  // flash through a "no name set" state before the profile row resolves.
+  if (loading || (user && profileLoading)) {
     return (
       <PageShell variant="form" className="pt-lg pb-10">
         <div className="flex items-center gap-xs text-on-surface-variant">
@@ -122,23 +138,22 @@ export default function ProfilePage() {
 
   // ── Signed in ────────────────────────────────────────────────────────────
 
-  // Username lives on Supabase user_metadata (cross-device source of truth);
-  // fall back to email's local part if the user hasn't set a screen name
-  // yet, and finally to the bullet glyph so the avatar initials never empty.
-  const metaUsername =
-    typeof user.user_metadata?.username === "string" ? user.user_metadata.username.trim() : "";
+  // Username lives on public.profiles (cross-device source of truth); the
+  // trigger guarantees a row for every signed-in user, so an empty string
+  // here means the user genuinely has no human-friendly name yet — fall
+  // back to email's local part, then to the bullet glyph for the initial.
+  const profileUsername = profile?.username?.trim() ?? "";
   const emailLocal = (user.email ?? "").split("@")[0];
-  const displayName = metaUsername || emailLocal || "there";
-  const initial = (metaUsername || user.email || "•").trim().charAt(0).toUpperCase() || "•";
-  // Canonical avatar URL from user_metadata, with localStorage as a
+  const displayName = profileUsername || emailLocal || "there";
+  const initial = (profileUsername || user.email || "•").trim().charAt(0).toUpperCase() || "•";
+  // Canonical avatar URL from public.profiles, with localStorage as a
   // fast-path fallback for the first render after sign-in. localOverride
   // wins so the just-uploaded photo paints instantly.
-  const metaAvatar =
-    typeof user.user_metadata?.avatar_url === "string" ? user.user_metadata.avatar_url : "";
+  const profileAvatar = profile?.avatar_url ?? "";
   const avatarUrl =
     localOverride !== null
       ? localOverride
-      : metaAvatar || (typeof window !== "undefined" ? getAvatarUrl() : "");
+      : profileAvatar || (typeof window !== "undefined" ? getAvatarUrl() : "");
 
   return (
     <PageShell variant="form" className="pt-lg pb-10">

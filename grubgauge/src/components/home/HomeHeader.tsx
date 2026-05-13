@@ -6,20 +6,26 @@ import type { User } from "@supabase/supabase-js";
 import { BrandMark } from "@/components/brand/BrandMark";
 import { navItems } from "@/lib/nav";
 import { useAuth } from "@/lib/auth/useAuth";
+import { useProfile } from "@/lib/profile/useProfile";
+import type { Profile } from "@/lib/profile/profile";
 
-function initialFor(user: User): string {
-  const source = user.user_metadata?.username ?? user.email ?? "";
+function initialFor(user: User, profile: Profile | null): string {
+  const source = profile?.username ?? user.email ?? "";
   const ch = source.trim().charAt(0).toUpperCase();
   return ch || "•";
 }
 
-function avatarUrlFor(user: User): string {
-  const url = user.user_metadata?.avatar_url;
+function avatarUrlFor(profile: Profile | null): string {
+  const url = profile?.avatar_url;
   return typeof url === "string" && url.length > 0 ? url : "";
 }
 
 function ProfileAvatar({ user }: { user: User }) {
-  const url = avatarUrlFor(user);
+  // useProfile keeps this slot in sync with the canonical row — refetches
+  // on a `profile:updated` window event so a photo committed on /profile
+  // appears here without a navigation.
+  const { profile } = useProfile();
+  const url = avatarUrlFor(profile);
   return (
     <Link
       href="/profile"
@@ -35,7 +41,7 @@ function ProfileAvatar({ user }: { user: User }) {
           referrerPolicy="no-referrer"
         />
       ) : (
-        initialFor(user)
+        initialFor(user, profile)
       )}
     </Link>
   );

@@ -1,8 +1,18 @@
 "use client";
 
+// Note: the rating card is now extracted into `<RatingCard>` and shared
+// between this Explore feed and `/u/[username]`. History and Dashboard
+// still render their own inline cards — those have different shapes
+// (History adds an edit affordance; Dashboard has a "Top Rated" callout
+// variant), so they're left in place until those surfaces converge or
+// get their own card variants.
+
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { getRatingsLikeCounts, getUserLikedRatings } from "@/lib/ratings/likes";
+import { attachRaters, type RaterFields } from "@/lib/profile/raters";
+import { RatingCard } from "@/components/ratings/RatingCard";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -19,6 +29,11 @@ interface Rating {
   weighted_score: number;
   notes: string | null;
   meal_photo_url: string | null;
+  user_id: string | null;
+  // Hydrated via `attachRaters` after the ratings query lands. `null` for
+  // guest ratings (user_id is null) and orphaned rows whose profile was
+  // deleted — both render the deleted-user fallback in <RaterBadge>.
+  rater: RaterFields | null;
 }
 
 // ── Config ──────────────────────────────────────────────────────────────────
@@ -40,21 +55,6 @@ const FILTER_OPTIONS: { value: VenueType; label: string; icon: string }[] = [
 
 type SortOption = "score" | "recent";
 
-// ── Helpers ────────────────────────────────────────────────────────────────
-
-function scoreBadge(score: number): { label: string; colorClass: string } {
-  if (score >= 9.0) return { label: "Exceptional", colorClass: "text-primary" };
-  if (score >= 7.5) return { label: "Great Value", colorClass: "text-primary" };
-  if (score >= 6.0) return { label: "Good",        colorClass: "text-tertiary" };
-  if (score >= 4.5) return { label: "Fair",        colorClass: "text-tertiary" };
-  return                   { label: "Poor",        colorClass: "text-error" };
-}
-
-function formatDate(dateStr: string): string {
-  const d = new Date(dateStr + "T12:00:00");
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-}
-
 // ── Explore Page ───────────────────────────────────────────────────────────
 
 export default function ExplorePage() {
@@ -63,6 +63,12 @@ export default function ExplorePage() {
   const [error, setError] = useState("");
   const [activeFilter, setActiveFilter] = useState<VenueType>("all");
   const [sort, setSort] = useState<SortOption>("score");
+  // Like state hydrated once per fetch and passed down to <LikeButton>.
+  // Holding both as Sets/Maps means O(1) lookups per card render and zero
+  // per-card round-trips. Empty values are safe defaults (no liked rows /
+  // 0 count), so the cards render correctly even before this resolves.
+  const [likedSet, setLikedSet] = useState<Set<string>>(() => new Set());
+  const [countMap, setCountMap] = useState<Map<string, number>>(() => new Map());
 
   useEffect(() => {
     async function fetchRatings() {
@@ -70,14 +76,30 @@ export default function ExplorePage() {
         const supabase = createClient();
         const { data, error } = await supabase
           .from("ratings")
-          .select("id, place_id, venue_name, venue_address, venue_type, meal_type, visit_date, weighted_score, notes, meal_photo_url")
+          .select("id, place_id, venue_name, venue_address, venue_type, meal_type, visit_date, weighted_score, notes, meal_photo_url, user_id")
           .order("weighted_score", { ascending: false });
         if (error) {
           console.error("Supabase error:", error.code, error.message);
           setError(error.message || "Could not load spots.");
           return;
         }
-        setRatings(data ?? []);
+        const rows = (data ?? []) as Omit<Rating, "rater">[];
+
+        // Hydrate likes + raters in parallel. Cards render with empty
+        // attribution and 0 likes between the first paint and this
+        // resolving; the <LikeButton key=…> + setRatings(rowsWithRaters)
+        // pair triggers a clean remount with hydrated data. Failures
+        // inside the helpers are absorbed (empty Set / Map / null rater)
+        // — missing social data should never break the feed.
+        const ids = rows.map((r) => r.id);
+        const [liked, counts, rowsWithRaters] = await Promise.all([
+          getUserLikedRatings(supabase, ids),
+          getRatingsLikeCounts(supabase, ids),
+          attachRaters(supabase, rows),
+        ]);
+        setRatings(rowsWithRaters);
+        setLikedSet(liked);
+        setCountMap(counts);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Could not load spots.");
       } finally {
@@ -235,66 +257,20 @@ export default function ExplorePage() {
         {/* Spot cards */}
         <div className="flex flex-col gap-sm">
           {filtered.map((r, index) => {
-            const meta = VENUE_META[r.venue_type] ?? VENUE_META.casual;
-            const { label: badge, colorClass } = scoreBadge(r.weighted_score);
+            const liked = likedSet.has(r.id);
+            const count = countMap.get(r.id) ?? 0;
             return (
-              <div
-                key={r.id}
-                className="flex flex-col gap-sm rounded-xl border border-outline-variant bg-surface-container-low p-md transition-colors hover:bg-surface-container"
-              >
-                {/* Rank + Name + Score */}
-                <div className="flex items-start gap-sm">
-                  <span className="shrink-0 mt-0.5 font-label-sm text-label-sm text-on-surface-variant tabular-nums w-5 text-right">
-                    {index + 1}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-title-sm text-title-sm font-semibold text-on-surface truncate">{r.venue_name}</p>
-                    {r.venue_address && (
-                      <p className="mt-0.5 font-label-sm text-label-sm text-on-surface-variant truncate">{r.venue_address}</p>
-                    )}
-                  </div>
-                  <div className="flex flex-col items-end shrink-0">
-                    <span className={`font-bold tabular-nums leading-none text-[28px] ${colorClass}`}>
-                      {r.weighted_score.toFixed(1)}
-                    </span>
-                    <span className="font-label-sm text-label-sm text-on-surface-variant">/10</span>
-                  </div>
-                </div>
-
-                {r.meal_photo_url && (
-                  <div className="pl-7 pr-0">
-                    <div className="overflow-hidden rounded-lg border border-outline-variant/50">
-                      {/* eslint-disable-next-line @next/next/no-img-element -- community meal photos from Storage */}
-                      <img
-                        src={r.meal_photo_url}
-                        alt={`Meal photo at ${r.venue_name}`}
-                        className="aspect-[16/9] w-full max-h-[180px] object-cover"
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {/* Chips */}
-                <div className="flex items-center gap-xs flex-wrap pl-7">
-                  <span className="inline-flex items-center gap-xs rounded-full bg-surface-variant px-xs py-0.5 font-label-sm text-label-sm text-on-surface-variant">
-                    <span className="material-symbols-outlined text-[13px]" style={{ fontVariationSettings: "'FILL' 1" }}>{meta.icon}</span>
-                    {meta.label}
-                  </span>
-                  <span className={`inline-flex items-center rounded-full bg-surface-container-high px-xs py-0.5 font-label-sm text-label-sm font-semibold ${colorClass}`}>
-                    {badge}
-                  </span>
-                  <span className="ml-auto font-label-sm text-label-sm text-on-surface-variant shrink-0">
-                    {formatDate(r.visit_date)}
-                  </span>
-                </div>
-
-                {/* Notes */}
-                {r.notes && (
-                  <p className="border-t border-outline-variant/50 pt-xs pl-7 font-body-md text-body-md italic text-on-surface-variant line-clamp-2">
-                    {`\u201C${r.notes}\u201D`}
-                  </p>
-                )}
-              </div>
+              <RatingCard
+                // Re-key on initial like values so the inner <LikeButton>
+                // (which lazy-inits its useState from props) remounts and
+                // re-seeds when batched like data hydrates after the first
+                // render. The card itself is otherwise pure on the rating.
+                key={`${r.id}|${liked}|${count}`}
+                rating={r}
+                rank={index + 1}
+                liked={liked}
+                likeCount={count}
+              />
             );
           })}
         </div>
