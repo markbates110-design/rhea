@@ -2,6 +2,7 @@ const DEVICE_KEY = "grubgauge_device_id";
 const ONBOARDED_KEY = "grubgauge_onboarded";
 const PREFS_KEY = "grubgauge_food_prefs";
 const USERNAME_KEY = "grubgauge_username";
+const AVATAR_URL_KEY = "grubgauge_avatar_url";
 
 export function getDeviceId(): string {
   if (typeof window === "undefined") return "";
@@ -45,4 +46,22 @@ export function setFoodPrefs(prefs: string[]): void {
   if (typeof window !== "undefined") {
     localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
   }
+}
+
+/**
+ * Avatar URL local mirror — fast-path hydration for signed-in users so the
+ * header / profile avatar paints instantly before `user_metadata.avatar_url`
+ * resolves. Canonical store is Supabase; the mirror is additive (never
+ * replaces the auth-backed value) and is cleared on sign-out by the
+ * consumer when desirable.
+ */
+export function getAvatarUrl(): string {
+  if (typeof window === "undefined") return "";
+  return localStorage.getItem(AVATAR_URL_KEY) ?? "";
+}
+
+export function setAvatarUrl(url: string): void {
+  if (typeof window === "undefined") return;
+  if (url) localStorage.setItem(AVATAR_URL_KEY, url);
+  else localStorage.removeItem(AVATAR_URL_KEY);
 }

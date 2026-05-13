@@ -13,14 +13,30 @@ function initialFor(user: User): string {
   return ch || "•";
 }
 
+function avatarUrlFor(user: User): string {
+  const url = user.user_metadata?.avatar_url;
+  return typeof url === "string" && url.length > 0 ? url : "";
+}
+
 function ProfileAvatar({ user }: { user: User }) {
+  const url = avatarUrlFor(user);
   return (
     <Link
       href="/profile"
       aria-label="Profile and settings"
       className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full border border-outline-variant bg-surface-container-high font-label-sm text-label-sm font-bold text-on-surface transition-colors hover:bg-surface-variant active:scale-95"
     >
-      {initialFor(user)}
+      {url ? (
+        // eslint-disable-next-line @next/next/no-img-element -- user-uploaded avatar from Storage; sized 32px, no LCP role
+        <img
+          src={url}
+          alt=""
+          className="h-full w-full object-cover"
+          referrerPolicy="no-referrer"
+        />
+      ) : (
+        initialFor(user)
+      )}
     </Link>
   );
 }

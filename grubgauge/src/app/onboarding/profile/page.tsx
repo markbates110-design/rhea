@@ -5,9 +5,12 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/lib/auth/useAuth";
 import { PageShell } from "@/components/layout/PageShell";
+import { AvatarUploader } from "@/components/profile/AvatarUploader";
 import {
+  getAvatarUrl,
   getFoodPrefs,
   getUsername,
+  setAvatarUrl,
   setFoodPrefs,
   setOnboarded,
   setUsername,
@@ -25,27 +28,40 @@ export default function OnboardingProfilePage() {
   const { user, loading: authLoading } = useAuth();
   const [name, setName] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
+  // Avatar URL state lives on the page so the value can be batched into the
+  // single `updateUser` call alongside username + food_prefs. The
+  // AvatarUploader handles the Storage write + local mirror itself; this
+  // page is responsible for persisting the URL to user_metadata.
+  const [avatarUrl, setAvatarUrlState] = useState("");
   const [hydrated, setHydrated] = useState(false);
   const [saving, setSaving] = useState(false);
 
   // Hydrate the form. Signed-in: read from Supabase user_metadata (canonical
-  // cross-device source). Guest: fall back to localStorage. Either case
-  // produces a one-shot initial value — we never overwrite local edits on
-  // re-render. Guarded by `hydrated` so a slow auth resolution doesn't
-  // clobber a user's typed input.
+  // cross-device source). Guest: fall back to localStorage. This is a
+  // genuine one-shot async hydration — values depend on the auth user which
+  // isn't available synchronously, so `useState` lazy init can't replace it.
+  // The `hydrated` flag prevents a re-fire from clobbering user edits, and
+  // the disable below is the documented escape hatch for this pattern (see
+  // rhea-insights.md 2026-05-12 19:30 CT).
   useEffect(() => {
     if (authLoading || hydrated) return;
-    if (user) {
-      const meta = user.user_metadata ?? {};
-      const metaUsername = typeof meta.username === "string" ? meta.username : "";
-      const metaPrefs = Array.isArray(meta.food_prefs) ? (meta.food_prefs as string[]) : [];
-      setName(metaUsername || getUsername());
-      setSelected(metaPrefs.length > 0 ? metaPrefs : getFoodPrefs());
-    } else {
-      setName(getUsername());
-      setSelected(getFoodPrefs());
-    }
+    const meta = user?.user_metadata ?? {};
+    const metaUsername = typeof meta.username === "string" ? meta.username : "";
+    const metaPrefs = Array.isArray(meta.food_prefs) ? (meta.food_prefs as string[]) : [];
+    const metaAvatar = typeof meta.avatar_url === "string" ? meta.avatar_url : "";
+    const nextName = (user && metaUsername) || getUsername();
+    const nextPrefs =
+      user && metaPrefs.length > 0 ? metaPrefs : getFoodPrefs();
+    const nextAvatar = (user && metaAvatar) || getAvatarUrl();
+    // One-shot async hydration; gated by `hydrated` so it fires exactly
+    // once per mount after auth resolves. Future refactor: child component
+    // keyed by user.id with lazy initial state from props.
+    /* eslint-disable react-hooks/set-state-in-effect */
+    setName(nextName);
+    setSelected(nextPrefs);
+    setAvatarUrlState(nextAvatar);
     setHydrated(true);
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [authLoading, hydrated, user]);
 
   function togglePref(id: string) {
@@ -70,11 +86,21 @@ export default function OnboardingProfilePage() {
 
       // Canonical cross-device source for signed-in users — survives
       // sign-out / sign-in and travels with the account, not the browser.
+      // Avatar URL is included so the upload that landed via AvatarUploader
+      // is committed to user_metadata in the same write as name/prefs.
       if (user) {
         const supabase = createClient();
         await supabase.auth.updateUser({
-          data: { username: trimmedName, food_prefs: selected },
+          data: {
+            username: trimmedName,
+            food_prefs: selected,
+            avatar_url: avatarUrl,
+          },
         });
+        // Keep the local mirror aligned with the canonical write — covers
+        // the edge where the avatar URL changed but the user hit Skip
+        // without triggering an AvatarUploader update flow.
+        setAvatarUrl(avatarUrl);
       }
 
       // Signed-up users land on their actual profile so the just-saved
@@ -106,6 +132,25 @@ export default function OnboardingProfilePage() {
           Quick setup — takes 10 seconds. All optional.
         </p>
       </div>
+
+      {/* Photo — signed-in only. Guests see the existing screen-name /
+          food-prefs flow unchanged; the avatar feature is gated behind a
+          real account so RLS-owned Storage writes always have an auth.uid()
+          to bind to. */}
+      {user && hydrated && (
+        <div className="mb-lg flex flex-col gap-xs">
+          <label
+            className="font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant"
+          >
+            Profile photo
+          </label>
+          <AvatarUploader
+            currentUrl={avatarUrl}
+            initial={(name.trim() || user.email || "•").charAt(0).toUpperCase()}
+            onChange={(next) => setAvatarUrlState(next)}
+          />
+        </div>
+      )}
 
       {/* Name */}
       <div className="mb-lg flex flex-col gap-xs">

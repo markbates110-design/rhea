@@ -571,6 +571,36 @@ Verified: `npx tsc --noEmit` ✓ exit 0, `npm run lint` ✓ exit 0, ReadLints cl
 
 ---
 
+## Assessment — Profile photo upload (Supabase Storage + `user_metadata.avatar_url`, signed-in only)
+**Timestamp: 2026-05-12 19:30 CT** · **Governance ref** — `rhea-governance-agent.md` **v3.14**
+
+**e** — Two structurally separate decisions had to land together: *where the bytes live* and *where the pointer lives*. For bytes: a new `avatars` Supabase Storage bucket (auth-only writes restricted to the user's folder via RLS predicate on `auth.uid()`) vs. reusing `meal-photos` (rejected: device-keyed and anonymous-writeable, wrong security model for an account-bound asset). For the pointer: a new `profiles` table column (heavier — migration, RLS, extra round-trip) vs. extending the established `user_metadata` pattern with an `avatar_url` field (chosen — composes onto the rule set in the `2026-05-10 17:50 CT` insight; zero new tables). For the UX: a dedicated photo-only screen vs. inlining the photo step into the existing `/onboarding/profile` form, with the same uploader reused from `/profile` (chosen — single component, single mental model). For the resize: server-side (rejected: round-trip cost, no immediate preview) vs. client-side `OffscreenCanvas` / canvas fallback to square 512×512 JPEG (chosen — sub-second; bucket cap can be 1 MB because output is always small).
+
+**s** — Six surgical additions/edits, no schema migration (Storage-only):
+1. **`grubgauge/supabase/migrations/20260512000000_avatars_bucket.sql`** (NEW) — provisions the `avatars` bucket (public read, 1 MB cap, JPEG/PNG/WebP) and four RLS policies: public select; authenticated insert/update/delete with `(storage.foldername(name))[1] = auth.uid()::text`. Idempotent (`drop policy if exists` + `on conflict do update`).
+2. **`grubgauge/src/lib/storage/avatar.ts`** (NEW) — `uploadAvatar(supabase, file)` (validates MIME + size, resizes client-side, uploads to `{user_id}/avatar.jpg` with `upsert: true`, returns cache-busted public URL) and `deleteAvatar(supabase)`. Both hard-fail-closed on no session via `auth.getUser()` before any Storage call. Resize uses `OffscreenCanvas` with `HTMLCanvasElement` fallback; center-crops to square; emits JPEG @ 0.85 quality.
+3. **`grubgauge/src/lib/identity/deviceId.ts`** — adds `getAvatarUrl()` / `setAvatarUrl()` localStorage mirror helpers (fast-path hydration; additive to auth-backed canonical).
+4. **`grubgauge/src/components/profile/AvatarUploader.tsx`** (NEW) — reusable round 112px uploader: file picker + drag-and-drop + optimistic object-URL preview + progress spinner + Remove action + inline error. Owns the Storage call and local-mirror write; bubbles the public URL up via `onChange` for the parent to persist to `user_metadata`. Implements the **override-or-currentUrl** pattern (state holds an optional override; `displayUrl = override ?? currentUrl` is derived in render) — sidesteps the `react-hooks/set-state-in-effect` rule that fires on the prop-mirror pattern.
+5. **`grubgauge/src/app/onboarding/profile/page.tsx`** — renders the uploader as a new "Profile photo" step **only when `user && hydrated`**; guests see the existing screen-name / food-prefs flow unchanged. The avatar URL batches into the single `supabase.auth.updateUser({ data: { username, food_prefs, avatar_url } })` call on Finish, plus a local-mirror sync to cover the Skip-without-change path. Existing hydration effect annotated with a scoped `/* eslint-disable react-hooks/set-state-in-effect */` block — one-shot async-data hydration is the documented exception, with a future-refactor pointer (child component keyed by `user.id` with lazy initial state).
+6. **`grubgauge/src/app/(main)/profile/page.tsx`** — uploader rendered above the greeting; canonical `avatarUrl` derived in render from `user.user_metadata.avatar_url` with `localOverride` taking precedence (optimistic UI). `handleAvatarChange` writes to `user_metadata` directly so the new photo travels with the account immediately. Sign-out clears the local avatar mirror so a returning guest doesn't see a stale image on first paint.
+7. **`grubgauge/src/components/home/HomeHeader.tsx`** — `ProfileAvatar` now renders an `<img>` when `user.user_metadata.avatar_url` is set, falling back to the initial glyph. `referrerPolicy="no-referrer"` set as a defensive default for the Storage CDN.
+
+**Verification Pass** — `npm run build` ✓ (all 11 static pages prerender clean; v3.13 build gate applied), `npx tsc --noEmit` ✓, `ReadLints` ✓ on every new and edited file. `npm run lint` ✓ for all newly authored files; the onboarding-profile hydration effect now carries a scoped disable block; **two pre-existing lint errors remain** at `(main)/page.tsx:91` and `(main)/history/page.tsx:124` (`setLoading(true)` in fetch effect) — flagged as follow-on tech debt (not blocking; `next build` in Next 16 does not gate on lint).
+
+**i² First** — Feature complete; uploader is reused across onboarding and profile; header gets the photo automatically via the existing `user_metadata` read path. **i² Second / compounding rules:**
+- *Storage security model corollary to the `user_metadata` rule:* anonymous-writeable buckets use device-keyed paths (meal-photos); auth-required buckets use uid-keyed paths with a matching RLS predicate (avatars). Future "owned by user" Storage assets compose into the uid-keyed shape.
+- *Optimistic UI without prop-mirror effects:* whenever you find yourself writing `useEffect(() => setState(prop), [prop])`, replace it with `override: T | null` state and compute the displayed value in render. This is the lint-clean shape for "seeded by prop, locally settable" UI state and now the codebase default — applied here in `AvatarUploader` and `/profile`.
+- *Pre-existing fetch-effect lint debt:* dashboard + history both call `setLoading(true)` inside a fetch effect. Not blocking deploy, but accumulates pressure for a small `useTransition`-or-derive refactor. Tracked as a follow-on; not amending governance now (token conservation).
+
+**Ops:**
+- **Run `supabase/migrations/20260512000000_avatars_bucket.sql` in BOTH Supabase environments before deploy.** Uploads will 403 until the bucket + RLS policies exist. Idempotent — safe to re-run.
+
+★★★★★ — Single coherent feature spans bucket provisioning, client-side resize, reusable uploader, three surfaces (onboarding · profile · header), additive identity discipline, and a generalizable React pattern. Zero schema migration; one Storage migration. Build passes.
+
+**Next:** push when ready; smoke-test by signing in, uploading a photo at `/onboarding/profile` (or `/profile` → uploader), confirming the header avatar updates and that signing out + back in still shows the photo (cross-device persistence proves `user_metadata.avatar_url` round-trip).
+
+---
+
 ## Assessment — Username persistence across sign-ins (Supabase `user_metadata`)
 **Timestamp: 2026-05-10 17:50 CT** · **Governance ref** — `rhea-governance-agent.md` **v3.12**
 

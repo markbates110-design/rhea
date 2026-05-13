@@ -5,19 +5,52 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { PageShell } from "@/components/layout/PageShell";
+import { AvatarUploader } from "@/components/profile/AvatarUploader";
 import { useAuth } from "@/lib/auth/useAuth";
-import { getUsername } from "@/lib/identity/deviceId";
+import { getAvatarUrl, getUsername, setAvatarUrl } from "@/lib/identity/deviceId";
 
 export default function ProfilePage() {
   const router = useRouter();
   const { user, loading } = useAuth();
   const [signingOut, setSigningOut] = useState(false);
+  // Local override — set only after the uploader settles, so we can show
+  // the new URL before `user_metadata.avatar_url` resolves through the
+  // useAuth refresh. `null` means "use canonical". Computing the displayed
+  // URL in render (rather than mirroring user_metadata into state via
+  // useEffect) keeps us inside the react-hooks/set-state-in-effect rule.
+  const [localOverride, setLocalOverride] = useState<string | null>(null);
+  const [persisting, setPersisting] = useState(false);
+  const [persistError, setPersistError] = useState<string | null>(null);
+
+  async function handleAvatarChange(nextUrl: string) {
+    setLocalOverride(nextUrl);
+    setAvatarUrl(nextUrl);
+    setPersistError(null);
+    setPersisting(true);
+    try {
+      const supabase = createClient();
+      // Persist to user_metadata so the avatar travels with the account.
+      // The uploader already wrote the Storage object + local mirror —
+      // this is the canonical commit.
+      const { error } = await supabase.auth.updateUser({ data: { avatar_url: nextUrl } });
+      if (error) {
+        setPersistError(error.message || "Couldn't save photo to your profile.");
+      }
+    } catch (err) {
+      setPersistError(err instanceof Error ? err.message : "Couldn't save photo.");
+    } finally {
+      setPersisting(false);
+    }
+  }
 
   async function handleSignOut() {
     setSigningOut(true);
     try {
       const supabase = createClient();
       await supabase.auth.signOut();
+      // Clear local avatar mirror so a guest reusing the device doesn't
+      // see the prior user's photo in any fast-path render.
+      setAvatarUrl("");
       router.replace("/");
     } finally {
       setSigningOut(false);
@@ -91,43 +124,49 @@ export default function ProfilePage() {
 
   // Username lives on Supabase user_metadata (cross-device source of truth);
   // fall back to email's local part if the user hasn't set a screen name
-  // yet, and finally to the bullet glyph so the avatar is never empty.
+  // yet, and finally to the bullet glyph so the avatar initials never empty.
   const metaUsername =
     typeof user.user_metadata?.username === "string" ? user.user_metadata.username.trim() : "";
   const emailLocal = (user.email ?? "").split("@")[0];
   const displayName = metaUsername || emailLocal || "there";
   const initial = (metaUsername || user.email || "•").trim().charAt(0).toUpperCase() || "•";
+  // Canonical avatar URL from user_metadata, with localStorage as a
+  // fast-path fallback for the first render after sign-in. localOverride
+  // wins so the just-uploaded photo paints instantly.
+  const metaAvatar =
+    typeof user.user_metadata?.avatar_url === "string" ? user.user_metadata.avatar_url : "";
+  const avatarUrl =
+    localOverride !== null
+      ? localOverride
+      : metaAvatar || (typeof window !== "undefined" ? getAvatarUrl() : "");
 
   return (
     <PageShell variant="form" className="pt-lg pb-10">
       <div className="flex flex-col gap-lg">
+        {/* Avatar above name — uploader doubles as Edit/Remove affordance. */}
+        <div className="flex flex-col items-start gap-sm">
+          <AvatarUploader
+            currentUrl={avatarUrl}
+            initial={initial}
+            onChange={handleAvatarChange}
+          />
+          {persisting && (
+            <p className="font-label-sm text-label-sm text-on-surface-variant">Saving…</p>
+          )}
+          {persistError && (
+            <p className="font-label-sm text-label-sm text-error" role="alert">
+              {persistError}
+            </p>
+          )}
+        </div>
+
         <div>
           <h1 className="font-headline-md text-headline-md font-semibold text-on-surface">
             Hey, {displayName}
           </h1>
-          <p className="mt-xs font-body-md text-body-md text-on-surface-variant">
-            Account and preferences.
+          <p className="mt-xs font-body-md text-body-md text-on-surface-variant truncate">
+            {user.email}
           </p>
-        </div>
-
-        {/* Identity card */}
-        <div className="flex items-center gap-sm rounded-xl border border-outline-variant bg-surface-container-low p-md">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-outline-variant bg-surface-container-high font-headline-md text-headline-md font-bold text-on-surface">
-            {initial}
-          </div>
-          <div className="flex-1 min-w-0">
-            {metaUsername ? (
-              <>
-                <p className="font-title-sm text-title-sm font-semibold text-on-surface truncate">{metaUsername}</p>
-                <p className="mt-0.5 font-label-sm text-label-sm text-on-surface-variant truncate">{user.email}</p>
-              </>
-            ) : (
-              <>
-                <p className="font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant">Signed in as</p>
-                <p className="mt-1 font-body-md text-body-md font-medium text-on-surface truncate">{user.email}</p>
-              </>
-            )}
-          </div>
         </div>
 
         {/* Actions */}
