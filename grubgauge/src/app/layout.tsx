@@ -19,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`dark ${workSans.variable} h-full antialiased`}>
+    <html lang="en" className={`${workSans.variable} h-full antialiased`}>
       <head>
         {/* Icon font — not in globals.css: PostCSS leaves @import url() after @theme, which is invalid CSS order. */}
         {/* eslint-disable-next-line @next/next/no-page-custom-font */}

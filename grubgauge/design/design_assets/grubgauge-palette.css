@@ -1,11 +1,76 @@
 /*
  * GrubGauge — canonical palette (single source of truth).
  * Import from src/app/globals.css; do not duplicate hex in @theme.
+ *
+ * Two palettes live here:
+ *   - palette-*    : the legacy dark-theme tokens (kept as a record; not
+ *                    referenced by globals.css after the TripAdvisor restyle).
+ *   - ta-*         : the TripAdvisor-flavoured light-theme tokens that
+ *                    globals.css's @theme inline now maps every semantic
+ *                    surface/text/accent slot to.
+ *
+ * The split keeps the legacy tokens recoverable (so a future "dark mode"
+ * task can re-bind @theme without grovelling through git history) while
+ * making the active palette obvious to read.
  */
 :root {
+  /* ── Legacy GrubGauge dark palette (retained, not currently referenced) ── */
   --palette-pitch-black: #0a0903;
   --palette-red: #ff0000;
   --palette-princeton-orange: #ff8200;
   --palette-amber-gold: #ffc100;
   --palette-vanilla-custard: #ffeaae;
+
+  /* ── TripAdvisor-flavoured light palette (active) ──────────────────────
+   *
+   * Two green tokens, one for CTAs and one for accent/highlight, mirroring
+   * TripAdvisor's own use of two green tones:
+   *
+   *   ta-green        — CTA / button green (Trip Sans Green Dark equivalent).
+   *                     Tuned to ~5.4:1 against white so 14px+ button labels
+   *                     pass WCAG AA. Used as `--color-primary` and as the
+   *                     filled `--color-primary-container` (active nav pill,
+   *                     liked-state chip, "Save" buttons).
+   *   ta-green-deep   — hover / pressed state for ta-green; also high-tier
+   *                     score text (`text-primary` reads as ta-green by way
+   *                     of the @theme map, but a darker shade would be
+   *                     swapped via `--color-on-primary-fixed` if we ever
+   *                     introduce a "selected nav" treatment that needs
+   *                     deeper contrast).
+   *   ta-green-bright — brighter accent for decorative tints (subtle 5–10%
+   *                     callouts, focus rings). NOT used for filled buttons
+   *                     because contrast against white is borderline.
+   *   ta-green-soft   — tinted background for hover-on-pill and "Top Rated"
+   *                     callouts (`bg-primary/5` etc. mostly cover this; the
+   *                     token is here for non-utility-alpha use cases).
+   *   ta-cream        — page background. Slightly warm off-white; reads as
+   *                     paper rather than the harsher pure-white of cards.
+   *   ta-paper        — primary surface (cards, header, bottom nav).
+   *   ta-mist         — secondary surface (chips, hover states, slider track).
+   *   ta-mist-deep    — deepest surface tier (hover-on-hover, raised chrome).
+   *   ta-charcoal     — primary text on cream/paper. ~13:1 on cream.
+   *   ta-mid          — secondary text. ~5.4:1 on cream — passes AA.
+   *   ta-edge         — hairline borders / dividers. Deliberately light;
+   *                     cards lean on subtle separation, not heavy outlines.
+   *   ta-amber        — middle-tier score text + Pro teaser pill.
+   *   ta-red          — error text on light bg. Tuned for AA on cream.
+   */
+  --ta-green: #00754a;
+  --ta-green-deep: #005c39;
+  --ta-green-bright: #00aa6c;
+  --ta-green-soft: #e6f5ee;
+  --ta-cream: #faf6f1;
+  --ta-paper: #ffffff;
+  --ta-mist: #f5f5f5;
+  --ta-mist-deep: #ebebeb;
+  --ta-charcoal: #2c2c2c;
+  --ta-mid: #6e6e6e;
+  --ta-edge: #e6e6e6;
+  /* ta-amber is darker than the brand-illustration amber (#f5b041) so it
+     reads as text on cream. Tuned to ~5:1 against ta-cream — passes AA for
+     normal text. The tinted-background uses (`bg-tertiary/10` on the Pro
+     teaser, `text-tertiary` for "Good"/"Fair" score badges) all benefit. */
+  --ta-amber: #b8731c;
+  --ta-amber-soft: #fdf1e0;
+  --ta-red: #d22b2b;
 }

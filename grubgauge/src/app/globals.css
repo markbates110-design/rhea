@@ -4,57 +4,70 @@
 /* Material Symbols: load via <link> in layout.tsx — @import url() here breaks after Tailwind expands.
    Keep grubgauge-palette.css as the first import so :root tokens exist before @theme. */
 
-/* GrubGauge — dark theme; accents from design/design_assets/grubgauge-palette.css */
+/* GrubGauge — TripAdvisor-flavoured light theme.
+   Every semantic slot resolves to a `--ta-*` token from grubgauge-palette.css.
+   Components read these via Tailwind's bg-/text-/border- utilities (e.g.
+   `bg-surface-container-low`, `text-on-surface-variant`, `text-primary`),
+   so the entire app re-themes by editing this block — no per-component
+   colour changes are required. */
 @theme inline {
   --font-sans: var(--font-work-sans), ui-sans-serif, system-ui, sans-serif;
 
-  --color-background: var(--palette-pitch-black);
-  --color-surface: var(--palette-pitch-black);
-  --color-on-background: var(--palette-vanilla-custard);
-  --color-primary: var(--palette-princeton-orange);
-  --color-on-primary: var(--palette-pitch-black);
-  --color-primary-container: #cc6800;
-  --color-on-primary-container: var(--palette-vanilla-custard);
-  --color-primary-fixed: #ffa040;
-  --color-primary-fixed-dim: var(--palette-princeton-orange);
-  --color-on-primary-fixed: var(--palette-pitch-black);
-  --color-on-primary-fixed-variant: #1a1408;
-  --color-tertiary: var(--palette-amber-gold);
-  --color-on-tertiary: var(--palette-pitch-black);
-  --color-tertiary-container: #c99400;
-  --color-on-tertiary-container: var(--palette-pitch-black);
-  --color-tertiary-fixed: #ffd54a;
-  --color-tertiary-fixed-dim: var(--palette-amber-gold);
-  --color-on-tertiary-fixed: var(--palette-pitch-black);
-  --color-on-tertiary-fixed-variant: #1a1408;
-  --color-secondary: #a89b7a;
-  --color-on-secondary: var(--palette-pitch-black);
-  --color-secondary-container: #3d382c;
-  --color-on-secondary-container: #e8dcc4;
-  --color-secondary-fixed: #d4c4a8;
-  --color-secondary-fixed-dim: #a89b7a;
-  --color-on-secondary-fixed: var(--palette-pitch-black);
-  --color-on-secondary-fixed-variant: #2a261c;
-  --color-on-surface: var(--palette-vanilla-custard);
-  --color-on-surface-variant: #c4b896;
-  --color-surface-variant: #3a3528;
-  --color-surface-container: #1c1912;
-  --color-surface-container-low: #14120c;
-  --color-surface-container-lowest: var(--palette-pitch-black);
-  --color-surface-container-high: #252118;
-  --color-surface-container-highest: #2e2a20;
-  --color-surface-bright: #454031;
-  --color-surface-dim: var(--palette-pitch-black);
-  --color-outline: #6b6350;
-  --color-outline-variant: #2e2a21;
-  --color-inverse-surface: var(--palette-vanilla-custard);
-  --color-inverse-on-surface: var(--palette-pitch-black);
-  --color-inverse-primary: #e67400;
-  --color-error: color-mix(in srgb, var(--palette-red) 72%, white);
-  --color-on-error: var(--palette-pitch-black);
-  --color-error-container: #5c0a0a;
-  --color-on-error-container: #ffc9c9;
-  --color-surface-tint: var(--palette-princeton-orange);
+  --color-background: var(--ta-cream);
+  --color-surface: var(--ta-paper);
+  --color-on-background: var(--ta-charcoal);
+  --color-primary: var(--ta-green);
+  --color-on-primary: #ffffff;
+  /* primary-container is the filled-action background (the dark theme used
+     a saturated orange + cream text). Same contract here: solid green with
+     white text on rest and a darker green on hover (primary-fixed) — text
+     stays white so contrast never inverts. */
+  --color-primary-container: var(--ta-green);
+  --color-on-primary-container: #ffffff;
+  --color-primary-fixed: var(--ta-green-deep);
+  --color-primary-fixed-dim: var(--ta-green);
+  --color-on-primary-fixed: #ffffff;
+  --color-on-primary-fixed-variant: #ffffff;
+  --color-tertiary: var(--ta-amber);
+  --color-on-tertiary: var(--ta-charcoal);
+  --color-tertiary-container: var(--ta-amber-soft);
+  --color-on-tertiary-container: #8a5a10;
+  --color-tertiary-fixed: var(--ta-amber-soft);
+  --color-tertiary-fixed-dim: var(--ta-amber);
+  --color-on-tertiary-fixed: var(--ta-charcoal);
+  --color-on-tertiary-fixed-variant: #8a5a10;
+  --color-secondary: var(--ta-mid);
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: var(--ta-mist);
+  --color-on-secondary-container: var(--ta-charcoal);
+  --color-secondary-fixed: var(--ta-mist-deep);
+  --color-secondary-fixed-dim: var(--ta-mid);
+  --color-on-secondary-fixed: var(--ta-charcoal);
+  --color-on-secondary-fixed-variant: var(--ta-charcoal);
+  --color-on-surface: var(--ta-charcoal);
+  --color-on-surface-variant: var(--ta-mid);
+  --color-surface-variant: var(--ta-mist);
+  /* Container tiers form a 4-step ramp so card hover (`bg-surface-container-low`
+     → `hover:bg-surface-container`) remains visible after the dark→light
+     flip. Card baseline is paper white; hover lifts to a faint mist; chips
+     and elevated chrome go one step deeper. */
+  --color-surface-container-lowest: var(--ta-cream);
+  --color-surface-container-low: var(--ta-paper);
+  --color-surface-container: var(--ta-mist);
+  --color-surface-container-high: var(--ta-mist-deep);
+  --color-surface-container-highest: var(--ta-mist-deep);
+  --color-surface-bright: var(--ta-paper);
+  --color-surface-dim: var(--ta-cream);
+  --color-outline: var(--ta-mid);
+  --color-outline-variant: var(--ta-edge);
+  --color-inverse-surface: var(--ta-charcoal);
+  --color-inverse-on-surface: var(--ta-cream);
+  --color-inverse-primary: var(--ta-green-soft);
+  --color-error: var(--ta-red);
+  --color-on-error: #ffffff;
+  --color-error-container: #fbe5e5;
+  --color-on-error-container: #7a1414;
+  --color-surface-tint: var(--ta-green);
 
   --spacing-xs: 8px;
   --spacing-sm: 12px;
@@ -94,9 +107,8 @@
   --text-label-sm--font-weight: 500;
 }
 
-html.dark,
 html {
-  color-scheme: dark;
+  color-scheme: light;
   /* Prevent mobile Safari/Chrome auto-inflating font size on rotate, which softens glyph rasterization. */
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;

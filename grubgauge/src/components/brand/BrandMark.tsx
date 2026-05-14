@@ -12,10 +12,10 @@ export function BrandMark({
 }) {
   return (
     <div className="flex shrink-0 items-center gap-xs">
-      <span className="material-symbols-outlined shrink-0 text-primary dark:text-primary transition active:scale-95 duration-150 ease-in-out">
+      <span className="material-symbols-outlined shrink-0 text-primary transition active:scale-95 duration-150 ease-in-out">
         restaurant
       </span>
-      <Tag className="whitespace-nowrap font-headline-md font-bold leading-snug text-primary dark:text-primary">
+      <Tag className="whitespace-nowrap font-headline-md font-bold leading-snug text-primary">
         GrubGauge
       </Tag>
     </div>
