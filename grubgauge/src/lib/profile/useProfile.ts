@@ -13,7 +13,8 @@ import { PROFILE_UPDATED_EVENT, PROFILES_TABLE, type Profile } from "./profile";
  * - `profile` is `null` for guests, sign-outs, or fetch failures.
  * - Refetches in response to:
  *     1. Auth state change (sign-in / sign-out / user-switch via useAuth dep)
- *     2. `profile:updated` window event dispatched by `upsertProfile`,
+ *     2. `profile:updated` window event dispatched by `updateProfile` /
+ *        `upsertProfile`,
  *        which keeps the header avatar live when the /profile page
  *        commits a new photo without forcing a full page navigation.
  *

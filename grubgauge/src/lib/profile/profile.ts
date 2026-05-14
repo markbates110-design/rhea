@@ -3,10 +3,11 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 export const PROFILES_TABLE = "profiles";
 
 /**
- * Window event dispatched after a successful `upsertProfile` so any active
- * `useProfile()` consumers in the same tab can refetch and update without
- * waiting for a navigation remount. Cross-tab consistency is out of scope
- * (would require Supabase Realtime or a BroadcastChannel).
+ * Window event dispatched after a successful `updateProfile` or
+ * `upsertProfile` so any active `useProfile()` consumers in the same tab can
+ * refetch and update without waiting for a navigation remount. Cross-tab
+ * consistency is out of scope (would require Supabase Realtime or a
+ * BroadcastChannel).
  */
 export const PROFILE_UPDATED_EVENT = "profile:updated";
 
@@ -30,19 +31,71 @@ export type UpsertProfileResult =
   | { ok: false; code: "unauthenticated" }
   | { ok: false; code: "failed"; message: string };
 
+export type UpdateProfileResult =
+  | { ok: true }
+  | { ok: false; error: "profile_not_found" }
+  | { ok: false; code: "unauthenticated" }
+  | { ok: false; code: "failed"; message: string };
+
 /**
- * Writes the current user's profile row. Only keys present on `patch` are
- * sent — undefined keys are skipped so callers can update one field at a
- * time without clobbering others (the row already exists thanks to the
- * `handle_new_user` trigger, so this is effectively an UPDATE that uses
- * upsert semantics defensively).
+ * Onboarding / first-write path: upserts `public.profiles` for the current
+ * user. `username` is required at the type level so a missing profile row
+ * never INSERTs without a NOT NULL `username`.
  *
  * Returns a discriminated union (no throw on unauth) for the same reason
  * `toggleLike` does — the unauthenticated path is a routine UI branch.
  */
-export async function upsertProfile(
+export type UpsertProfilePatch = Omit<ProfilePatch, "username"> & {
+  username: string;
+};
+
+function dispatchProfileUpdated() {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent(PROFILE_UPDATED_EVENT));
+  }
+}
+
+/**
+ * Updates an existing `public.profiles` row for the current user only.
+ * Partial patches are supported; undefined keys are omitted. If no row
+ * matches (0 rows updated), returns `profile_not_found` so callers can
+ * surface support messaging instead of treating the write as success.
+ */
+export async function updateProfile(
   supabase: SupabaseClient,
   patch: ProfilePatch,
+): Promise<UpdateProfileResult> {
+  const { data: authData, error: authError } = await supabase.auth.getUser();
+  if (authError || !authData.user) {
+    return { ok: false, code: "unauthenticated" };
+  }
+
+  const row: Record<string, unknown> = {
+    updated_at: new Date().toISOString(),
+  };
+  if (patch.username !== undefined) row.username = patch.username;
+  if (patch.display_name !== undefined) row.display_name = patch.display_name;
+  if (patch.avatar_url !== undefined) row.avatar_url = patch.avatar_url;
+
+  const { data, error } = await supabase
+    .from(PROFILES_TABLE)
+    .update(row)
+    .eq("id", authData.user.id)
+    .select("id");
+  if (error) {
+    return { ok: false, code: "failed", message: error.message };
+  }
+  if (!data?.length) {
+    return { ok: false, error: "profile_not_found" };
+  }
+
+  dispatchProfileUpdated();
+  return { ok: true };
+}
+
+export async function upsertProfile(
+  supabase: SupabaseClient,
+  patch: UpsertProfilePatch,
 ): Promise<UpsertProfileResult> {
   const { data: authData, error: authError } = await supabase.auth.getUser();
   if (authError || !authData.user) {
@@ -51,12 +104,11 @@ export async function upsertProfile(
 
   const row: Record<string, unknown> = {
     id: authData.user.id,
-    // `updated_at` has a DEFAULT but the default only fires on INSERT. The
-    // trigger pre-created the row, so every call here is an UPDATE — we
-    // set updated_at explicitly to keep it current.
+    username: patch.username,
+    // `updated_at` has a DEFAULT but the default only fires on INSERT. We
+    // set it explicitly on every write so it stays current.
     updated_at: new Date().toISOString(),
   };
-  if (patch.username !== undefined) row.username = patch.username;
   if (patch.display_name !== undefined) row.display_name = patch.display_name;
   if (patch.avatar_url !== undefined) row.avatar_url = patch.avatar_url;
 
@@ -65,9 +117,7 @@ export async function upsertProfile(
     return { ok: false, code: "failed", message: error.message };
   }
 
-  if (typeof window !== "undefined") {
-    window.dispatchEvent(new CustomEvent(PROFILE_UPDATED_EVENT));
-  }
+  dispatchProfileUpdated();
   return { ok: true };
 }
 

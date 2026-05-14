@@ -8,7 +8,7 @@ import { PageShell } from "@/components/layout/PageShell";
 import { AvatarUploader } from "@/components/profile/AvatarUploader";
 import { useAuth } from "@/lib/auth/useAuth";
 import { useProfile } from "@/lib/profile/useProfile";
-import { upsertProfile } from "@/lib/profile/profile";
+import { updateProfile } from "@/lib/profile/profile";
 import { getAvatarUrl, getUsername, setAvatarUrl } from "@/lib/identity/deviceId";
 
 export default function ProfilePage() {
@@ -38,16 +38,24 @@ export default function ProfilePage() {
       const supabase = createClient();
       // Persist to public.profiles so the avatar travels with the account.
       // The uploader already wrote the Storage object + local mirror —
-      // this is the canonical commit. upsertProfile also dispatches a
+      // this is the canonical commit. updateProfile dispatches a
       // `profile:updated` window event so the header re-fetches.
-      const result = await upsertProfile(supabase, {
+      const result = await updateProfile(supabase, {
         avatar_url: nextUrl || null,
       });
       if (!result.ok) {
-        const message =
-          result.code === "unauthenticated"
-            ? "You need to be signed in to save a photo."
-            : result.message || "Couldn't save photo to your profile.";
+        let message: string;
+        if ("code" in result) {
+          if (result.code === "unauthenticated") {
+            message = "You need to be signed in to save a photo.";
+          } else if (result.code === "failed") {
+            message = result.message || "Couldn't save photo to your profile.";
+          } else {
+            message = "Couldn't save photo to your profile.";
+          }
+        } else {
+          message = "Your profile is missing. Please contact support.";
+        }
         setPersistError(message);
       }
     } catch (err) {

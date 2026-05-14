@@ -26,7 +26,8 @@ interface AvatarUploaderProps {
  *   - Storage write happens immediately (so the user sees the image),
  *     mirrors to localStorage for fast-path hydration.
  *   - Caller must persist `nextUrl` to `public.profiles.avatar_url` via
- *     `upsertProfile({ avatar_url })` — otherwise the local mirror falls
+ *     `updateProfile({ avatar_url })` (or `upsertProfile` on onboarding) —
+ *     otherwise the local mirror falls
  *     out of sync with the canonical store on the next cross-device login.
  */
 export function AvatarUploader({ currentUrl, initial, onChange }: AvatarUploaderProps) {

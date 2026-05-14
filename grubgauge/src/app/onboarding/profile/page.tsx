@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/lib/auth/useAuth";
 import { useProfile } from "@/lib/profile/useProfile";
-import { upsertProfile } from "@/lib/profile/profile";
+import { updateProfile, upsertProfile } from "@/lib/profile/profile";
 import { PageShell } from "@/components/layout/PageShell";
 import { AvatarUploader } from "@/components/profile/AvatarUploader";
 import {
@@ -95,15 +95,14 @@ export default function OnboardingProfilePage() {
       // independent and there's no ordering requirement.
       if (user) {
         const supabase = createClient();
+        const resolvedUsername = (trimmedName || profile?.username || "").trim();
         await Promise.all([
-          // Skip the username field entirely when empty so we don't
-          // violate the NOT NULL constraint — the trigger-generated
-          // value (e.g. "user_a1b2c3d4") stays in place until the user
-          // sets a real name.
-          upsertProfile(supabase, {
-            ...(trimmedName ? { username: trimmedName } : {}),
-            avatar_url: avatarUrl || null,
-          }),
+          resolvedUsername
+            ? upsertProfile(supabase, {
+                username: resolvedUsername,
+                avatar_url: avatarUrl || null,
+              })
+            : updateProfile(supabase, { avatar_url: avatarUrl || null }),
           supabase.auth.updateUser({ data: { food_prefs: selected } }),
         ]);
         // Keep the local mirror aligned with the canonical write — covers
