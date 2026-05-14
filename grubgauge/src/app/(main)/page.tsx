@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { PageShell } from "@/components/layout/PageShell";
+import { NearbyVenuesRow } from "@/components/discovery/NearbyVenuesRow";
 import { getDeviceId, isOnboarded } from "@/lib/identity/deviceId";
 import { useAuth } from "@/lib/auth/useAuth";
 import { applyRatingsOwnerScope } from "@/lib/ratings/scope";
@@ -137,13 +138,18 @@ export default function DashboardPage() {
             <h1 className="font-display-lg text-[32px] font-bold leading-[40px] text-on-surface">GrubGauge</h1>
             <p className="mt-xs font-body-md text-body-md text-on-surface-variant">Your personal food value tracker.</p>
           </div>
+          {/* Near You first — a brand-new visitor sees real local
+              restaurants before they see "you have nothing." When the
+              row hides (location denied / unsupported) the existing
+              "Rate a Spot" CTA below remains the universal fallback. */}
+          <NearbyVenuesRow />
           <div className="flex flex-col items-center gap-lg rounded-xl border border-outline-variant bg-surface-container-low px-lg py-xl text-center">
             <span className="material-symbols-outlined text-[48px] text-on-surface-variant" style={{ fontVariationSettings: "'FILL' 1" }}>
               restaurant_menu
             </span>
             <div>
               <p className="font-title-sm text-title-sm text-on-surface">No ratings yet</p>
-              <p className="mt-xs font-body-md text-body-md text-on-surface-variant">Rate your first spot to start tracking.</p>
+              <p className="mt-xs font-body-md text-body-md text-on-surface-variant">Tap a nearby spot above, or search for any place.</p>
             </div>
             <Link
               href={rateHref}
@@ -180,6 +186,9 @@ export default function DashboardPage() {
             Rate
           </Link>
         </div>
+
+        {/* Near You — discovery row, lead content above retrospective stats */}
+        <NearbyVenuesRow />
 
         {/* Stats row */}
         <div className="grid grid-cols-3 gap-sm">

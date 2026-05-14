@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { getDeviceId } from "@/lib/identity/deviceId";
 import {
@@ -11,6 +11,7 @@ import {
   calcWeightedScore,
   type VenueType,
 } from "@/lib/ratings/scoring";
+import { inferVenueType } from "@/lib/places/venueType";
 import { uploadMealPhoto } from "@/lib/storage/mealPhoto";
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -22,71 +23,10 @@ interface SpotSelection {
   venueType: VenueType;
 }
 
-// Google Places types grouped by VenueType. Inference uses priority order
-// (fast-food > food-truck > fine > casual) — Google sometimes returns the
-// generic `restaurant` / cuisine type *before* `fast_food_restaurant`, which
-// would mis-classify chains like McDonald's as Casual Dining under a
-// first-match scan. Priority match guarantees the most specific bucket wins.
-const TYPES_BY_VENUE: Record<VenueType, readonly string[]> = {
-  "fast-food": [
-    "fast_food_restaurant",
-    "hamburger_restaurant",
-    "sandwich_shop",
-    "pizza_restaurant",
-    "meal_takeaway",
-    "meal_delivery",
-    "donut_shop",
-    "bagel_shop",
-    "ice_cream_shop",
-    "coffee_shop",
-    "cafe",
-    "chicken_restaurant",
-    "fried_chicken_restaurant",
-    "taco_restaurant",
-    "burrito_restaurant",
-  ],
-  "food-truck": ["food_truck", "food_stall", "street_food"],
-  fine: ["fine_dining_restaurant"],
-  casual: [
-    "casual_dining_restaurant",
-    "restaurant",
-    "american_restaurant",
-    "italian_restaurant",
-    "mexican_restaurant",
-    "chinese_restaurant",
-    "japanese_restaurant",
-    "thai_restaurant",
-    "indian_restaurant",
-    "korean_restaurant",
-    "vietnamese_restaurant",
-    "french_restaurant",
-    "mediterranean_restaurant",
-    "greek_restaurant",
-    "spanish_restaurant",
-    "middle_eastern_restaurant",
-    "steak_house",
-    "seafood_restaurant",
-    "vegetarian_restaurant",
-    "vegan_restaurant",
-    "barbecue_restaurant",
-    "ramen_restaurant",
-    "sushi_restaurant",
-    "bar",
-    "pub",
-    "wine_bar",
-    "brewery",
-  ],
-};
-
-const VENUE_PRIORITY: readonly VenueType[] = ["fast-food", "food-truck", "fine", "casual"];
-
-function inferVenueType(types: string[]): VenueType {
-  const set = new Set(types);
-  for (const venue of VENUE_PRIORITY) {
-    if (TYPES_BY_VENUE[venue].some((t) => set.has(t))) return venue;
-  }
-  return "casual";
-}
+// Google Places types → VenueType mapping has been extracted to
+// `lib/places/venueType.ts` so the dashboard's NearbyVenuesRow shares
+// the same inference (and so we don't drift on which Google type strings
+// belong in which bucket).
 
 // ── Scoring ────────────────────────────────────────────────────────────────
 
@@ -104,12 +44,30 @@ function today(): string {
 
 // ── Spot Search ────────────────────────────────────────────────────────────
 
-function SpotSearch({ onSelect }: { onSelect: (s: SpotSelection) => void }) {
+interface SpotSearchProps {
+  onSelect: (s: SpotSelection) => void;
+  /**
+   * Optional Google place_id to auto-select on mount. Powers entry-point
+   * deep-links like the dashboard "Near You" card → `/rate?placeId=...`.
+   * Consumed exactly once via an internal ref guard so a re-render with
+   * the same prop doesn't re-spend a Place Details call. The parent
+   * additionally clears its own consumed-flag after the first onSelect
+   * so a remount (e.g. user clicks "Change") doesn't re-auto-select the
+   * same venue.
+   */
+  initialPlaceId?: string;
+}
+
+function SpotSearch({ onSelect, initialPlaceId }: SpotSearchProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const mapDivRef = useRef<HTMLDivElement>(null);
   const autocompleteRef = useRef<google.maps.places.AutocompleteService | null>(null);
   const placesRef = useRef<google.maps.places.PlacesService | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // One-shot guard so `initialPlaceId` is only ever consumed once, even
+  // if the auto-select effect re-runs from a stable identity change in
+  // the `onSelect` callback prop.
+  const autoSelectFiredRef = useRef(false);
 
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<google.maps.places.AutocompletePrediction[]>([]);
@@ -122,6 +80,32 @@ function SpotSearch({ onSelect }: { onSelect: (s: SpotSelection) => void }) {
       placesRef.current = new google.maps.places.PlacesService(mapDivRef.current);
     }
   }, []);
+
+  // Auto-select when entry-point wiring (?placeId on /rate) supplies a
+  // venue. Runs after the placesRef init effect (effect declaration order
+  // = run order in the same commit phase, so placesRef.current is already
+  // set by the time this fires). Failures are silent — the user can still
+  // search manually, and we never want a bad deep-link to UI-noise the
+  // form that's about to be filled in.
+  useEffect(() => {
+    if (autoSelectFiredRef.current) return;
+    if (!initialPlaceId) return;
+    if (!placesRef.current) return;
+    autoSelectFiredRef.current = true;
+    placesRef.current.getDetails(
+      { placeId: initialPlaceId, fields: ["name", "formatted_address", "types", "place_id"] },
+      (place, status) => {
+        if (status === google.maps.places.PlacesServiceStatus.OK && place?.place_id) {
+          onSelect({
+            placeId: place.place_id,
+            name: place.name ?? "",
+            address: place.formatted_address ?? "",
+            venueType: inferVenueType(place.types ?? []),
+          });
+        }
+      },
+    );
+  }, [initialPlaceId, onSelect]);
 
   const fetchSuggestions = useCallback((input: string) => {
     if (!input.trim() || input.length < 2) { setSuggestions([]); return; }
@@ -235,12 +219,43 @@ function SpotSearch({ onSelect }: { onSelect: (s: SpotSelection) => void }) {
 
 // ── Rate Page ──────────────────────────────────────────────────────────────
 
+/**
+ * Default export is a thin Suspense wrapper around RatePageInner so the
+ * `useSearchParams()` read inside (powering the `?placeId` deep-link
+ * auto-select) doesn't break Next.js static prerender. Same shape used by
+ * `/onboarding/signup` for the same reason.
+ */
 export default function RatePage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="mx-auto w-full min-w-0 pb-10 pt-lg md:pt-xl">
+          <div className="h-[420px]" aria-hidden />
+        </main>
+      }
+    >
+      <RatePageInner />
+    </Suspense>
+  );
+}
+
+function RatePageInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [mapsReady, setMapsReady] = useState(false);
   const [mapsError, setMapsError] = useState(false);
 
   const [spot, setSpot] = useState<SpotSelection | null>(null);
+  // `?placeId=...` deep-link consumed exactly once: the URL value seeds
+  // SpotSearch on first mount, then `consumedPlaceId` flips true so any
+  // subsequent SpotSearch remount (e.g. user clicks "Change" → spot
+  // toggles to null → key flips → fresh SpotSearch mounts) does NOT
+  // re-trigger the auto-select against the stale URL value. The URL itself
+  // is left as-is — clearing it via router.replace would compete with
+  // browser-back semantics for no real benefit.
+  const [consumedPlaceId, setConsumedPlaceId] = useState(false);
+  const queryPlaceId = searchParams?.get("placeId") ?? null;
+  const initialPlaceId = consumedPlaceId ? undefined : queryPlaceId ?? undefined;
   const [visitDate, setVisitDate] = useState(today());
   const [mealType, setMealType] = useState("dinner");
   const [scores, setScores] = useState<Record<string, number>>({});
@@ -313,6 +328,10 @@ export default function RatePage() {
     setScores({});
     setError("");
     clearMealPhoto();
+    // Mark the deep-link consumed so a later "Change" → SpotSearch remount
+    // doesn't auto-select the original `?placeId` venue again. Safe to call
+    // unconditionally — already-true is a no-op.
+    setConsumedPlaceId(true);
   }
 
   function handleMealPhotoPick(fileList: FileList | null) {
@@ -506,7 +525,14 @@ export default function RatePage() {
               // Places service refs, debounce timer) when the user clicks
               // "Change" on the selected-spot chip. Guarantees a clean search
               // surface — no stale dropdown can overlay the chip area.
-              <SpotSearch key={spot ? "selected" : "empty"} onSelect={handleSpotSelect} />
+              // `initialPlaceId` is gated on `consumedPlaceId` (parent state) so
+              // a remount triggered by Change doesn't re-auto-select the URL
+              // deep-link value.
+              <SpotSearch
+                key={spot ? "selected" : "empty"}
+                onSelect={handleSpotSelect}
+                initialPlaceId={spot ? undefined : initialPlaceId}
+              />
             ) : !mapsError ? (
               <div className="flex items-center gap-xs text-on-surface-variant font-body-md text-body-md">
                 <span className="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
