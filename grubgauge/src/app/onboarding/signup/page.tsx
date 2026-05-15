@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/lib/auth/useAuth";
 import { PageShell } from "@/components/layout/PageShell";
 import { isOnboarded, setOnboarded } from "@/lib/identity/deviceId";
+import { applyPendingFollow } from "@/lib/follows/applyPending";
 
 type Mode = "signup" | "signin";
 
@@ -54,8 +55,21 @@ function OnboardingAuthPageInner() {
   // — never silently redirect into authenticated flows when session is null.
   const [pendingEmail, setPendingEmail] = useState<string | null>(null);
 
+  // Email-confirmation path lands here already authenticated. If the
+  // visitor opened the FollowGateSheet before verifying, honor that
+  // intent before falling through to the canonical /profile landing.
   useEffect(() => {
-    if (!authLoading && user) router.replace("/profile");
+    if (authLoading || !user) return;
+    let cancelled = false;
+    (async () => {
+      const supabase = createClient();
+      const next = await applyPendingFollow(supabase);
+      if (cancelled) return;
+      router.replace(next ?? "/profile");
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [authLoading, user, router]);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -95,7 +109,8 @@ function OnboardingAuthPageInner() {
           return;
         }
         setOnboarded();
-        router.push("/profile");
+        const next = await applyPendingFollow(supabase);
+        router.push(next ?? "/profile");
         return;
       }
 

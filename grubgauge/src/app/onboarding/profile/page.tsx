@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/lib/auth/useAuth";
 import { useProfile } from "@/lib/profile/useProfile";
 import { updateProfile, upsertProfile } from "@/lib/profile/profile";
+import { applyPendingFollow } from "@/lib/follows/applyPending";
 import { PageShell } from "@/components/layout/PageShell";
 import { AvatarUploader } from "@/components/profile/AvatarUploader";
 import {
@@ -115,7 +116,15 @@ export default function OnboardingProfilePage() {
       // screen name is immediately visible; guests reach this screen via
       // the "Update preferences" link on /profile, so /profile is the
       // correct return target for them too.
-      router.push("/profile");
+      //
+      // If a guest tapped Follow on someone before signup, honor that
+      // intent now: applyPendingFollow runs the follow on the now-active
+      // session and returns the path the user originally wanted to land
+      // back on. Guests (no `user`) skip this — the helper short-circuits
+      // because applyPendingFollow internally requires an auth session.
+      const supabase = createClient();
+      const next = user ? await applyPendingFollow(supabase) : null;
+      router.push(next ?? "/profile");
     } finally {
       setSaving(false);
     }

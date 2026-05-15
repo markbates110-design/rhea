@@ -6,6 +6,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { PageShell } from "@/components/layout/PageShell";
 import { AvatarUploader } from "@/components/profile/AvatarUploader";
+import { FollowStatRow } from "@/components/follows/FollowStatRow";
 import { useAuth } from "@/lib/auth/useAuth";
 import { useProfile } from "@/lib/profile/useProfile";
 import { updateProfile } from "@/lib/profile/profile";
@@ -191,6 +192,13 @@ export default function ProfilePage() {
             {user.email}
           </p>
         </div>
+
+        {/* Social graph — counts tap into the same list pages used on
+            /u/[username], so the own-profile + public-profile views share
+            one navigation surface. No Follow button on self. */}
+        {profileUsername && (
+          <FollowStatRow userId={user.id} username={profileUsername} />
+        )}
 
         {/* Actions */}
         <div className="flex flex-col gap-sm">

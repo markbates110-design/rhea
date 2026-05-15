@@ -7,6 +7,8 @@ import { PageShell } from "@/components/layout/PageShell";
 import { RatingCard, type RatingCardRating } from "@/components/ratings/RatingCard";
 import { getProfileByUsername, type Profile } from "@/lib/profile/profile";
 import { getRatingsLikeCounts, getUserLikedRatings } from "@/lib/ratings/likes";
+import { FollowButton } from "@/components/follows/FollowButton";
+import { FollowStatRow } from "@/components/follows/FollowStatRow";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -191,6 +193,17 @@ export default function PublicProfilePage() {
             <h1 className="font-headline-md text-headline-md font-bold text-on-surface">{name}</h1>
             <p className="mt-0.5 font-label-sm text-label-sm text-on-surface-variant">@{profile.username}</p>
           </div>
+
+          <FollowButton
+            target={{
+              userId: profile.id,
+              username: profile.username,
+              displayName: name,
+              avatarUrl: profile.avatar_url ?? null,
+            }}
+          />
+
+          <FollowStatRow userId={profile.id} username={profile.username} />
 
           <div className="flex flex-col items-center gap-0.5">
             <p className="font-body-md text-body-md text-on-surface">
