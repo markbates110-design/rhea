@@ -43,17 +43,9 @@ export default function OnboardingWelcomePage() {
       <div className="flex-1" />
 
       <PageShell variant="feed" className="pb-10">
-        {/* Brand */}
+        {/* Brand — full lockup includes gauge arc; no separate icon tile */}
         <div className="flex flex-col items-center gap-sm text-center">
-          <div className="mb-xs flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/30 bg-primary/10">
-            <span
-              className="material-symbols-outlined text-[36px] text-primary"
-              style={{ fontVariationSettings: "'FILL' 1" }}
-            >
-              restaurant
-            </span>
-          </div>
-          <BrandMark as="h1" />
+          <BrandMark as="h1" size="lg" />
           <p className="font-body-md text-body-md text-on-surface-variant">
             Find true culinary value.
           </p>

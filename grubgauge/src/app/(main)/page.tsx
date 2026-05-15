@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { PageShell } from "@/components/layout/PageShell";
+import { BrandMark } from "@/components/brand/BrandMark";
 import { NearbyVenuesRow } from "@/components/discovery/NearbyVenuesRow";
 import { getDeviceId, isOnboarded } from "@/lib/identity/deviceId";
 import { useAuth } from "@/lib/auth/useAuth";
@@ -135,7 +136,7 @@ export default function DashboardPage() {
       <PageShell variant="feed" className="pt-lg pb-10">
         <div className="flex flex-col gap-lg">
           <div>
-            <h1 className="font-display-lg text-[32px] font-bold leading-[40px] text-on-surface">GrubGauge</h1>
+            <BrandMark as="h1" size="hero" />
             <p className="mt-xs font-body-md text-body-md text-on-surface-variant">Your personal food value tracker.</p>
           </div>
           {/* Near You first — a brand-new visitor sees real local
@@ -175,7 +176,7 @@ export default function DashboardPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="font-display-lg text-[32px] font-bold leading-[40px] text-on-surface">GrubGauge</h1>
+            <BrandMark as="h1" size="hero" />
             <p className="mt-xs font-body-md text-body-md text-on-surface-variant">Your personal food value tracker.</p>
           </div>
           <Link
