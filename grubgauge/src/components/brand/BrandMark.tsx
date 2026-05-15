@@ -22,10 +22,10 @@ export function BrandMark({
 }) {
   const imgClass =
     size === "lg"
-      ? "mx-auto h-[4.5rem] w-auto max-w-[min(100%,18rem)] object-contain sm:h-24"
+      ? "mx-auto h-28 w-auto max-w-[min(100%,22rem)] object-contain sm:h-32"
       : size === "hero"
-        ? "h-10 w-auto max-h-11 object-contain object-left md:h-11"
-        : "h-9 w-auto max-h-10 object-contain object-left md:h-10";
+        ? "h-12 w-auto max-h-14 object-contain object-left md:h-14"
+        : "h-11 w-auto max-h-12 object-contain object-left md:h-12";
 
   return (
     <div
