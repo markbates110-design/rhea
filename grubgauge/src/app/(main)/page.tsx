@@ -5,10 +5,10 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { PageShell } from "@/components/layout/PageShell";
-import { BrandMark } from "@/components/brand/BrandMark";
 import { NearbyVenuesRow } from "@/components/discovery/NearbyVenuesRow";
-import { getDeviceId, isOnboarded } from "@/lib/identity/deviceId";
+import { getDeviceId, getUsername, isOnboarded } from "@/lib/identity/deviceId";
 import { useAuth } from "@/lib/auth/useAuth";
+import { useProfile } from "@/lib/profile/useProfile";
 import { applyRatingsOwnerScope } from "@/lib/ratings/scope";
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -60,6 +60,7 @@ function formatDate(dateStr: string): string {
 export default function DashboardPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
+  const { profile } = useProfile();
   const [ratings, setRatings] = useState<Rating[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -116,6 +117,17 @@ export default function DashboardPage() {
 
   const recent = ratings.slice(0, 3);
 
+  const greetingTitle = useMemo(() => {
+    if (!user) {
+      const guest = getUsername().trim();
+      return guest ? `Hey, ${guest}` : "Hey there";
+    }
+    const profileUsername = profile?.username?.trim() ?? "";
+    const emailLocal = (user.email ?? "").split("@")[0];
+    const displayName = profileUsername || emailLocal || "there";
+    return displayName === "there" ? "Welcome back" : `Hey, ${displayName}`;
+  }, [user, profile]);
+
   // ── Loading ──────────────────────────────────────────────────────────────
 
   if (loading) {
@@ -136,8 +148,10 @@ export default function DashboardPage() {
       <PageShell variant="feed" className="pt-lg pb-10">
         <div className="flex flex-col gap-lg">
           <div>
-            <BrandMark as="h1" size="hero" />
-            <p className="mt-xs font-body-md text-body-md text-on-surface-variant">Your personal food value tracker.</p>
+            <h1 className="font-headline-md text-headline-md font-semibold text-on-surface">{greetingTitle}</h1>
+            <p className="mt-xs font-body-md text-body-md text-on-surface-variant">
+              No ratings yet — explore Near You below, or rate any spot.
+            </p>
           </div>
           {/* Near You first — a brand-new visitor sees real local
               restaurants before they see "you have nothing." When the
@@ -174,10 +188,12 @@ export default function DashboardPage() {
       <div className="flex flex-col gap-lg">
 
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <BrandMark as="h1" size="hero" />
-            <p className="mt-xs font-body-md text-body-md text-on-surface-variant">Your personal food value tracker.</p>
+        <div className="flex items-center justify-between gap-sm">
+          <div className="min-w-0">
+            <h1 className="font-headline-md text-headline-md font-semibold text-on-surface">{greetingTitle}</h1>
+            <p className="mt-xs font-body-md text-body-md text-on-surface-variant">
+              You&apos;ve rated {stats!.total} spot{stats!.total === 1 ? "" : "s"} · avg {stats!.avg.toFixed(1)}/10
+            </p>
           </div>
           <Link
             href={rateHref}
