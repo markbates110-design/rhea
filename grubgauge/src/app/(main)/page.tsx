@@ -120,7 +120,7 @@ export default function DashboardPage() {
   const greetingTitle = useMemo(() => {
     if (!user) {
       const guest = getUsername().trim();
-      return guest ? `Welcome back, ${guest}` : "Welcome back";
+      return guest ? `Welcome, ${guest}` : "Welcome";
     }
     const profileUsername = profile?.username?.trim() ?? "";
     const emailLocal = (user.email ?? "").split("@")[0];
