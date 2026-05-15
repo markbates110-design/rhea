@@ -7,6 +7,8 @@ import { createClient } from "@/lib/supabase/client";
 import { PageShell } from "@/components/layout/PageShell";
 import { AvatarUploader } from "@/components/profile/AvatarUploader";
 import { FollowStatRow } from "@/components/follows/FollowStatRow";
+import { FounderBadge } from "@/components/founder/FounderBadge";
+import { useFounderState } from "@/lib/founder/useFounderState";
 import { useAuth } from "@/lib/auth/useAuth";
 import { useProfile } from "@/lib/profile/useProfile";
 import { updateProfile } from "@/lib/profile/profile";
@@ -20,6 +22,7 @@ export default function ProfilePage() {
   // so a handleAvatarChange in this same component re-hydrates the header
   // avatar via useProfile elsewhere.
   const { profile, loading: profileLoading } = useProfile();
+  const { badge: founderBadge } = useFounderState();
   const [signingOut, setSigningOut] = useState(false);
   // Local override — set only after the uploader settles, so we can show
   // the new URL before useProfile refetches. `null` means "use canonical".
@@ -184,13 +187,18 @@ export default function ProfilePage() {
           )}
         </div>
 
-        <div>
+        <div className="flex flex-col gap-xs">
           <h1 className="font-headline-md text-headline-md font-semibold text-on-surface">
             Hey, {displayName}
           </h1>
-          <p className="mt-xs font-body-md text-body-md text-on-surface-variant truncate">
+          <p className="font-body-md text-body-md text-on-surface-variant truncate">
             {user.email}
           </p>
+          {founderBadge && (
+            <div className="mt-xs">
+              <FounderBadge badge={founderBadge} size="full" />
+            </div>
+          )}
         </div>
 
         {/* Social graph — counts tap into the same list pages used on

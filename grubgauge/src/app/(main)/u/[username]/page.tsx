@@ -9,6 +9,8 @@ import { getProfileByUsername, type Profile } from "@/lib/profile/profile";
 import { getRatingsLikeCounts, getUserLikedRatings } from "@/lib/ratings/likes";
 import { FollowButton } from "@/components/follows/FollowButton";
 import { FollowStatRow } from "@/components/follows/FollowStatRow";
+import { FounderBadge } from "@/components/founder/FounderBadge";
+import { getFounderBadge, type FounderBadgeInfo } from "@/lib/founder/founder";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -76,6 +78,7 @@ export default function PublicProfilePage() {
   const username = decodeParam(params?.username);
 
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [founderBadge, setFounderBadge] = useState<FounderBadgeInfo | null>(null);
   const [ratings, setRatings] = useState<Rating[]>([]);
   const [likedSet, setLikedSet] = useState<Set<string>>(() => new Set());
   const [countMap, setCountMap] = useState<Map<string, number>>(() => new Map());
@@ -96,6 +99,11 @@ export default function PublicProfilePage() {
           return;
         }
         setProfile(found);
+        // Founder/FM badge runs in parallel with ratings load below; resolved
+        // separately so a failure here doesn't gate the rating list render.
+        getFounderBadge(supabase, found.id).then((b) => {
+          if (!cancelled) setFounderBadge(b);
+        });
 
         const { data, error } = await supabase
           .from("ratings")
@@ -189,9 +197,10 @@ export default function PublicProfilePage() {
             )}
           </div>
 
-          <div>
+          <div className="flex flex-col items-center gap-xs">
             <h1 className="font-headline-md text-headline-md font-bold text-on-surface">{name}</h1>
-            <p className="mt-0.5 font-label-sm text-label-sm text-on-surface-variant">@{profile.username}</p>
+            <p className="font-label-sm text-label-sm text-on-surface-variant">@{profile.username}</p>
+            {founderBadge && <FounderBadge badge={founderBadge} size="full" />}
           </div>
 
           <FollowButton

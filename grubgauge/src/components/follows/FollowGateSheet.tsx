@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { clearPendingFollow } from "@/lib/follows/pendingFollow";
+import { FounderSlotCounter } from "@/components/founder/FounderSlotCounter";
 
 export interface FollowGateTarget {
   userId: string;
@@ -222,6 +223,14 @@ export function FollowGateSheet({ open, target, onDismiss }: Props) {
           >
             Continue browsing
           </button>
+        </div>
+
+        {/* Founder hook urgency line — the gate sheet is already the
+            highest-intent moment in the guest funnel; layering the
+            founder scarcity here amplifies the conversion lever
+            without adding any new modal chrome. */}
+        <div style={{ marginTop: 4 }}>
+          <FounderSlotCounter variant="pill" />
         </div>
       </div>
     </div>,

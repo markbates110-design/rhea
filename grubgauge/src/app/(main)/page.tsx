@@ -6,6 +6,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { PageShell } from "@/components/layout/PageShell";
 import { NearbyVenuesRow } from "@/components/discovery/NearbyVenuesRow";
+import { FounderProgressCard } from "@/components/founder/FounderProgressCard";
 import { getDeviceId, getUsername, isOnboarded } from "@/lib/identity/deviceId";
 import { useAuth } from "@/lib/auth/useAuth";
 import { useProfile } from "@/lib/profile/useProfile";
@@ -153,6 +154,10 @@ export default function DashboardPage() {
               No ratings yet — explore Near You below, or rate any spot.
             </p>
           </div>
+          {/* Founder hook — surfaces only for signed-in non-founders while
+              slots remain. Self-hides for guests / founders / closed program
+              so this slot collapses cleanly when not applicable. */}
+          <FounderProgressCard rateHref={rateHref} />
           {/* Near You first — a brand-new visitor sees real local
               restaurants before they see "you have nothing." When the
               row hides (location denied / unsupported) the existing
@@ -203,6 +208,12 @@ export default function DashboardPage() {
             Rate
           </Link>
         </div>
+
+        {/* Founder hook — same self-hiding behaviour as in the empty
+            branch. For a rated-but-not-yet-FM user this nudges them to
+            the 3-day threshold before they get distracted by their own
+            history below. */}
+        <FounderProgressCard rateHref={rateHref} />
 
         {/* Near You — discovery row, lead content above retrospective stats */}
         <NearbyVenuesRow />

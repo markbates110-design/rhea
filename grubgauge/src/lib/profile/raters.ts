@@ -1,18 +1,26 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { PROFILES_TABLE } from "@/lib/profile/profile";
+import {
+  type FounderBadgeInfo,
+  getFounderBadgesByUserIds,
+} from "@/lib/founder/founder";
 
 /**
- * Public-facing slice of a `public.profiles` row. Just the fields needed to
- * render an attribution badge — no `created_at` / `updated_at` etc.
+ * Public-facing slice of a `public.profiles` row plus optional founder
+ * status, all the fields needed to render an attribution badge + the
+ * far-right founder pill on a rating card — no `created_at` / `updated_at`.
  *
  * The narrower type keeps this decoupled from the `Profile` shape used by
  * `useProfile` (current user's full row), so a future change to that shape
- * doesn't ripple through every rating card.
+ * doesn't ripple through every rating card. Founder is included here
+ * because it travels with the same batched lookup; a second hydration
+ * pass would double the round-trips on every feed render.
  */
 export interface RaterFields {
   username: string;
   display_name: string | null;
   avatar_url: string | null;
+  founder: FounderBadgeInfo | null;
 }
 
 /**
@@ -45,18 +53,25 @@ export async function getRatersByUserIds(
   );
   if (unique.length === 0) return map;
 
-  const { data, error } = await supabase
-    .from(PROFILES_TABLE)
-    .select("id, username, display_name, avatar_url")
-    .in("id", unique);
-  if (error || !data) return map;
+  // Parallel: profile fields + founder badges (FM rows + The Founder env
+  // resolution). Both queries are public-read and hit independent indexes,
+  // so launching them together adds no contention.
+  const [profileRes, founderMap] = await Promise.all([
+    supabase
+      .from(PROFILES_TABLE)
+      .select("id, username, display_name, avatar_url")
+      .in("id", unique),
+    getFounderBadgesByUserIds(supabase, unique),
+  ]);
+  if (profileRes.error || !profileRes.data) return map;
 
-  for (const row of data) {
+  for (const row of profileRes.data) {
     const id = row.id as string;
     map.set(id, {
       username: row.username as string,
       display_name: (row.display_name as string | null) ?? null,
       avatar_url: (row.avatar_url as string | null) ?? null,
+      founder: founderMap.get(id) ?? null,
     });
   }
   return map;

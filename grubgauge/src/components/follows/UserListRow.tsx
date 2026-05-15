@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import type { Profile } from "@/lib/profile/profile";
+import type { FounderBadgeInfo } from "@/lib/founder/founder";
+import { FounderBadge } from "@/components/founder/FounderBadge";
 import { FollowButton } from "./FollowButton";
 
 interface Props {
@@ -10,6 +12,12 @@ interface Props {
    * follow edge to the corresponding profiles row.
    */
   profile: Profile;
+  /**
+   * Optional founder badge for this row's user. Caller batch-hydrates via
+   * `getFounderBadgesByUserIds`; omit when not needed (the row renders
+   * cleanly without the trailing pill).
+   */
+  founderBadge?: FounderBadgeInfo | null;
 }
 
 /**
@@ -20,7 +28,7 @@ interface Props {
  * Mirrors the avatar chrome used in `RaterBadge` and `HomeHeader` so the
  * follow lists feel like part of the same visual system.
  */
-export function UserListRow({ profile }: Props) {
+export function UserListRow({ profile, founderBadge = null }: Props) {
   const displayName = profile.display_name?.trim() || profile.username;
   const initial = displayName.trim().charAt(0).toUpperCase() || "•";
 
@@ -48,8 +56,11 @@ export function UserListRow({ profile }: Props) {
           )}
         </span>
         <span className="flex min-w-0 flex-col">
-          <span className="truncate font-title-sm text-title-sm font-semibold text-on-surface">
-            {displayName}
+          <span className="flex items-center gap-xs min-w-0">
+            <span className="truncate font-title-sm text-title-sm font-semibold text-on-surface">
+              {displayName}
+            </span>
+            <FounderBadge badge={founderBadge} size="compact" />
           </span>
           <span className="truncate font-label-sm text-label-sm text-on-surface-variant">
             @{profile.username}

@@ -15,6 +15,10 @@ import {
   getFollowers,
   getFollowing,
 } from "@/lib/follows/follows";
+import {
+  type FounderBadgeInfo,
+  getFounderBadgesByUserIds,
+} from "@/lib/founder/founder";
 import { UserListRow } from "./UserListRow";
 
 type Mode = "followers" | "following";
@@ -44,6 +48,9 @@ export function FollowList({ mode }: Props) {
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [rows, setRows] = useState<Profile[]>([]);
+  const [founderMap, setFounderMap] = useState<Map<string, FounderBadgeInfo>>(
+    () => new Map(),
+  );
   const [loading, setLoading] = useState(true);
   const [missing, setMissing] = useState(false);
 
@@ -79,6 +86,15 @@ export function FollowList({ mode }: Props) {
           .map((id) => profiles.get(id))
           .filter((p): p is Profile => p !== undefined);
         setRows(ordered);
+
+        // Founder/FM badges for the rows. Failures resolve to an empty
+        // Map; UserListRow renders cleanly when the badge is absent.
+        const badges = await getFounderBadgesByUserIds(
+          supabase,
+          ordered.map((p) => p.id),
+        );
+        if (cancelled) return;
+        setFounderMap(badges);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -132,7 +148,11 @@ export function FollowList({ mode }: Props) {
         ) : (
           <div className="flex flex-col gap-sm">
             {rows.map((p) => (
-              <UserListRow key={p.id} profile={p} />
+              <UserListRow
+                key={p.id}
+                profile={p}
+                founderBadge={founderMap.get(p.id) ?? null}
+              />
             ))}
           </div>
         )}

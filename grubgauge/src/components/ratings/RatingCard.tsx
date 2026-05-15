@@ -3,6 +3,7 @@
 import type { RaterFields } from "@/lib/profile/raters";
 import { LikeButton } from "@/components/ratings/LikeButton";
 import { RaterBadge } from "@/components/ratings/RaterBadge";
+import { FounderBadge } from "@/components/founder/FounderBadge";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -112,6 +113,11 @@ export function RatingCard({ rating, rank, liked, likeCount, hideRater = false }
       {!hideRater && (
         <div className="flex items-center justify-between gap-sm">
           <RaterBadge rater={rating.rater} />
+          {/* Far-right slot — reserved for the founder pill in v1. Future
+              popular-rater / city-expert badges land between RaterBadge
+              and this position, so the founder pill stays rightmost as
+              the rarest marker. */}
+          <FounderBadge badge={rating.rater?.founder ?? null} size="compact" />
         </div>
       )}
 
