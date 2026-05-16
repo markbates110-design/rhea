@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/lib/auth/useAuth";
 import { useProfile } from "@/lib/profile/useProfile";
 import { updateProfile, upsertProfile } from "@/lib/profile/profile";
+import { displayNameForProfile, initialForName } from "@/lib/profile/names";
 import { applyPendingFollow } from "@/lib/follows/applyPending";
 import { PageShell } from "@/components/layout/PageShell";
 import { AvatarUploader } from "@/components/profile/AvatarUploader";
@@ -30,11 +31,12 @@ const FOOD_OPTIONS = [
 export default function OnboardingProfilePage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
-  // After the profiles cutover, username + avatar_url come from
+  // After the profiles cutover, username/display_name/avatar_url come from
   // public.profiles (read via useProfile). food_prefs still lives on
   // user_metadata, so we keep reading it from `user` directly.
   const { profile, loading: profileLoading } = useProfile();
-  const [name, setName] = useState("");
+  const [handle, setHandle] = useState("");
+  const [displayName, setDisplayName] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
   // Avatar URL state lives on the page so it can be batched into the
   // profiles upsert call alongside the username. The AvatarUploader
@@ -44,9 +46,10 @@ export default function OnboardingProfilePage() {
   const [hydrated, setHydrated] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  // Hydrate the form once auth + profile resolve. Signed-in: read username
-  // + avatar_url from public.profiles (canonical cross-device source) and
-  // food_prefs from user_metadata. Guest: fall back to localStorage. This
+  // Hydrate the form once auth + profile resolve. Signed-in: read handle,
+  // display name + avatar_url from public.profiles (canonical cross-device
+  // source) and food_prefs from user_metadata. Guest: fall back to the
+  // local handle mirror. This
   // is a genuine one-shot async hydration — values depend on async
   // resources, so `useState` lazy init can't replace it. The `hydrated`
   // flag prevents a re-fire from clobbering user edits.
@@ -57,13 +60,16 @@ export default function OnboardingProfilePage() {
     const meta = user?.user_metadata ?? {};
     const metaPrefs = Array.isArray(meta.food_prefs) ? (meta.food_prefs as string[]) : [];
     const profileUsername = profile?.username ?? "";
+    const profileDisplayName = profile?.display_name ?? "";
     const profileAvatar = profile?.avatar_url ?? "";
 
-    const nextName = (user && profileUsername) || getUsername();
+    const nextHandle = (user && profileUsername) || getUsername();
+    const nextDisplayName = user ? profileDisplayName : "";
     const nextPrefs = user && metaPrefs.length > 0 ? metaPrefs : getFoodPrefs();
     const nextAvatar = (user && profileAvatar) || getAvatarUrl();
     /* eslint-disable react-hooks/set-state-in-effect */
-    setName(nextName);
+    setHandle(nextHandle);
+    setDisplayName(nextDisplayName);
     setSelected(nextPrefs);
     setAvatarUrlState(nextAvatar);
     setHydrated(true);
@@ -80,31 +86,36 @@ export default function OnboardingProfilePage() {
     if (saving) return;
     setSaving(true);
     try {
-      const trimmedName = name.trim();
+      const trimmedHandle = handle.trim();
+      const trimmedDisplayName = displayName.trim();
 
       // Local mirror — kept for guest sessions and as a fast-path hydration
       // source on subsequent visits. Identity is additive: writing to
       // localStorage never replaces the auth-backed user_metadata, only
       // shadows it on this device.
-      if (trimmedName) setUsername(trimmedName);
+      if (trimmedHandle) setUsername(trimmedHandle);
       setFoodPrefs(selected);
       setOnboarded();
 
       // Canonical cross-device sources for signed-in users — survive
-      // sign-out / sign-in and travel with the account. Username +
-      // avatar_url go to public.profiles; food_prefs stays on
-      // user_metadata. Both write paths run in parallel because they're
-      // independent and there's no ordering requirement.
+      // sign-out / sign-in and travel with the account. Username is the
+      // unique @ handle; display_name is the friendly label shown in UI;
+      // avatar_url lives beside them in public.profiles. food_prefs stays
+      // on user_metadata.
       if (user) {
         const supabase = createClient();
-        const resolvedUsername = (trimmedName || profile?.username || "").trim();
+        const resolvedUsername = (trimmedHandle || profile?.username || "").trim();
+        const profilePatch = {
+          display_name: trimmedDisplayName || null,
+          avatar_url: avatarUrl || null,
+        };
         await Promise.all([
           resolvedUsername
             ? upsertProfile(supabase, {
                 username: resolvedUsername,
-                avatar_url: avatarUrl || null,
+                ...profilePatch,
               })
-            : updateProfile(supabase, { avatar_url: avatarUrl || null }),
+            : updateProfile(supabase, profilePatch),
           supabase.auth.updateUser({ data: { food_prefs: selected } }),
         ]);
         // Keep the local mirror aligned with the canonical write — covers
@@ -114,7 +125,7 @@ export default function OnboardingProfilePage() {
       }
 
       // Signed-up users land on their actual profile so the just-saved
-      // screen name is immediately visible; guests reach this screen via
+      // profile identity is immediately visible; guests reach this screen via
       // the "Update preferences" link on /profile, so /profile is the
       // correct return target for them too.
       //
@@ -151,7 +162,7 @@ export default function OnboardingProfilePage() {
         </p>
       </div>
 
-      {/* Photo — signed-in only. Guests see the existing screen-name /
+      {/* Photo — signed-in only. Guests see the existing handle /
           food-prefs flow unchanged; the avatar feature is gated behind a
           real account so RLS-owned Storage writes always have an auth.uid()
           to bind to. */}
@@ -164,23 +175,53 @@ export default function OnboardingProfilePage() {
           </label>
           <AvatarUploader
             currentUrl={avatarUrl}
-            initial={(name.trim() || user.email || "•").charAt(0).toUpperCase()}
+            initial={initialForName(
+              displayName.trim() || displayNameForProfile(profile, handle || user.email || "•"),
+            )}
             onChange={(next) => setAvatarUrlState(next)}
           />
         </div>
       )}
 
-      {/* Name — same UsernameClaimField as /onboarding welcome so the
+      {/* Display name — friendly, mutable identity label. Only shown for
+          signed-in users because guests do not have a canonical profile row
+          to persist it to yet. */}
+      {user && hydrated && (
+        <div className="mb-lg flex flex-col gap-xs">
+          <label
+            htmlFor="display-name"
+            className="font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant"
+          >
+            Display name
+          </label>
+          <input
+            id="display-name"
+            type="text"
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            maxLength={60}
+            placeholder="What should people call you?"
+            autoComplete="name"
+            className="w-full rounded-xl border border-outline-variant bg-surface-container-low px-md py-[13px] font-body-md text-body-md text-on-surface placeholder-on-surface-variant/50 outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
+          />
+          <p className="font-label-sm text-label-sm text-on-surface-variant">
+            Shown on your profile, ratings, and follow lists. You can change it anytime.
+          </p>
+        </div>
+      )}
+
+      {/* Handle — same UsernameClaimField as /onboarding welcome so the
           live availability + scarcity messaging carries through to the
           post-signup setup step. If the user pre-claimed on welcome, the
-          value pre-fills from localStorage via the `name` state seeded by
+          value pre-fills from localStorage via the `handle` state seeded by
           the hydration effect above; no retyping. handle_new_user trigger
           will resolve any collision at write time. */}
       <div className="mb-lg">
         <UsernameClaimField
-          value={name}
-          onChange={(next) => setName(next)}
-          label="Pick your @"
+          value={handle}
+          onChange={(next) => setHandle(next)}
+          label="Your @ handle"
+          excludeUserIdFromAvailability={user?.id ?? null}
         />
       </div>
 

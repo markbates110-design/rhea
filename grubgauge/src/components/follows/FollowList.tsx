@@ -19,6 +19,7 @@ import {
   type FounderBadgeInfo,
   getFounderBadgesByUserIds,
 } from "@/lib/founder/founder";
+import { displayNameForProfile } from "@/lib/profile/names";
 import { UserListRow } from "./UserListRow";
 
 type Mode = "followers" | "following";
@@ -118,7 +119,7 @@ export function FollowList({ mode }: Props) {
     );
   }
 
-  const displayName = profile.display_name?.trim() || profile.username;
+  const displayName = displayNameForProfile(profile);
   const heading = mode === "followers" ? "Followers" : "Following";
   const emptyCopy =
     mode === "followers"

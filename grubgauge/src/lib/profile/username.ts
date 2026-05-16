@@ -44,15 +44,22 @@ export function validateUsername(candidate: string): UsernameValidation {
 export async function isUsernameAvailable(
   supabase: SupabaseClient,
   candidate: string,
+  options: { excludeUserId?: string | null } = {},
 ): Promise<boolean> {
   const trimmed = candidate.trim();
   if (trimmed.length === 0) return false;
 
-  const { data, error } = await supabase
+  let query = supabase
     .from(PROFILES_TABLE)
     .select("id")
     .ilike("username", trimmed)
-    .maybeSingle();
+    .limit(1);
+
+  if (options.excludeUserId) {
+    query = query.neq("id", options.excludeUserId);
+  }
+
+  const { data, error } = await query;
   if (error) return true;
-  return !data;
+  return !data?.length;
 }

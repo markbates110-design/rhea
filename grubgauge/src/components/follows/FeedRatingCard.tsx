@@ -1,6 +1,7 @@
 "use client";
 
 import { RatingCard, type RatingCardProps } from "@/components/ratings/RatingCard";
+import { displayNameForProfile } from "@/lib/profile/names";
 import { FollowButton } from "./FollowButton";
 
 /**
@@ -35,7 +36,7 @@ export function FeedRatingCard(props: RatingCardProps) {
     return <RatingCard {...props} />;
   }
 
-  const displayName = rater.display_name?.trim() || rater.username;
+  const displayName = displayNameForProfile(rater);
 
   return (
     <RatingCard

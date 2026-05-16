@@ -8,11 +8,11 @@ import { navItems } from "@/lib/nav";
 import { useAuth } from "@/lib/auth/useAuth";
 import { useProfile } from "@/lib/profile/useProfile";
 import type { Profile } from "@/lib/profile/profile";
+import { displayNameForProfile, initialForName } from "@/lib/profile/names";
 
 function initialFor(user: User, profile: Profile | null): string {
-  const source = profile?.username ?? user.email ?? "";
-  const ch = source.trim().charAt(0).toUpperCase();
-  return ch || "•";
+  const source = displayNameForProfile(profile, user.email ?? "");
+  return initialForName(source);
 }
 
 function avatarUrlFor(profile: Profile | null): string {

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { Profile } from "@/lib/profile/profile";
 import type { FounderBadgeInfo } from "@/lib/founder/founder";
+import { displayNameForProfile, initialForName } from "@/lib/profile/names";
 import { FounderBadge } from "@/components/founder/FounderBadge";
 import { FollowButton } from "./FollowButton";
 
@@ -29,8 +30,8 @@ interface Props {
  * follow lists feel like part of the same visual system.
  */
 export function UserListRow({ profile, founderBadge = null }: Props) {
-  const displayName = profile.display_name?.trim() || profile.username;
-  const initial = displayName.trim().charAt(0).toUpperCase() || "•";
+  const displayName = displayNameForProfile(profile);
+  const initial = initialForName(displayName);
 
   return (
     <div className="flex items-center gap-sm rounded-xl border border-outline-variant bg-surface-container-low px-md py-sm transition-colors hover:bg-surface-container">

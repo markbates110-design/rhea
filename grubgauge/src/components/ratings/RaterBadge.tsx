@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { RaterFields } from "@/lib/profile/raters";
+import { displayNameForProfile, handleForProfile, initialForName } from "@/lib/profile/names";
 
 interface RaterBadgeProps {
   /**
@@ -55,27 +56,34 @@ export function RaterBadge({ rater, isGuest = false }: RaterBadgeProps) {
     );
   }
 
-  const displayName = rater.display_name?.trim() || rater.username;
-  const initial = initialFor(displayName);
+  const displayName = displayNameForProfile(rater);
+  const initial = initialForName(displayName);
 
   return (
     <Link
       href={`/u/${rater.username}`}
-      className="group inline-flex items-center gap-xs rounded-full px-0.5 py-0.5 transition-colors hover:bg-surface-container active:scale-[0.98]"
+      className="group inline-flex min-w-0 items-center gap-xs rounded-full px-0.5 py-0.5 transition-colors hover:bg-surface-container active:scale-[0.98]"
       aria-label={`View ${displayName}'s ratings`}
     >
-      <RaterBadgeContent name={displayName} avatarUrl={rater.avatar_url} glyph={initial} />
+      <RaterBadgeContent
+        name={displayName}
+        handle={handleForProfile(rater)}
+        avatarUrl={rater.avatar_url}
+        glyph={initial}
+      />
     </Link>
   );
 }
 
 function RaterBadgeContent({
   name,
+  handle,
   avatarUrl,
   glyph,
   muted = false,
 }: {
   name: string;
+  handle?: string;
   avatarUrl: string | null;
   /** Fallback rendered inside the avatar tile when no avatarUrl exists. */
   glyph: ReactNode;
@@ -102,18 +110,20 @@ function RaterBadgeContent({
           glyph
         )}
       </span>
-      <span
-        className={`font-label-sm text-label-sm font-semibold truncate ${
-          muted ? "text-on-surface-variant italic" : "text-on-surface group-hover:text-primary"
-        }`}
-      >
-        {name}
+      <span className="flex min-w-0 flex-col">
+        <span
+          className={`font-label-sm text-label-sm font-semibold truncate ${
+            muted ? "text-on-surface-variant italic" : "text-on-surface group-hover:text-primary"
+          }`}
+        >
+          {name}
+        </span>
+        {handle && (
+          <span className="truncate font-label-sm text-[10px] leading-tight text-on-surface-variant">
+            {handle}
+          </span>
+        )}
       </span>
     </>
   );
-}
-
-function initialFor(source: string): string {
-  const ch = source.trim().charAt(0).toUpperCase();
-  return ch || "•";
 }

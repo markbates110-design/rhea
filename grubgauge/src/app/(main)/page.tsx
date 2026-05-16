@@ -12,6 +12,7 @@ import { FollowingFeed } from "@/components/follows/FollowingFeed";
 import { getDeviceId, getUsername, isOnboarded } from "@/lib/identity/deviceId";
 import { useAuth } from "@/lib/auth/useAuth";
 import { useProfile } from "@/lib/profile/useProfile";
+import { displayNameForProfile } from "@/lib/profile/names";
 import { applyRatingsOwnerScope } from "@/lib/ratings/scope";
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -125,9 +126,8 @@ export default function DashboardPage() {
       const guest = getUsername().trim();
       return guest ? `Welcome, ${guest}` : "Welcome";
     }
-    const profileUsername = profile?.username?.trim() ?? "";
     const emailLocal = (user.email ?? "").split("@")[0];
-    const displayName = profileUsername || emailLocal || "there";
+    const displayName = displayNameForProfile(profile, emailLocal || "there");
     return displayName === "there" ? "Welcome back" : `Welcome back, ${displayName}`;
   }, [user, profile]);
 

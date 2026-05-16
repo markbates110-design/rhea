@@ -148,6 +148,19 @@ export function FollowGateSheet({ open, target, onDismiss }: Props) {
           <p
             style={{
               margin: 0,
+              fontSize: 12,
+              lineHeight: 1.3,
+              fontWeight: 500,
+              color: "var(--color-on-surface-variant)",
+              fontFamily:
+                "var(--font-work-sans, ui-sans-serif, system-ui, sans-serif)",
+            }}
+          >
+            @{target.username}
+          </p>
+          <p
+            style={{
+              margin: 0,
               fontSize: 14,
               lineHeight: 1.5,
               fontWeight: 400,

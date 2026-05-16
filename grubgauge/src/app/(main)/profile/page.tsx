@@ -12,6 +12,7 @@ import { useFounderState } from "@/lib/founder/useFounderState";
 import { useAuth } from "@/lib/auth/useAuth";
 import { useProfile } from "@/lib/profile/useProfile";
 import { updateProfile } from "@/lib/profile/profile";
+import { displayNameForProfile, handleForProfile, initialForName } from "@/lib/profile/names";
 import { getAvatarUrl, getUsername, setAvatarUrl } from "@/lib/identity/deviceId";
 
 export default function ProfilePage() {
@@ -150,14 +151,13 @@ export default function ProfilePage() {
 
   // ── Signed in ────────────────────────────────────────────────────────────
 
-  // Username lives on public.profiles (cross-device source of truth); the
-  // trigger guarantees a row for every signed-in user, so an empty string
-  // here means the user genuinely has no human-friendly name yet — fall
-  // back to email's local part, then to the bullet glyph for the initial.
+  // Username is the permanent @ handle; display_name is the friendly label.
+  // Fall back through username/email so older profiles created before the
+  // display-name field was surfaced still render cleanly.
   const profileUsername = profile?.username?.trim() ?? "";
   const emailLocal = (user.email ?? "").split("@")[0];
-  const displayName = profileUsername || emailLocal || "there";
-  const initial = (profileUsername || user.email || "•").trim().charAt(0).toUpperCase() || "•";
+  const displayName = displayNameForProfile(profile, emailLocal || "there");
+  const initial = initialForName(displayName || user.email || "•");
   // Canonical avatar URL from public.profiles, with localStorage as a
   // fast-path fallback for the first render after sign-in. localOverride
   // wins so the just-uploaded photo paints instantly.
@@ -189,9 +189,12 @@ export default function ProfilePage() {
 
         <div className="flex flex-col gap-xs">
           <h1 className="font-headline-md text-headline-md font-semibold text-on-surface">
-            Hey, {displayName}
+            {displayName}
           </h1>
           <p className="font-body-md text-body-md text-on-surface-variant truncate">
+            {profile ? handleForProfile(profile) : user.email}
+          </p>
+          <p className="font-label-sm text-label-sm text-on-surface-variant truncate">
             {user.email}
           </p>
           {founderBadge && (
@@ -214,7 +217,7 @@ export default function ProfilePage() {
             href="/onboarding/profile"
             className="flex items-center justify-between rounded-xl border border-outline-variant bg-surface-container-low px-md py-sm transition-colors hover:bg-surface-container"
           >
-            <span className="font-body-md text-body-md text-on-surface">Update preferences</span>
+            <span className="font-body-md text-body-md text-on-surface">Edit profile and preferences</span>
             <span className="material-symbols-outlined text-[20px] text-on-surface-variant">chevron_right</span>
           </Link>
 

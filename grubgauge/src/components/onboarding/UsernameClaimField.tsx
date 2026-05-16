@@ -25,6 +25,11 @@ interface Props {
    */
   label?: string;
   /**
+   * Signed-in profile editor path: the current user's own handle should not
+   * show as "taken" when it is merely unchanged.
+   */
+  excludeUserIdFromAvailability?: string | null;
+  /**
    * When true, suppress the default "Lock it in before someone else does."
    * idle-state hint so callers that provide their own surrounding copy
    * don't double up.
@@ -66,6 +71,7 @@ export function UsernameClaimField({
   onChange,
   id = "username-claim",
   label = "Your handle",
+  excludeUserIdFromAvailability = null,
   hideIdleHint = false,
 }: Props) {
   const [status, setStatus] = useState<Status>({ kind: "idle" });
@@ -94,7 +100,9 @@ export function UsernameClaimField({
     const requestId = ++reqRef.current;
     timerRef.current = setTimeout(async () => {
       const supabase = createClient();
-      const available = await isUsernameAvailable(supabase, trimmed);
+      const available = await isUsernameAvailable(supabase, trimmed, {
+        excludeUserId: excludeUserIdFromAvailability,
+      });
       // Drop the response if a later keystroke superseded this one — keeps
       // the visible status in sync with the latest input even when an
       // earlier request is still in flight.
@@ -105,7 +113,7 @@ export function UsernameClaimField({
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [value]);
+  }, [value, excludeUserIdFromAvailability]);
 
   const trimmed = value.trim();
   const statusIcon = statusGlyph(status);

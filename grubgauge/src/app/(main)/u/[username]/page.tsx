@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { PageShell } from "@/components/layout/PageShell";
 import { RatingCard, type RatingCardRating } from "@/components/ratings/RatingCard";
 import { getProfileByUsername, type Profile } from "@/lib/profile/profile";
+import { displayNameForProfile, initialForName } from "@/lib/profile/names";
 import { getRatingsLikeCounts, getUserLikedRatings } from "@/lib/ratings/likes";
 import { FollowButton } from "@/components/follows/FollowButton";
 import { FollowStatRow } from "@/components/follows/FollowStatRow";
@@ -23,15 +24,6 @@ interface Rating extends RatingCardRating {
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────
-
-function displayNameOf(profile: Profile): string {
-  return profile.display_name?.trim() || profile.username;
-}
-
-function initialOf(name: string): string {
-  const ch = name.trim().charAt(0).toUpperCase();
-  return ch || "•";
-}
 
 /**
  * Pulls the username out of `useParams()` and decodes it. Next.js's
@@ -170,8 +162,8 @@ export default function PublicProfilePage() {
   // toggle, which is a larger network cost than the visual drift).
   const totalLikes = Array.from(countMap.values()).reduce((s, n) => s + n, 0);
   const ratingCount = ratings.length;
-  const name = displayNameOf(profile);
-  const initial = initialOf(name);
+  const name = displayNameForProfile(profile);
+  const initial = initialForName(name);
   const avgLikes = ratingCount > 0 ? totalLikes / ratingCount : 0;
 
   return (

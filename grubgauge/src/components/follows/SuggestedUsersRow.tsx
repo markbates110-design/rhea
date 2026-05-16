@@ -9,6 +9,7 @@ import {
   getSuggestedUsers,
 } from "@/lib/follows/suggestions";
 import { FOLLOW_CHANGED_EVENT } from "@/lib/follows/follows";
+import { displayNameForProfile, initialForName } from "@/lib/profile/names";
 import { FollowButton } from "./FollowButton";
 import { FounderBadge } from "@/components/founder/FounderBadge";
 
@@ -97,9 +98,8 @@ export function SuggestedUsersRow() {
 }
 
 function SuggestedUserCard({ card }: { card: SuggestedUser }) {
-  const displayName =
-    card.profile.display_name?.trim() || card.profile.username;
-  const initial = displayName.trim().charAt(0).toUpperCase() || "•";
+  const displayName = displayNameForProfile(card.profile);
+  const initial = initialForName(displayName);
 
   return (
     <div
