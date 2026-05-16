@@ -28,7 +28,7 @@ interface Props {
  *     has not earned a badge).
  *
  * For everyone else, surfaces the threshold copy + progress meter ("2 of
- * 3 ratings done"), the live slot counter ("47 founder spots left"), and
+ * 3 ratings done"), the live slot counter ("47 founding member spots left"), and
  * a direct rate-link. Sized to slot above existing dashboard sections
  * without dominating them.
  */

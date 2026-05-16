@@ -9,7 +9,7 @@ import { getAvailableFounderSlots } from "./founder";
  *
  * Mount-time fetch only in v1 — no realtime subscription. The number
  * shown is fresh per page navigation, which is "close enough" for the
- * FOMO copy ("47 founder spots left"). Upgrading to Supabase Realtime
+ * FOMO copy ("47 founding member spots left"). Upgrading to Supabase Realtime
  * (broadcast / postgres_changes channel) is a low-effort follow-up if
  * we want the counter to tick down live in front of a guest.
  */

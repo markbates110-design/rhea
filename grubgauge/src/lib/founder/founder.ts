@@ -105,7 +105,7 @@ export async function getFounderBadgesByUserIds(
 
 /**
  * Live counter for the onboarding / dashboard / FollowGateSheet copy
- * (e.g., "47 founder spots left"). Calls the SECURITY DEFINER RPC so
+ * (e.g., "47 founding member spots left"). Calls the SECURITY DEFINER RPC so
  * any visitor — including guests — can read the number without
  * needing direct table access.
  *

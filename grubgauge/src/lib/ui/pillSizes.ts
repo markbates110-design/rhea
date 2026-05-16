@@ -10,6 +10,6 @@
  * even when they appear to share the same Tailwind size tokens.
  */
 export const PILL_COMPACT_SIZE_CLASSES =
-  "h-5 px-xs py-0 font-label-sm text-label-sm leading-none";
+  "h-5 px-xs py-0 font-label-sm text-[10px] leading-none";
 
-export const PILL_COMPACT_ICON_SIZE_CLASS = "text-[13px] leading-none";
+export const PILL_COMPACT_ICON_SIZE_CLASS = "text-[11px] leading-none";

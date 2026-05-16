@@ -22,14 +22,14 @@ interface Props {
  * Distinct, scarce identity marker shown on profile + every rating.
  * Two visual kinds, both using design-system tokens:
  *
- *   - "the-founder"   → bold amber pill with a crown glyph + "FOUNDER".
+ *   - "the-founder"   → amber pill with a crown glyph + "The Founder".
  *                       Singular badge, env-pinned to the app founder's
  *                       user_id. No number — it's THE Founder.
- *   - "founding-member" → green pill with the slot number (#1-100).
+ *   - "founding-member" → green pill with "Founding Member #N".
  *                         Awarded by DB trigger when a user posts 3
  *                         qualifying ratings.
  *
- * Layout pre-allocates a fixed visual size at compact = ~h-6 so the
+ * Layout pre-allocates a fixed visual height at compact = h-5 so the
  * far-right slot on rating cards doesn't reflow as feeds hydrate.
  */
 export function FounderBadge({ badge, size = "compact" }: Props) {
@@ -45,9 +45,8 @@ export function FounderBadge({ badge, size = "compact" }: Props) {
 // from any other chip in the system) while dropping the visual shout of
 // a solid-filled brand pill. The Founder keeps its crown at every size
 // because the crown IS the asset (singular badge, no number to fall back
-// on); FoundingMember drops the medal icon at compact size and renders
-// just `#N` — the number IS the asset there (the whole appeal is being
-// FM #7 not FM #94, so the number deserves the spotlight).
+// on); FoundingMember drops the medal icon at compact size but keeps the
+// label explicit so numbered members are never confused with the app founder.
 
 function TheFounderPill({ size }: { size: "compact" | "full" }) {
   const sizeClasses =
@@ -67,7 +66,7 @@ function TheFounderPill({ size }: { size: "compact" | "full" }) {
       >
         crown
       </span>
-      FOUNDER
+      The Founder
     </span>
   );
 }
@@ -98,8 +97,9 @@ function FoundingMemberPill({
           workspace_premium
         </span>
       )}
-      <span className="tabular-nums">#{slot}</span>
-      {size === "full" && <span>FOUNDER</span>}
+      <span>
+        Founding Member <span className="tabular-nums">#{slot}</span>
+      </span>
     </span>
   );
 }

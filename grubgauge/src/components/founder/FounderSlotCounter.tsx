@@ -4,7 +4,7 @@ import { useFounderSlots } from "@/lib/founder/useFounderSlots";
 
 interface Props {
   /**
-   * "inline"   → renders as a sentence fragment ("47 founder spots left").
+   * "inline"   → renders as a sentence fragment ("47 founding member spots left").
    *              Drop-in for end-of-paragraph copy inside any hook surface.
    * "pill"     → renders as a self-contained chip you can place above /
    *              beside a CTA. Slightly heavier visual; standalone.
@@ -14,7 +14,7 @@ interface Props {
 }
 
 /**
- * Live counter component used by every founder-program touchpoint
+ * Live counter component used by every founding-member touchpoint
  * (onboarding hero, dashboard progress card, FollowGateSheet urgency
  * line, future section banners). One source of truth for the
  * remaining-slots number so every surface stays in sync without
@@ -26,7 +26,7 @@ interface Props {
  *
  * When all 100 slots are filled the copy flips to a closed-state
  * message instead of "0 spots left" (which reads weirder than
- * "Founder program is closed").
+ * "Founding member program is closed").
  */
 export function FounderSlotCounter({ variant = "inline" }: Props) {
   const { remaining, loading } = useFounderSlots();
@@ -42,18 +42,18 @@ export function FounderSlotCounter({ variant = "inline" }: Props) {
 
   if (remaining <= 0) {
     if (variant === "headline") {
-      return <span className="font-display-lg text-display-lg font-bold text-on-surface-variant">CLOSED</span>;
+      return <span className="font-display-lg text-display-lg font-bold text-on-surface-variant">Closed</span>;
     }
     if (variant === "pill") {
       return (
         <span className="inline-flex items-center rounded-full bg-surface-container-high px-sm py-0.5 font-label-sm text-label-sm font-semibold text-on-surface-variant">
-          Founder program closed
+          Founding member program closed
         </span>
       );
     }
     return (
       <span className="font-semibold text-on-surface-variant">
-        Founder program closed
+        Founding member program closed
       </span>
     );
   }
@@ -65,7 +65,7 @@ export function FounderSlotCounter({ variant = "inline" }: Props) {
           {remaining}
         </span>
         <span className="font-title-sm text-title-sm font-semibold text-on-surface-variant">
-          of 100 left
+          founding member spots left
         </span>
       </span>
     );
@@ -81,14 +81,14 @@ export function FounderSlotCounter({ variant = "inline" }: Props) {
         >
           crown
         </span>
-        <span className="tabular-nums">{remaining}</span> founder spots left
+        <span className="tabular-nums">{remaining}</span> founding member spots left
       </span>
     );
   }
 
   return (
     <span className="font-semibold text-tertiary">
-      <span className="tabular-nums">{remaining}</span> founder spots left
+      <span className="tabular-nums">{remaining}</span> founding member spots left
     </span>
   );
 }
