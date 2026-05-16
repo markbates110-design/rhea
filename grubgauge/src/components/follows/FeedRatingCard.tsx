@@ -6,17 +6,16 @@ import { FollowButton } from "./FollowButton";
 
 /**
  * RatingCard wrapper for the FollowingFeed's guest variant. For signed-in
- * viewers it delegates to the plain RatingCard with no changes. For guests,
- * it overlays a small inline Follow button next to the rater chip, turning
- * every visible rater into a single-tap conversion target via FollowGateSheet.
+ * viewers it delegates to the plain RatingCard with no changes. For guests
+ * it slots a small inline Follow button into the LikeButton row via the
+ * card's `trailingAction` prop, turning every visible rater into a
+ * single-tap conversion target via FollowGateSheet.
  *
- * Keeps RatingCard pristine: every other surface (history, explore,
- * /u/[username]) continues to use it without the guest-funnel chrome.
+ * Keeps RatingCard pristine for every other surface (history, explore,
+ * /u/[username]) — they pass no `trailingAction` and render unchanged.
  *
- * The Follow button is rendered *outside* the card flow as an absolute-
- * positioned overlay anchored to the top-right area where the founder
- * pill normally sits. This avoids restructuring RatingCard internals
- * just to slot one more control in.
+ * The Follow button shares its row with LikeButton (right-aligned via
+ * justify-between) instead of overlapping the founder pill at top-right.
  */
 export function FeedRatingCard(props: RatingCardProps) {
   const { user, loading } = useAuth();
@@ -29,47 +28,42 @@ export function FeedRatingCard(props: RatingCardProps) {
   }
 
   const rater = props.rating.rater;
-  // Cards without a resolved rater (deleted user) have no follow target,
-  // so the overlay is omitted; the underlying card still renders.
-  if (!rater) {
+  const userId = readUserId(props);
+  // Cards without a resolved rater (deleted user) or a known user_id
+  // (would break the follow mutation since follows are keyed on user_id)
+  // render the underlying card with no Follow control. Better to show
+  // nothing than the wrong follow target.
+  if (!rater || !userId) {
     return <RatingCard {...props} />;
   }
 
   const displayName = rater.display_name?.trim() || rater.username;
 
   return (
-    <div className="relative">
-      <RatingCard {...props} />
-      <div className="pointer-events-none absolute right-md top-md">
-        {/* Re-enable pointer events only on the actual control so taps
-            elsewhere on the overlay pass through to the underlying card. */}
-        <div className="pointer-events-auto">
-          <FollowButton
-            target={{
-              userId: rater_userId(rater, props),
-              username: rater.username,
-              displayName,
-              avatarUrl: rater.avatar_url ?? null,
-            }}
-            size="sm"
-          />
-        </div>
-      </div>
-    </div>
+    <RatingCard
+      {...props}
+      trailingAction={
+        <FollowButton
+          target={{
+            userId,
+            username: rater.username,
+            displayName,
+            avatarUrl: rater.avatar_url ?? null,
+          }}
+          size="sm"
+        />
+      }
+    />
   );
 }
 
 /**
- * RaterFields doesn't carry the user_id (it's the lookup key, not a field).
- * Trending feeds always set `props.rating.user_id` upstream, so we read it
- * from there. Falling back to the username string would break the follow
- * mutation since follows are keyed on user_id; we'd rather render nothing
- * than the wrong follow target.
+ * RaterFields doesn't carry the user_id (it's the lookup key, not a field
+ * on the badge type). Feeds upstream always set `props.rating.user_id`,
+ * so we read it from there via a narrow cast — the RatingCardRating type
+ * is intentionally minimal, so a structural extension is the right tool.
  */
-function rater_userId(
-  _rater: NonNullable<RatingCardProps["rating"]["rater"]>,
-  props: RatingCardProps,
-): string {
+function readUserId(props: RatingCardProps): string {
   const candidate = (props.rating as { user_id?: string | null }).user_id;
   return typeof candidate === "string" ? candidate : "";
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import type { RaterFields } from "@/lib/profile/raters";
 import { LikeButton } from "@/components/ratings/LikeButton";
 import { RaterBadge } from "@/components/ratings/RaterBadge";
@@ -54,6 +55,13 @@ export interface RatingCardProps {
    * existing Explore behavior.
    */
   hideRater?: boolean;
+  /**
+   * Optional control rendered on the right of the LikeButton row, anchored
+   * with `justify-between`. Used by FeedRatingCard to drop a guest-only
+   * Follow button into the card without colliding with the FounderBadge
+   * up top. Left null on every other surface.
+   */
+  trailingAction?: ReactNode;
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -99,7 +107,7 @@ function formatDate(dateStr: string): string {
  * when a remount is warranted from hydration), so this component just
  * forwards `initialLiked` / `initialCount`.
  */
-export function RatingCard({ rating, rank, liked, likeCount, hideRater = false }: RatingCardProps) {
+export function RatingCard({ rating, rank, liked, likeCount, hideRater = false, trailingAction = null }: RatingCardProps) {
   const meta = VENUE_META[rating.venue_type] ?? VENUE_META.casual;
   const { label: badge, colorClass } = scoreBadge(rating.weighted_score);
   const showRank = typeof rank === "number";
@@ -168,8 +176,9 @@ export function RatingCard({ rating, rank, liked, likeCount, hideRater = false }
         </span>
       </div>
 
-      <div className={`flex items-center ${bodyIndent}`}>
+      <div className={`flex items-center justify-between gap-sm ${bodyIndent}`}>
         <LikeButton ratingId={rating.id} initialLiked={liked} initialCount={likeCount} />
+        {trailingAction}
       </div>
 
       {rating.notes && (
