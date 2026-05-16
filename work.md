@@ -8,6 +8,8 @@ Paste a task under `## sticky` and say `go`. The agent moves it to `## current`,
 
 *(paste new task here, then say go)*
 
+- **grubgauge — subtler Founder pill** — the green Founding Member pill + amber The Founder pill currently read as too prominent against rating cards / profile headers. Goal: same recognition, less visual shout. Levers to try, lightest-touch first: (a) **outline variant** (transparent bg + colored border/icon/number) replacing the solid fill on both kinds; (b) at compact size, **drop the `workspace_premium` icon** for FM and just render `#N` in a tighter pill — the number alone is the asset on rating cards; (c) if (a)/(b) aren't enough, shift FM off `bg-primary-container` (it competes with the brand green) toward a muted neutral like `bg-surface-container-high text-on-surface` with a subtle accent, while The Founder keeps its amber but in a softer `tertiary-container`/`on-tertiary-container` pairing. Touch points: `components/founder/FounderBadge.tsx` (only one). Verify by eyeing dashboard cards + profile + `/u/[username]` + UserListRow + SuggestedUsersRow — pill should still be unmistakable but no longer dominate.
+
 ---
 
 ## current
