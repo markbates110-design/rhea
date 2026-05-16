@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { PageShell } from "@/components/layout/PageShell";
-import { NearbyVenuesRow } from "@/components/discovery/NearbyVenuesRow";
+import { FeaturedSpotsRow } from "@/components/discovery/FeaturedSpotsRow";
 import { FounderProgressCard } from "@/components/founder/FounderProgressCard";
 import { SuggestedUsersRow } from "@/components/follows/SuggestedUsersRow";
 import { FollowingFeed } from "@/components/follows/FollowingFeed";
@@ -153,18 +153,20 @@ export default function DashboardPage() {
           <div>
             <h1 className="font-headline-md text-headline-md font-semibold text-on-surface">{greetingTitle}</h1>
             <p className="mt-xs font-body-md text-body-md text-on-surface-variant">
-              No ratings yet — explore Near You below, or rate any spot.
+              No ratings yet — tap a featured spot below, or search for any
+              place.
             </p>
           </div>
           {/* Founder hook — surfaces only for signed-in non-founders while
               slots remain. Self-hides for guests / founders / closed program
               so this slot collapses cleanly when not applicable. */}
           <FounderProgressCard rateHref={rateHref} />
-          {/* Near You first — a brand-new visitor sees real local
-              restaurants before they see "you have nothing." When the
-              row hides (location denied / unsupported) the existing
-              "Rate a Spot" CTA below remains the universal fallback. */}
-          <NearbyVenuesRow />
+          {/* Featured spots — hand-curated row of must-try places powered
+              by lib/places/featured.ts. Replaces the deleted Google-backed
+              NearbyVenuesRow; zero per-load API cost. Self-hides while the
+              curated list is empty so the dashboard collapses cleanly until
+              photos are populated in public/featured/. */}
+          <FeaturedSpotsRow />
           {/* People to follow — guest/member both see this; FollowButton
               inside opens the gate sheet for guests. Self-hides when no
               suggestions exist (brand-new project). */}
@@ -180,7 +182,7 @@ export default function DashboardPage() {
             </span>
             <div>
               <p className="font-title-sm text-title-sm text-on-surface">No ratings yet</p>
-              <p className="mt-xs font-body-md text-body-md text-on-surface-variant">Tap a nearby spot above, or search for any place.</p>
+              <p className="mt-xs font-body-md text-body-md text-on-surface-variant">Tap a featured spot above, or search for any place.</p>
             </div>
             <Link
               href={rateHref}
@@ -226,8 +228,9 @@ export default function DashboardPage() {
             history below. */}
         <FounderProgressCard rateHref={rateHref} />
 
-        {/* Near You — discovery row, lead content above retrospective stats */}
-        <NearbyVenuesRow />
+        {/* Featured spots — curated discovery row, lead content above
+            retrospective stats. Replaces the deleted NearbyVenuesRow. */}
+        <FeaturedSpotsRow />
 
         {/* Social discovery + network feed — sit above retrospective
             stats because their content is more time-sensitive (people

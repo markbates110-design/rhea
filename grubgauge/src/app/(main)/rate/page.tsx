@@ -40,9 +40,11 @@ interface SpotSelection {
 }
 
 // Google Places types → VenueType mapping has been extracted to
-// `lib/places/venueType.ts` so the dashboard's NearbyVenuesRow shares
-// the same inference (and so we don't drift on which Google type strings
-// belong in which bucket).
+// `lib/places/venueType.ts` so /rate's classifier stays a single source
+// of truth (no drift on which Google type strings belong in which
+// bucket). Previously also shared with the dashboard's NearbyVenuesRow,
+// which has been deleted (Google Discovery cost was unaffordable at
+// MVP scale; the dashboard now uses FeaturedSpotsRow instead).
 
 // ── Scoring ────────────────────────────────────────────────────────────────
 
