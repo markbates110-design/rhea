@@ -15,6 +15,7 @@ import { inferVenueType } from "@/lib/places/venueType";
 import { googleTypesToCuisine, type Cuisine } from "@/lib/places/cuisine";
 import { extractAddressComponents, type AddressComponentLike } from "@/lib/places/address";
 import { uploadMealPhoto } from "@/lib/storage/mealPhoto";
+import { VenueTypePicker } from "@/components/rate/VenueTypePicker";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -653,39 +654,9 @@ function RatePageInner() {
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-base shrink-0">
-                  {/* Editable venue type pill. Auto-inferred from Google's
-                      types + price_level; user can override when the
-                      inference is wrong (e.g., a sit-down pizza joint
-                      Google tags pizza_restaurant but is actually casual,
-                      not fast-food — fixed in the classifier but the
-                      override is a safety net for the remaining edges).
-                      Changing the type resets the criteria sliders since
-                      VENUE_CRITERIA is per-type. */}
-                  <label className="sr-only" htmlFor="venue-type-select">
-                    Venue type
-                  </label>
-                  <div className="relative">
-                    <select
-                      id="venue-type-select"
-                      value={spot.venueType}
-                      onChange={(e) => handleVenueTypeChange(e.target.value as VenueType)}
-                      className="appearance-none cursor-pointer rounded-full bg-primary-container pl-sm pr-lg py-0.5 font-label-sm text-label-sm font-bold text-on-primary-container whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-primary/40"
-                    >
-                      {(["fast-food", "casual", "fine", "food-truck"] as VenueType[]).map(
-                        (v) => (
-                          <option key={v} value={v}>
-                            {VENUE_META[v].label}
-                          </option>
-                        ),
-                      )}
-                    </select>
-                    <span
-                      aria-hidden
-                      className="material-symbols-outlined pointer-events-none absolute right-1 top-1/2 -translate-y-1/2 text-[16px] text-on-primary-container"
-                    >
-                      expand_more
-                    </span>
-                  </div>
+                  {/* Subtle "current" indicator only — the editable picker
+                      lives below the chip in its own visually prominent
+                      block so the user can't miss the override. */}
                   <button
                     type="button"
                     onClick={() => {
@@ -700,6 +671,19 @@ function RatePageInner() {
                   </button>
                 </div>
               </div>
+            )}
+
+            {/* Venue-type override — prominent and labeled so the
+                "Auto-detected" inference is always visible and one-tap-
+                correctable. The weighted score depends on which
+                criteria sliders we show next, so this control is
+                foundational, not decorative. */}
+            {spot && (
+              <VenueTypePicker
+                value={spot.venueType}
+                onChange={handleVenueTypeChange}
+                autoDetected
+              />
             )}
           </section>
 

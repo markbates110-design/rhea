@@ -16,6 +16,7 @@ import {
 } from "@/lib/ratings/scoring";
 import { uploadMealPhoto } from "@/lib/storage/mealPhoto";
 import { DeleteRatingConfirm } from "@/components/history/DeleteRatingConfirm";
+import { VenueTypePicker } from "@/components/rate/VenueTypePicker";
 
 export interface EditableRatingRow {
   id: string;
@@ -72,7 +73,12 @@ function RatingEditSheetInner({ rating, onClose, onSaved, onDeleted }: InnerProp
   // edit/delete from succeeding cross-account or failing for a signed-in
   // user who rated on a different device.
   const { user } = useAuth();
-  const venueType: VenueType = normalizeVenueType(rating.venue_type);
+  // venueType is editable here — if the original /rate auto-inference was
+  // wrong, the user can correct it post-hoc without losing visit date,
+  // photo, notes, etc. Criteria + meta derive from the live state.
+  const [venueType, setVenueType] = useState<VenueType>(() =>
+    normalizeVenueType(rating.venue_type),
+  );
   const criteria = useMemo(() => VENUE_CRITERIA[venueType], [venueType]);
   const meta = VENUE_META[venueType];
 
@@ -83,6 +89,27 @@ function RatingEditSheetInner({ rating, onClose, onSaved, onDeleted }: InnerProp
   const [mealPhotoFile, setMealPhotoFile] = useState<File | null>(null);
   const [mealPhotoPreviewUrl, setMealPhotoPreviewUrl] = useState<string | null>(null);
   const [photoCleared, setPhotoCleared] = useState(false);
+
+  /**
+   * Re-derive criteria scores when the venue type changes. We reuse the
+   * mount-time `buildInitialScores` helper so the merge rule stays in
+   * one place: any criterion present in both the old and new venue
+   * type's criteria sets keeps the user's value; criteria new to the
+   * target type seed to DEFAULT_SCORE. The user keeps their effort on
+   * overlapping criteria rather than losing it on every type change.
+   */
+  function handleVenueTypeChange(next: VenueType) {
+    if (next === venueType) return;
+    setVenueType(next);
+    setScores(
+      buildInitialScores({
+        ...rating,
+        venue_type: next,
+        criteria_scores: scores,
+      }),
+    );
+    setError("");
+  }
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -160,6 +187,7 @@ function RatingEditSheetInner({ rating, onClose, onSaved, onDeleted }: InnerProp
       const updateBase = supabase
         .from("ratings")
         .update({
+          venue_type: venueType,
           meal_type: mealType,
           visit_date: visitDate,
           criteria_scores: criteriaScores,
@@ -256,7 +284,7 @@ function RatingEditSheetInner({ rating, onClose, onSaved, onDeleted }: InnerProp
 
         <div className="min-h-0 min-w-0 flex-1 overflow-y-auto px-md py-md">
           <div className="flex min-w-0 flex-col gap-md">
-            <div className="rounded-xl border border-outline-variant/80 bg-surface-container-low px-sm py-xs">
+            <div className="flex flex-col gap-sm rounded-xl border border-outline-variant/80 bg-surface-container-low px-sm py-sm">
               <div className="flex items-start gap-xs">
                 <span
                   className="material-symbols-outlined mt-0.5 text-[18px] text-primary"
@@ -269,11 +297,24 @@ function RatingEditSheetInner({ rating, onClose, onSaved, onDeleted }: InnerProp
                   {rating.venue_address ? (
                     <p className="font-label-sm text-label-sm text-on-surface-variant">{rating.venue_address}</p>
                   ) : null}
-                  <span className="mt-xs inline-flex rounded-full bg-primary-container px-xs py-0.5 font-label-sm text-label-sm font-semibold text-on-primary-container">
-                    {meta.label}
-                  </span>
                 </div>
               </div>
+
+              {/* Venue-type override — when the original auto-inference
+                  was wrong, the user can correct it here without
+                  re-rating. Changing the type re-derives criteria
+                  scores: overlapping criteria keep their values,
+                  new criteria seed to DEFAULT_SCORE. autoDetected
+                  is false because by the time the user is editing,
+                  the value on file is THEIR choice (or a prior
+                  inference they implicitly accepted) — labeling it
+                  as "auto-detected" would be misleading. */}
+              <VenueTypePicker
+                value={venueType}
+                onChange={handleVenueTypeChange}
+                autoDetected={false}
+                id={`edit-venue-type-${rating.id}`}
+              />
             </div>
 
             <section className="flex flex-col gap-sm rounded-xl border border-outline-variant bg-surface-container-low p-md">
