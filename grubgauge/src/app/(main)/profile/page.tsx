@@ -173,7 +173,6 @@ export default function ProfilePage() {
 
   return (
     <PageShell variant="form" className="pt-lg pb-10">
-      <InstallPrompt />
       <div className="flex flex-col gap-lg">
         {/* Avatar above name — uploader doubles as Edit/Remove affordance. */}
         <div className="flex flex-col items-start gap-sm">
@@ -245,6 +244,12 @@ export default function ProfilePage() {
             )}
           </button>
         </div>
+
+        <InstallPrompt
+          variant="inline"
+          showImmediately
+          ignoreDismissCooldown
+        />
 
         <section
           aria-labelledby="account-danger-title"

@@ -20,6 +20,13 @@ interface BeforeInstallPromptEvent extends Event {
 const ENGAGEMENT_DELAY_MS = 30_000;
 
 type Platform = "ios" | "android" | "unsupported";
+type InstallPromptVariant = "floating" | "inline";
+
+interface InstallPromptProps {
+  variant?: InstallPromptVariant;
+  showImmediately?: boolean;
+  ignoreDismissCooldown?: boolean;
+}
 
 function isStandalone(): boolean {
   return (
@@ -49,10 +56,10 @@ function isDismissedInCooldown(): boolean {
   return Number.isFinite(until) && Date.now() < until;
 }
 
-function shouldSuppressPrompt(): boolean {
+function shouldSuppressPrompt(ignoreDismissCooldown = false): boolean {
   return (
     isStandalone() ||
-    isDismissedInCooldown() ||
+    (!ignoreDismissCooldown && isDismissedInCooldown()) ||
     localStorage.getItem(INSTALL_INSTALLED_KEY) === "true"
   );
 }
@@ -65,10 +72,14 @@ function shouldSuppressPrompt(): boolean {
  * equivalent event, so the best UX is clear manual instructions after the user
  * has already shown intent.
  */
-export function InstallPrompt() {
+export function InstallPrompt({
+  variant = "floating",
+  showImmediately = false,
+  ignoreDismissCooldown = false,
+}: InstallPromptProps) {
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
-  const [eligible, setEligible] = useState(false);
+  const [eligible, setEligible] = useState(showImmediately);
   const [platform] = useState<Platform>(() => {
     if (typeof window === "undefined") return "unsupported";
     return detectPlatform();
@@ -76,7 +87,7 @@ export function InstallPrompt() {
   const visible = eligible && (platform === "ios" || platform === "android");
 
   useEffect(() => {
-    if (shouldSuppressPrompt()) return;
+    if (shouldSuppressPrompt(ignoreDismissCooldown)) return;
 
     if (localStorage.getItem(INSTALL_ELIGIBLE_KEY) === "true") {
       queueMicrotask(() => setEligible(true));
@@ -113,7 +124,7 @@ export function InstallPrompt() {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
       window.removeEventListener("appinstalled", handleInstalled);
     };
-  }, []);
+  }, [ignoreDismissCooldown]);
 
   async function handleInstall() {
     if (!deferredPrompt) return;
@@ -145,11 +156,20 @@ export function InstallPrompt() {
 
   if (!visible) return null;
 
+  const sectionClasses =
+    variant === "inline"
+      ? "block rounded-2xl border border-primary/30 bg-primary/5 p-md"
+      : "fixed bottom-20 left-1/2 z-50 block -translate-x-1/2 rounded-2xl border border-outline-variant bg-surface-container-high p-md shadow-xl";
+  const sectionStyle =
+    variant === "inline"
+      ? undefined
+      : { width: "min(448px, calc(100vw - 40px))", minWidth: "280px" };
+
   return (
     <section
       aria-labelledby="install-prompt-title"
-      className="fixed bottom-20 left-1/2 z-50 block -translate-x-1/2 rounded-2xl border border-outline-variant bg-surface-container-high p-md shadow-xl"
-      style={{ width: "min(448px, calc(100vw - 40px))", minWidth: "280px" }}
+      className={sectionClasses}
+      style={sectionStyle}
     >
       <div className="flex flex-col gap-sm">
         <div className="flex items-start gap-sm">
