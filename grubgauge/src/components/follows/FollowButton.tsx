@@ -4,7 +4,10 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useFollowState } from "@/lib/follows/useFollowState";
 import { setPendingFollow } from "@/lib/follows/pendingFollow";
-import { PILL_COMPACT_SIZE_CLASSES } from "@/lib/ui/pillSizes";
+import {
+  PILL_COMPACT_ICON_SIZE_CLASS,
+  PILL_COMPACT_SIZE_CLASSES,
+} from "@/lib/ui/pillSizes";
 import { FollowGateSheet, type FollowGateTarget } from "./FollowGateSheet";
 
 export type FollowButtonSize = "md" | "sm";
@@ -68,7 +71,7 @@ export function FollowButton({ target, size = "md" }: Props) {
     size === "sm"
       ? PILL_COMPACT_SIZE_CLASSES
       : "px-md py-xs font-label-sm text-label-sm";
-  const iconSize = size === "sm" ? "text-[11px]" : "text-[16px]";
+  const iconSize = size === "sm" ? PILL_COMPACT_ICON_SIZE_CLASS : "text-[16px]";
   const baseClass = isFollowing
     ? "border border-outline-variant bg-surface-container-high text-on-surface hover:bg-surface-variant"
     : "bg-primary-container text-on-primary-container hover:brightness-110";

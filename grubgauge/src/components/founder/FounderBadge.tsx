@@ -1,5 +1,8 @@
 import type { FounderBadgeInfo } from "@/lib/founder/founder";
-import { PILL_COMPACT_SIZE_CLASSES } from "@/lib/ui/pillSizes";
+import {
+  PILL_COMPACT_ICON_SIZE_CLASS,
+  PILL_COMPACT_SIZE_CLASSES,
+} from "@/lib/ui/pillSizes";
 
 interface Props {
   /**
@@ -58,7 +61,7 @@ function TheFounderPill({ size }: { size: "compact" | "full" }) {
       title="The Founder — the one and only."
     >
       <span
-        className={`material-symbols-outlined ${size === "full" ? "text-[12px]" : "text-[11px]"}`}
+        className={`material-symbols-outlined ${size === "full" ? "text-[12px]" : PILL_COMPACT_ICON_SIZE_CLASS}`}
         style={{ fontVariationSettings: "'FILL' 1" }}
         aria-hidden
       >

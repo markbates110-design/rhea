@@ -5,6 +5,10 @@ import type { RaterFields } from "@/lib/profile/raters";
 import { LikeButton } from "@/components/ratings/LikeButton";
 import { RaterBadge } from "@/components/ratings/RaterBadge";
 import { FounderBadge } from "@/components/founder/FounderBadge";
+import {
+  PILL_COMPACT_ICON_SIZE_CLASS,
+  PILL_COMPACT_SIZE_CLASSES,
+} from "@/lib/ui/pillSizes";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -172,11 +176,11 @@ export function RatingCard({ rating, rank, liked, likeCount, hideRater = false, 
       )}
 
       <div className={`flex items-center gap-xs flex-wrap ${bodyIndent}`}>
-        <span className="inline-flex items-center gap-xs rounded-full bg-surface-variant px-xs py-0.5 font-label-sm text-label-sm text-on-surface-variant">
-          <span className="material-symbols-outlined text-[13px]" style={{ fontVariationSettings: "'FILL' 1" }}>{meta.icon}</span>
+        <span className={`inline-flex items-center gap-xs rounded-full bg-surface-variant text-on-surface-variant ${PILL_COMPACT_SIZE_CLASSES}`}>
+          <span className={`material-symbols-outlined ${PILL_COMPACT_ICON_SIZE_CLASS}`} style={{ fontVariationSettings: "'FILL' 1" }}>{meta.icon}</span>
           {meta.label}
         </span>
-        <span className={`inline-flex items-center rounded-full bg-surface-container-high px-xs py-0.5 font-label-sm text-label-sm font-semibold ${colorClass}`}>
+        <span className={`inline-flex items-center rounded-full bg-surface-container-high font-semibold ${PILL_COMPACT_SIZE_CLASSES} ${colorClass}`}>
           {badge}
         </span>
         <span className="ml-auto font-label-sm text-label-sm text-on-surface-variant shrink-0">
