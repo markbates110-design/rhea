@@ -104,21 +104,6 @@ export default function OnboardingWelcomePage() {
             Continue as Guest
           </button>
         </div>
-
-        {/* Pro teaser */}
-        <div className="my-xl flex items-center justify-center">
-          <div className="inline-flex items-center gap-xs rounded-full border border-tertiary/30 bg-tertiary/10 px-md py-xs">
-            <span
-              className="material-symbols-outlined text-[14px] text-tertiary"
-              style={{ fontVariationSettings: "'FILL' 1" }}
-            >
-              bolt
-            </span>
-            <span className="font-label-sm text-label-sm text-tertiary">
-              GrubGauge Pro — coming soon
-            </span>
-          </div>
-        </div>
       </PageShell>
 
       {/* Bottom spacer */}

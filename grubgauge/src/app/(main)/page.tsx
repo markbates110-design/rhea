@@ -7,6 +7,8 @@ import { createClient } from "@/lib/supabase/client";
 import { PageShell } from "@/components/layout/PageShell";
 import { NearbyVenuesRow } from "@/components/discovery/NearbyVenuesRow";
 import { FounderProgressCard } from "@/components/founder/FounderProgressCard";
+import { SuggestedUsersRow } from "@/components/follows/SuggestedUsersRow";
+import { FollowingFeed } from "@/components/follows/FollowingFeed";
 import { getDeviceId, getUsername, isOnboarded } from "@/lib/identity/deviceId";
 import { useAuth } from "@/lib/auth/useAuth";
 import { useProfile } from "@/lib/profile/useProfile";
@@ -163,6 +165,15 @@ export default function DashboardPage() {
               row hides (location denied / unsupported) the existing
               "Rate a Spot" CTA below remains the universal fallback. */}
           <NearbyVenuesRow />
+          {/* People to follow — guest/member both see this; FollowButton
+              inside opens the gate sheet for guests. Self-hides when no
+              suggestions exist (brand-new project). */}
+          <SuggestedUsersRow />
+          {/* Following feed — three variants (member-with-follows /
+              member-no-follows / guest trending). Guests see content
+              from day one with a sign-up CTA banner; members see their
+              network or a "Start your feed" nudge. */}
+          <FollowingFeed />
           <div className="flex flex-col items-center gap-lg rounded-xl border border-outline-variant bg-surface-container-low px-lg py-xl text-center">
             <span className="material-symbols-outlined text-[48px] text-on-surface-variant" style={{ fontVariationSettings: "'FILL' 1" }}>
               restaurant_menu
@@ -217,6 +228,13 @@ export default function DashboardPage() {
 
         {/* Near You — discovery row, lead content above retrospective stats */}
         <NearbyVenuesRow />
+
+        {/* Social discovery + network feed — sit above retrospective
+            stats because their content is more time-sensitive (people
+            to follow now, recent ratings from your network) than the
+            viewer's own historical totals. */}
+        <SuggestedUsersRow />
+        <FollowingFeed />
 
         {/* Stats row */}
         <div className="grid grid-cols-3 gap-sm">

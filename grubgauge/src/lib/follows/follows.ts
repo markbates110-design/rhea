@@ -190,6 +190,23 @@ export async function getFollowing(
   return data as FollowEdge[];
 }
 
+/**
+ * Just the user ids `userId` follows — lighter than `getFollowing` when
+ * the caller only needs the set for a downstream `in()` filter. Used by
+ * the FollowingFeed to scope the ratings query to followees in one round-trip.
+ */
+export async function getFollowingIds(
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<string[]> {
+  const { data, error } = await supabase
+    .from(FOLLOWS_TABLE)
+    .select("followee_id")
+    .eq("follower_id", userId);
+  if (error || !data) return [];
+  return data.map((row) => row.followee_id as string);
+}
+
 // ── internals ────────────────────────────────────────────────────────────
 
 function isUniqueViolation(err: { code?: string } | null | undefined): boolean {
