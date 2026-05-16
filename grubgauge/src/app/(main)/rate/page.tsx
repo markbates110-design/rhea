@@ -12,6 +12,8 @@ import {
   type VenueType,
 } from "@/lib/ratings/scoring";
 import { inferVenueType } from "@/lib/places/venueType";
+import { googleTypesToCuisine, type Cuisine } from "@/lib/places/cuisine";
+import { extractAddressComponents, type AddressComponentLike } from "@/lib/places/address";
 import { uploadMealPhoto } from "@/lib/storage/mealPhoto";
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -21,6 +23,19 @@ interface SpotSelection {
   name: string;
   address: string;
   venueType: VenueType;
+  /**
+   * Derived metadata for SEO query patterns ("best [cuisine] in [city]",
+   * "cheapest in [city]"). All extracted from the Google Place Details
+   * response — no user input. Nullable where Google doesn't return
+   * the field (neighborhood is most often missing; price_level is
+   * absent for ~10-20% of restaurants).
+   */
+  cuisine: Cuisine;
+  city: string | null;
+  neighborhood: string | null;
+  state: string | null;
+  postal_code: string | null;
+  price_level: number | null;
 }
 
 // Google Places types → VenueType mapping has been extracted to
@@ -40,6 +55,63 @@ function scoreBadge(score: number): { label: string; colorClass: string } {
 
 function today(): string {
   return new Date().toISOString().split("T")[0];
+}
+
+// ── Place Details capture ──────────────────────────────────────────────────
+
+/**
+ * Fields requested on every Place Details call. `address_components` is
+ * free (Basic Data SKU, same bucket as name/types/formatted_address);
+ * `price_level` is Atmosphere Data — billed separately at ~$5/1K, which
+ * is negligible at MVP scale and is the source of truth for the SEO
+ * "cheapest in [city]" query pattern.
+ */
+const PLACE_DETAILS_FIELDS: string[] = [
+  "name",
+  "formatted_address",
+  "types",
+  "place_id",
+  "address_components",
+  "price_level",
+];
+
+/**
+ * Build the SpotSelection from a Google PlaceResult — single shared
+ * shape so the autocomplete-select path and the deep-link auto-select
+ * path can't drift on which fields they pull.
+ */
+function spotSelectionFromPlace(
+  place: google.maps.places.PlaceResult,
+  fallbackPlaceId: string,
+  prediction?: google.maps.places.AutocompletePrediction,
+): SpotSelection {
+  const address = extractAddressComponents(
+    (place.address_components as readonly AddressComponentLike[] | undefined) ?? null,
+  );
+  // Google's typing models `price_level` as `number | undefined`. Treat
+  // the absent case as null so the column-NULL semantics line up with
+  // "Google didn't tell us" rather than "this place is free."
+  const rawPriceLevel = (place as { price_level?: number }).price_level;
+  const priceLevel =
+    typeof rawPriceLevel === "number" && rawPriceLevel >= 0 && rawPriceLevel <= 4
+      ? rawPriceLevel
+      : null;
+
+  return {
+    placeId: place.place_id ?? fallbackPlaceId,
+    name: place.name ?? prediction?.structured_formatting.main_text ?? "",
+    address:
+      place.formatted_address ??
+      prediction?.structured_formatting.secondary_text ??
+      "",
+    venueType: inferVenueType(place.types ?? []),
+    cuisine: googleTypesToCuisine(place.types ?? []),
+    city: address.city,
+    neighborhood: address.neighborhood,
+    state: address.state,
+    postal_code: address.postal_code,
+    price_level: priceLevel,
+  };
 }
 
 // ── Spot Search ────────────────────────────────────────────────────────────
@@ -93,15 +165,13 @@ function SpotSearch({ onSelect, initialPlaceId }: SpotSearchProps) {
     if (!placesRef.current) return;
     autoSelectFiredRef.current = true;
     placesRef.current.getDetails(
-      { placeId: initialPlaceId, fields: ["name", "formatted_address", "types", "place_id"] },
+      {
+        placeId: initialPlaceId,
+        fields: PLACE_DETAILS_FIELDS,
+      },
       (place, status) => {
         if (status === google.maps.places.PlacesServiceStatus.OK && place?.place_id) {
-          onSelect({
-            placeId: place.place_id,
-            name: place.name ?? "",
-            address: place.formatted_address ?? "",
-            venueType: inferVenueType(place.types ?? []),
-          });
+          onSelect(spotSelectionFromPlace(place, place.place_id));
         }
       },
     );
@@ -138,21 +208,26 @@ function SpotSearch({ onSelect, initialPlaceId }: SpotSearchProps) {
     setSuggestions([]);
     if (!placesRef.current) return;
     placesRef.current.getDetails(
-      { placeId: prediction.place_id, fields: ["name", "formatted_address", "types", "place_id"] },
+      { placeId: prediction.place_id, fields: PLACE_DETAILS_FIELDS },
       (place, status) => {
         if (status === google.maps.places.PlacesServiceStatus.OK && place) {
-          onSelect({
-            placeId: place.place_id ?? prediction.place_id,
-            name: place.name ?? prediction.structured_formatting.main_text,
-            address: place.formatted_address ?? prediction.structured_formatting.secondary_text ?? "",
-            venueType: inferVenueType(place.types ?? []),
-          });
+          onSelect(spotSelectionFromPlace(place, prediction.place_id, prediction));
         } else {
+          // Place Details unavailable — degrade to autocomplete fields only.
+          // SEO metadata is null; the rating still lands, just without the
+          // structured location / cuisine / price_level. Operator can
+          // backfill later via the scripts/backfill-ratings-metadata script.
           onSelect({
             placeId: prediction.place_id,
             name: prediction.structured_formatting.main_text,
             address: prediction.structured_formatting.secondary_text ?? "",
             venueType: "casual",
+            cuisine: "other",
+            city: null,
+            neighborhood: null,
+            state: null,
+            postal_code: null,
+            price_level: null,
           });
         }
       }
@@ -395,6 +470,16 @@ function RatePageInner() {
         meal_photo_url: mealPhotoUrl,
         device_id: deviceId,
         user_id: userId,
+        // Derived metadata that powers the SEO "best [cuisine] in [city]" /
+        // "cheapest in [city]" query patterns + future auto-generated
+        // public pages. All nullable upstream — null is legitimate
+        // ("Google didn't return it") not error.
+        cuisine: spot.cuisine,
+        city: spot.city,
+        neighborhood: spot.neighborhood,
+        state: spot.state,
+        postal_code: spot.postal_code,
+        price_level: spot.price_level,
       });
       setSubmittedMealPhotoUrl(mealPhotoUrl);
       clearMealPhoto();
