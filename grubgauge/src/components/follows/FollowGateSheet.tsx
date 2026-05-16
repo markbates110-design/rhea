@@ -87,9 +87,9 @@ export function FollowGateSheet({ open, target, onDismiss }: Props) {
           maxWidth: 384,
           padding: 24,
           borderRadius: 16,
-          border: "1px solid #2e2a21",
-          backgroundColor: "#252118",
-          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
+          border: "1px solid var(--color-outline-variant)",
+          backgroundColor: "var(--color-surface-container-high)",
+          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -108,9 +108,9 @@ export function FollowGateSheet({ open, target, onDismiss }: Props) {
             width: 64,
             height: 64,
             borderRadius: 9999,
-            border: "1px solid #6b6350",
-            backgroundColor: "#3a3526",
-            color: "#e8dcc4",
+            border: "1px solid var(--color-outline-variant)",
+            backgroundColor: "var(--color-surface-variant)",
+            color: "var(--color-on-surface)",
             fontSize: 28,
             fontWeight: 700,
             fontFamily:
@@ -138,7 +138,7 @@ export function FollowGateSheet({ open, target, onDismiss }: Props) {
               fontSize: 18,
               fontWeight: 600,
               lineHeight: 1.33,
-              color: "#e8dcc4",
+              color: "var(--color-on-surface)",
               fontFamily:
                 "var(--font-work-sans, ui-sans-serif, system-ui, sans-serif)",
             }}
@@ -151,7 +151,7 @@ export function FollowGateSheet({ open, target, onDismiss }: Props) {
               fontSize: 14,
               lineHeight: 1.5,
               fontWeight: 400,
-              color: "#c4b896",
+              color: "var(--color-on-surface-variant)",
               fontFamily:
                 "var(--font-work-sans, ui-sans-serif, system-ui, sans-serif)",
             }}
@@ -198,8 +198,8 @@ export function FollowGateSheet({ open, target, onDismiss }: Props) {
               fontWeight: 600,
               fontFamily:
                 "var(--font-work-sans, ui-sans-serif, system-ui, sans-serif)",
-              border: "1px solid #6b6350",
-              color: "#e8dcc4",
+              border: "1px solid var(--color-outline)",
+              color: "var(--color-on-surface)",
               backgroundColor: "transparent",
               textDecoration: "none",
             }}
@@ -216,7 +216,7 @@ export function FollowGateSheet({ open, target, onDismiss }: Props) {
               padding: "8px 16px",
               fontSize: 12,
               fontWeight: 500,
-              color: "#c4b896",
+              color: "var(--color-on-surface-variant)",
               fontFamily:
                 "var(--font-work-sans, ui-sans-serif, system-ui, sans-serif)",
             }}
