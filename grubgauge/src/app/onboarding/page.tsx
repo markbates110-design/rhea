@@ -1,11 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { BrandMark } from "@/components/brand/BrandMark";
 import { PageShell } from "@/components/layout/PageShell";
 import { FounderSlotCounter } from "@/components/founder/FounderSlotCounter";
-import { setOnboarded } from "@/lib/identity/deviceId";
+import { UsernameClaimField } from "@/components/onboarding/UsernameClaimField";
+import { getUsername, setOnboarded, setUsername } from "@/lib/identity/deviceId";
 
 const VALUE_PROPS = [
   {
@@ -27,6 +29,22 @@ const VALUE_PROPS = [
 
 export default function OnboardingWelcomePage() {
   const router = useRouter();
+
+  // Pre-fill from device storage so a returning visitor (came back later
+  // to claim) sees their pending handle rather than an empty box. Lazy
+  // initializer keeps the read out of every render. Persistence flows
+  // back to localStorage on every change so the value travels into
+  // /onboarding/profile (post-signup) and into the `handle_new_user`
+  // trigger via user_metadata at signup time.
+  const [handle, setHandle] = useState<string>(() => {
+    if (typeof window === "undefined") return "";
+    return getUsername();
+  });
+
+  function handleHandleChange(next: string) {
+    setHandle(next);
+    setUsername(next.trim());
+  }
 
   // No auto-redirect for already-onboarded users — `/onboarding` is now a
   // re-entry surface for returning guests routed here from the body `+ Rate`
@@ -86,6 +104,27 @@ export default function OnboardingWelcomePage() {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Stake-your-handle — sits between value props and CTAs so the
+            user has already absorbed why GrubGauge exists before they're
+            asked to commit to a name. Persisted to localStorage on every
+            keystroke so the value travels through to /onboarding/profile
+            (post-signup) and into handle_new_user via user_metadata —
+            zero-cost UX for the user, who never has to retype it. */}
+        <div className="mt-xl flex flex-col gap-sm rounded-2xl border border-primary/40 bg-primary/5 px-md py-md">
+          <p className="font-title-sm text-title-sm font-bold text-on-surface">
+            Claim your handle
+          </p>
+          <p className="font-body-md text-body-md text-on-surface-variant">
+            Once it&apos;s yours, it&apos;s yours — only one @name per rater on GrubGauge.
+          </p>
+          <UsernameClaimField
+            value={handle}
+            onChange={handleHandleChange}
+            label="Pick your @"
+            hideIdleHint
+          />
         </div>
 
         {/* CTAs */}

@@ -9,6 +9,7 @@ import { updateProfile, upsertProfile } from "@/lib/profile/profile";
 import { applyPendingFollow } from "@/lib/follows/applyPending";
 import { PageShell } from "@/components/layout/PageShell";
 import { AvatarUploader } from "@/components/profile/AvatarUploader";
+import { UsernameClaimField } from "@/components/onboarding/UsernameClaimField";
 import {
   getAvatarUrl,
   getFoodPrefs,
@@ -169,22 +170,17 @@ export default function OnboardingProfilePage() {
         </div>
       )}
 
-      {/* Name */}
-      <div className="mb-lg flex flex-col gap-xs">
-        <label
-          htmlFor="username"
-          className="font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant"
-        >
-          What should we call you?
-        </label>
-        <input
-          id="username"
-          type="text"
+      {/* Name — same UsernameClaimField as /onboarding welcome so the
+          live availability + scarcity messaging carries through to the
+          post-signup setup step. If the user pre-claimed on welcome, the
+          value pre-fills from localStorage via the `name` state seeded by
+          the hydration effect above; no retyping. handle_new_user trigger
+          will resolve any collision at write time. */}
+      <div className="mb-lg">
+        <UsernameClaimField
           value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="First name or nickname"
-          autoComplete="given-name"
-          className="w-full rounded-xl border border-outline-variant bg-surface-container-low px-md py-[13px] font-body-md text-body-md text-on-surface placeholder-on-surface-variant/50 outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
+          onChange={(next) => setName(next)}
+          label="Pick your @"
         />
       </div>
 
