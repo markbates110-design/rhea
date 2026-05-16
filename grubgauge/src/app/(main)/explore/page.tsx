@@ -13,6 +13,12 @@ import { createClient } from "@/lib/supabase/client";
 import { getRatingsLikeCounts, getUserLikedRatings } from "@/lib/ratings/likes";
 import { attachRaters, type RaterFields } from "@/lib/profile/raters";
 import { RatingCard } from "@/components/ratings/RatingCard";
+// FeedRatingCard wraps RatingCard with a Follow control in the like row
+// (member → live Follow / Following toggle, guest → FollowGateSheet,
+// self → no control). Explore feed shows ratings from anyone; the
+// Follow control closes the "discovered a great rater" loop without
+// forcing a detour through /u/[username].
+import { FeedRatingCard } from "@/components/follows/FeedRatingCard";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -260,7 +266,7 @@ export default function ExplorePage() {
             const liked = likedSet.has(r.id);
             const count = countMap.get(r.id) ?? 0;
             return (
-              <RatingCard
+              <FeedRatingCard
                 // Re-key on initial like values so the inner <LikeButton>
                 // (which lazy-inits its useState from props) remounts and
                 // re-seeds when batched like data hydrates after the first
