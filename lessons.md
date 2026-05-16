@@ -35,6 +35,8 @@ Things worth remembering across tasks. Append under the relevant section after a
 
 *(patterns about how to work — scoping, clarification, sequencing, when to ask)*
 
+- **Sticky items drain FIFO on the next implementation iteration unless the user explicitly says otherwise.** `work.md`'s `## sticky` section is not an indefinite parking lot — anything the user parks there has already been judged worth doing, and leaving it untouched while taking on new ad-hoc work forces them to re-raise it (which is exactly the token spend they parked it to avoid). When the user opens a new implementation task, default behavior is: check sticky → drain the top item first (or bundle with the new ask if related), then do the new ask. Only skip sticky when the user explicitly says "skip sticky," "do X first," or "hold for later." Discussion-only / planning turns don't count as iterations and don't trigger sticky drain — only a coding/implementation request does. Caught when "subtler Founder pill" sat in sticky for several iterations of unrelated rating-system work and the user had to re-raise it.
+
 ---
 
 ## costly mistakes
