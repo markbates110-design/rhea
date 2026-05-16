@@ -12,4 +12,6 @@
 export const PILL_COMPACT_SIZE_CLASSES =
   "h-5 px-xs py-0 font-label-sm text-[10px] leading-none";
 
-export const PILL_COMPACT_ICON_SIZE_CLASS = "text-[11px] leading-none";
+export const PILL_COMPACT_ICON_SIZE_CLASS = "text-[10px] leading-none";
+
+export const PILL_COMPACT_GAP_CLASS = "gap-1";

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { toggleLike } from "@/lib/ratings/likes";
 import {
+  PILL_COMPACT_GAP_CLASS,
   PILL_COMPACT_ICON_SIZE_CLASS,
   PILL_COMPACT_SIZE_CLASSES,
 } from "@/lib/ui/pillSizes";
@@ -84,7 +85,7 @@ export function LikeButton({ ratingId, initialLiked, initialCount }: LikeButtonP
       disabled={pending}
       aria-pressed={liked}
       aria-label={liked ? "Unlike this rating" : "Like this rating"}
-      className={`inline-flex items-center gap-xs rounded-full transition-colors active:scale-95 disabled:opacity-70 ${PILL_COMPACT_SIZE_CLASSES} ${
+      className={`inline-flex items-center rounded-full transition-colors active:scale-95 disabled:opacity-70 ${PILL_COMPACT_GAP_CLASS} ${PILL_COMPACT_SIZE_CLASSES} ${
         liked
           ? "bg-primary-container text-on-primary-container"
           : "text-on-surface-variant hover:text-on-surface hover:bg-surface-variant"

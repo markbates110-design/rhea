@@ -6,6 +6,7 @@ import { LikeButton } from "@/components/ratings/LikeButton";
 import { RaterBadge } from "@/components/ratings/RaterBadge";
 import { FounderBadge } from "@/components/founder/FounderBadge";
 import {
+  PILL_COMPACT_GAP_CLASS,
   PILL_COMPACT_ICON_SIZE_CLASS,
   PILL_COMPACT_SIZE_CLASSES,
 } from "@/lib/ui/pillSizes";
@@ -176,7 +177,7 @@ export function RatingCard({ rating, rank, liked, likeCount, hideRater = false, 
       )}
 
       <div className={`flex items-center gap-xs flex-wrap ${bodyIndent}`}>
-        <span className={`inline-flex items-center gap-xs rounded-full bg-surface-variant text-on-surface-variant ${PILL_COMPACT_SIZE_CLASSES}`}>
+        <span className={`inline-flex items-center rounded-full bg-surface-variant text-on-surface-variant ${PILL_COMPACT_GAP_CLASS} ${PILL_COMPACT_SIZE_CLASSES}`}>
           <span className={`material-symbols-outlined ${PILL_COMPACT_ICON_SIZE_CLASS}`} style={{ fontVariationSettings: "'FILL' 1" }}>{meta.icon}</span>
           {meta.label}
         </span>

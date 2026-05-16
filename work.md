@@ -20,6 +20,12 @@ Paste a task under `## sticky` and say `go`. The agent moves it to `## current`,
 
 *(completed tasks with retrospectives, most recent first)*
 
+### grubgauge — compact pill icons subtle and unclipped — 2026-05-16
+worked: kept the fixed compact pill container height unchanged; reduced the shared compact Material Symbols token from 11px to 10px so icons now match the compact text size; added a shared compact gap token (`gap-1`) and applied it to icon-bearing compact pills (The Founder, Follow, Like, venue) so the icon does not feel oversized or trophy-like beside the text; full-size Founder/Follow paths retain their existing larger icon/gap sizing.
+didn't: did NOT change Founding Member numbered pill copy or program logic; did NOT alter the fixed h-5 container or text size; did NOT touch non-rating-card pill styles such as filters, profile CTAs, or rate-page venue picker chips.
+lesson: for icon-text pills, "same font size" still needs a matching gap. A 10px icon next to 10px text can still look loud if the old 8px `gap-xs` remains; scale spacing with the glyph, not just the glyph itself.
+status: shipped locally (ReadLints clean on edited files; `npm run typecheck` green)
+
 ### grubgauge — founding member copy distinct from app Founder — 2026-05-16
 worked: changed the countdown/counter language from "founder spots left" to "founding member spots left" across inline, pill, and headline variants; updated closed-state copy to "Founding member program closed"; updated numbered badge rendering so earned member badges read `Founding Member #x` instead of a generic Founder label; preserved the singular app-founder badge as `The Founder`; updated comments/docs near the counter helpers so future copy work does not reintroduce "founder spots" for numbered members.
 didn't: did NOT rename database tables/functions (`founding_members`, `available_founder_slots`, `FounderBadgeInfo`, etc.) because those are internal implementation names and a codewide rename would be noisy for no user-facing gain; did NOT change the app founder env var or badge kind names.

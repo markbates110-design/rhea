@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useFollowState } from "@/lib/follows/useFollowState";
 import { setPendingFollow } from "@/lib/follows/pendingFollow";
 import {
+  PILL_COMPACT_GAP_CLASS,
   PILL_COMPACT_ICON_SIZE_CLASS,
   PILL_COMPACT_SIZE_CLASSES,
 } from "@/lib/ui/pillSizes";
@@ -72,6 +73,7 @@ export function FollowButton({ target, size = "md" }: Props) {
       ? PILL_COMPACT_SIZE_CLASSES
       : "px-md py-xs font-label-sm text-label-sm";
   const iconSize = size === "sm" ? PILL_COMPACT_ICON_SIZE_CLASS : "text-[16px]";
+  const gapClass = size === "sm" ? PILL_COMPACT_GAP_CLASS : "gap-xs";
   const baseClass = isFollowing
     ? "border border-outline-variant bg-surface-container-high text-on-surface hover:bg-surface-variant"
     : "bg-primary-container text-on-primary-container hover:brightness-110";
@@ -84,7 +86,7 @@ export function FollowButton({ target, size = "md" }: Props) {
         disabled={pending || loading}
         aria-pressed={isFollowing}
         aria-label={isFollowing ? `Unfollow ${target.displayName}` : `Follow ${target.displayName}`}
-        className={`inline-flex shrink-0 items-center gap-xs rounded-full font-semibold transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed ${sizeClass} ${baseClass}`}
+        className={`inline-flex shrink-0 items-center rounded-full font-semibold transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed ${gapClass} ${sizeClass} ${baseClass}`}
       >
         <span
           className={`material-symbols-outlined ${iconSize}`}

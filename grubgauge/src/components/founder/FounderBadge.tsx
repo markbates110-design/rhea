@@ -1,5 +1,6 @@
 import type { FounderBadgeInfo } from "@/lib/founder/founder";
 import {
+  PILL_COMPACT_GAP_CLASS,
   PILL_COMPACT_ICON_SIZE_CLASS,
   PILL_COMPACT_SIZE_CLASSES,
 } from "@/lib/ui/pillSizes";
@@ -53,9 +54,10 @@ function TheFounderPill({ size }: { size: "compact" | "full" }) {
     size === "full"
       ? "px-sm py-0.5 font-label-sm text-label-sm"
       : PILL_COMPACT_SIZE_CLASSES;
+  const gapClass = size === "full" ? "gap-xs" : PILL_COMPACT_GAP_CLASS;
   return (
     <span
-      className={`inline-flex shrink-0 items-center gap-xs rounded-full border border-tertiary bg-tertiary/10 text-tertiary font-semibold ${sizeClasses}`}
+      className={`inline-flex shrink-0 items-center rounded-full border border-tertiary bg-tertiary/10 text-tertiary font-semibold ${gapClass} ${sizeClasses}`}
       aria-label="The Founder badge"
       title="The Founder — the one and only."
     >
