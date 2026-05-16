@@ -16,6 +16,8 @@ import { updateProfile } from "@/lib/profile/profile";
 import { displayNameForProfile, handleForProfile, initialForName } from "@/lib/profile/names";
 import { getAvatarUrl, getUsername, setAvatarUrl } from "@/lib/identity/deviceId";
 
+type DeleteAccountMode = "delete-all" | "anonymize-ratings";
+
 export default function ProfilePage() {
   const router = useRouter();
   const { user, loading } = useAuth();
@@ -34,6 +36,7 @@ export default function ProfilePage() {
   const [localOverride, setLocalOverride] = useState<string | null>(null);
   const [persisting, setPersisting] = useState(false);
   const [persistError, setPersistError] = useState<string | null>(null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   async function handleAvatarChange(nextUrl: string) {
     setLocalOverride(nextUrl);
@@ -242,7 +245,191 @@ export default function ProfilePage() {
             )}
           </button>
         </div>
+
+        <section
+          aria-labelledby="account-danger-title"
+          className="flex flex-col gap-sm rounded-xl border border-error/40 bg-error-container/20 p-md"
+        >
+          <div className="flex flex-col gap-xs">
+            <h2
+              id="account-danger-title"
+              className="font-title-sm text-title-sm font-semibold text-on-surface"
+            >
+              Danger Zone
+            </h2>
+            <p className="font-body-md text-body-md text-on-surface-variant">
+              Delete your account, with the choice to remove your ratings or keep
+              them as anonymous Guest Ratings.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setDeleteOpen(true)}
+            className="flex w-full items-center justify-center gap-xs rounded-xl border border-error bg-surface-container-low py-[12px] font-title-sm text-title-sm font-semibold text-error transition-colors hover:bg-error-container/30 active:scale-95"
+          >
+            <span className="material-symbols-outlined text-[18px]">delete_forever</span>
+            Delete account
+          </button>
+        </section>
       </div>
+      <DeleteAccountSheet
+        open={deleteOpen}
+        onDismiss={() => setDeleteOpen(false)}
+        onDeleted={() => {
+          setAvatarUrl("");
+          router.replace("/");
+        }}
+      />
     </PageShell>
+  );
+}
+
+function DeleteAccountSheet({
+  open,
+  onDismiss,
+  onDeleted,
+}: {
+  open: boolean;
+  onDismiss: () => void;
+  onDeleted: () => void;
+}) {
+  const [mode, setMode] = useState<DeleteAccountMode>("anonymize-ratings");
+  const [confirm, setConfirm] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  if (!open) return null;
+
+  async function handleDelete() {
+    if (confirm !== "DELETE" || deleting) return;
+    setDeleting(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/account/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mode }),
+      });
+      const body = (await res.json().catch(() => null)) as { error?: string } | null;
+      if (!res.ok) {
+        setError(body?.error ?? "Could not delete account.");
+        return;
+      }
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      onDeleted();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not delete account.");
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 px-margin-edge"
+      role="presentation"
+      onClick={() => !deleting && onDismiss()}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="delete-account-title"
+        className="block rounded-2xl border border-outline-variant bg-surface-container-high p-lg shadow-xl"
+        style={{ width: "min(448px, calc(100vw - 40px))", minWidth: "280px" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex flex-col gap-md">
+          <div className="flex flex-col gap-xs">
+            <h2
+              id="delete-account-title"
+              className="font-headline-md text-headline-md font-semibold text-on-surface"
+            >
+              Delete account?
+            </h2>
+            <p className="font-body-md text-body-md text-on-surface-variant">
+              This removes your sign-in, profile, follows, likes, and avatar.
+              Choose what should happen to your ratings before continuing.
+            </p>
+          </div>
+
+          <div className="grid gap-sm">
+            <label className="flex gap-sm rounded-xl border border-outline-variant bg-surface-container-low p-sm">
+              <input
+                type="radio"
+                name="delete-account-mode"
+                value="anonymize-ratings"
+                checked={mode === "anonymize-ratings"}
+                onChange={() => setMode("anonymize-ratings")}
+                className="mt-1"
+              />
+              <span className="flex flex-col gap-base">
+                <span className="font-body-md text-body-md font-semibold text-on-surface">
+                  Keep ratings as Guest Ratings
+                </span>
+                <span className="font-label-sm text-label-sm text-on-surface-variant">
+                  Your ratings stay public, but they are no longer tied to your profile.
+                </span>
+              </span>
+            </label>
+            <label className="flex gap-sm rounded-xl border border-outline-variant bg-surface-container-low p-sm">
+              <input
+                type="radio"
+                name="delete-account-mode"
+                value="delete-all"
+                checked={mode === "delete-all"}
+                onChange={() => setMode("delete-all")}
+                className="mt-1"
+              />
+              <span className="flex flex-col gap-base">
+                <span className="font-body-md text-body-md font-semibold text-on-surface">
+                  Delete my ratings too
+                </span>
+                <span className="font-label-sm text-label-sm text-on-surface-variant">
+                  Removes your account-owned ratings and their meal photos.
+                </span>
+              </span>
+            </label>
+          </div>
+
+          <label className="flex flex-col gap-xs">
+            <span className="font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant">
+              Type DELETE to confirm
+            </span>
+            <input
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+              className="w-full rounded-xl border border-outline-variant bg-surface-container-low px-md py-[13px] font-body-md text-body-md text-on-surface outline-none focus:border-error focus:ring-1 focus:ring-error"
+              autoComplete="off"
+            />
+          </label>
+
+          {error && (
+            <p className="rounded-xl border border-error/40 bg-error-container/20 px-md py-sm font-body-md text-body-md text-error">
+              {error}
+            </p>
+          )}
+
+          <div className="flex gap-sm">
+            <button
+              type="button"
+              onClick={onDismiss}
+              disabled={deleting}
+              className="flex-1 rounded-xl border border-outline-variant bg-surface-container-low py-[12px] font-title-sm text-title-sm font-semibold text-on-surface-variant transition-colors hover:bg-surface-container disabled:opacity-60"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleDelete}
+              disabled={confirm !== "DELETE" || deleting}
+              className="flex-1 rounded-xl bg-error py-[12px] font-title-sm text-title-sm font-bold text-on-error transition-opacity disabled:opacity-50"
+            >
+              {deleting ? "Deleting..." : "Delete"}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

@@ -10,6 +10,10 @@ export function getSupabasePublishableKey(): string | undefined {
   );
 }
 
+export function getSupabaseServiceRoleKey(): string | undefined {
+  return process.env.SUPABASE_SERVICE_ROLE_KEY;
+}
+
 export function isSupabaseConfigured(): boolean {
   return Boolean(getSupabaseUrl() && getSupabasePublishableKey());
 }
