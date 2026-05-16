@@ -104,7 +104,11 @@ function spotSelectionFromPlace(
       place.formatted_address ??
       prediction?.structured_formatting.secondary_text ??
       "",
-    venueType: inferVenueType(place.types ?? []),
+    // Pass price_level as a tie-breaker so inferVenueType can promote
+    // ambiguous "restaurant"-tagged places with $$$+ pricing to `fine`
+    // even when Google didn't tag them `fine_dining_restaurant`. Explicit
+    // format tags still win; this only intervenes on the default branch.
+    venueType: inferVenueType(place.types ?? [], priceLevel),
     cuisine: googleTypesToCuisine(place.types ?? []),
     city: address.city,
     neighborhood: address.neighborhood,
@@ -409,6 +413,17 @@ function RatePageInner() {
     setConsumedPlaceId(true);
   }
 
+  // User override for the auto-inferred venue type. Different venue types
+  // expose different criteria sliders (VENUE_CRITERIA[venueType]), so an
+  // override mid-form invalidates any scores collected against the prior
+  // type — reset them to keep the rating consistent.
+  function handleVenueTypeChange(next: VenueType) {
+    if (!spot || spot.venueType === next) return;
+    setSpot({ ...spot, venueType: next });
+    setScores({});
+    setError("");
+  }
+
   function handleMealPhotoPick(fileList: FileList | null) {
     const file = fileList?.[0];
     if (!file) return;
@@ -638,9 +653,39 @@ function RatePageInner() {
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-base shrink-0">
-                  <span className="inline-flex items-center gap-xs rounded-full bg-primary-container px-xs py-0.5 font-label-sm text-label-sm font-bold text-on-primary-container whitespace-nowrap">
-                    {meta?.label}
-                  </span>
+                  {/* Editable venue type pill. Auto-inferred from Google's
+                      types + price_level; user can override when the
+                      inference is wrong (e.g., a sit-down pizza joint
+                      Google tags pizza_restaurant but is actually casual,
+                      not fast-food — fixed in the classifier but the
+                      override is a safety net for the remaining edges).
+                      Changing the type resets the criteria sliders since
+                      VENUE_CRITERIA is per-type. */}
+                  <label className="sr-only" htmlFor="venue-type-select">
+                    Venue type
+                  </label>
+                  <div className="relative">
+                    <select
+                      id="venue-type-select"
+                      value={spot.venueType}
+                      onChange={(e) => handleVenueTypeChange(e.target.value as VenueType)}
+                      className="appearance-none cursor-pointer rounded-full bg-primary-container pl-sm pr-lg py-0.5 font-label-sm text-label-sm font-bold text-on-primary-container whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    >
+                      {(["fast-food", "casual", "fine", "food-truck"] as VenueType[]).map(
+                        (v) => (
+                          <option key={v} value={v}>
+                            {VENUE_META[v].label}
+                          </option>
+                        ),
+                      )}
+                    </select>
+                    <span
+                      aria-hidden
+                      className="material-symbols-outlined pointer-events-none absolute right-1 top-1/2 -translate-y-1/2 text-[16px] text-on-primary-container"
+                    >
+                      expand_more
+                    </span>
+                  </div>
                   <button
                     type="button"
                     onClick={() => {

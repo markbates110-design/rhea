@@ -170,10 +170,18 @@ export async function getNearbyVenues(
       const lat = typeof loc.lat === "function" ? loc.lat() : (loc as unknown as { lat: number }).lat;
       const lng = typeof loc.lng === "function" ? loc.lng() : (loc as unknown as { lng: number }).lng;
       const photoUrl = p.photos?.[0]?.getUrl({ maxWidth: PHOTO_MAX_WIDTH }) ?? null;
+      // Google's Nearby Search returns price_level on the basic place
+      // payload (no extra SKU); pass it through so `inferVenueType` can
+      // use it as a tie-breaker when no explicit format tag is present.
+      const rawPriceLevel = (p as { price_level?: number }).price_level;
+      const priceLevel =
+        typeof rawPriceLevel === "number" && rawPriceLevel >= 0 && rawPriceLevel <= 4
+          ? rawPriceLevel
+          : null;
       return {
         placeId: p.place_id,
         name: p.name ?? "Unknown",
-        cuisineType: inferVenueType(p.types ?? []),
+        cuisineType: inferVenueType(p.types ?? [], priceLevel),
         photoUrl,
         distanceMeters: haversineMeters(coords, { lat, lng }),
         googleRating: typeof p.rating === "number" ? p.rating : null,
