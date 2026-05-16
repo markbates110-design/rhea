@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Work_Sans } from "next/font/google";
+import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
 import "./globals.css";
 
 const workSans = Work_Sans({
@@ -28,7 +29,10 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-full font-body-md">{children}</body>
+      <body className="min-h-full font-body-md">
+        <ServiceWorkerRegister />
+        {children}
+      </body>
     </html>
   );
 }

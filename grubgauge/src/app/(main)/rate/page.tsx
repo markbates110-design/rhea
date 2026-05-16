@@ -4,6 +4,7 @@ import { Suspense, useState, useEffect, useRef, useMemo, useCallback } from "rea
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { getDeviceId } from "@/lib/identity/deviceId";
+import { notifyCoreActionCompleted } from "@/lib/pwa/installPrompt";
 import {
   DEFAULT_SCORE,
   VENUE_CRITERIA,
@@ -499,6 +500,7 @@ function RatePageInner() {
         postal_code: spot.postal_code,
         price_level: spot.price_level,
       });
+      notifyCoreActionCompleted();
       setSubmittedMealPhotoUrl(mealPhotoUrl);
       clearMealPhoto();
       setSubmitted(true);

@@ -9,6 +9,7 @@ import { FeaturedSpotsRow } from "@/components/discovery/FeaturedSpotsRow";
 import { FounderProgressCard } from "@/components/founder/FounderProgressCard";
 import { SuggestedUsersRow } from "@/components/follows/SuggestedUsersRow";
 import { FollowingFeed } from "@/components/follows/FollowingFeed";
+import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import { getDeviceId, getUsername, isOnboarded } from "@/lib/identity/deviceId";
 import { useAuth } from "@/lib/auth/useAuth";
 import { useProfile } from "@/lib/profile/useProfile";
@@ -149,6 +150,7 @@ export default function DashboardPage() {
   if (ratings.length === 0) {
     return (
       <PageShell variant="feed" className="pt-lg pb-10">
+        <InstallPrompt />
         <div className="flex flex-col gap-lg">
           <div>
             <h1 className="font-headline-md text-headline-md font-semibold text-on-surface">{greetingTitle}</h1>
@@ -203,6 +205,7 @@ export default function DashboardPage() {
 
   return (
     <PageShell variant="feed" className="pt-lg pb-10">
+      <InstallPrompt />
       <div className="flex flex-col gap-lg">
 
         {/* Header */}

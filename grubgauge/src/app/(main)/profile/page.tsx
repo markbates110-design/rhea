@@ -8,6 +8,7 @@ import { PageShell } from "@/components/layout/PageShell";
 import { AvatarUploader } from "@/components/profile/AvatarUploader";
 import { FollowStatRow } from "@/components/follows/FollowStatRow";
 import { FounderBadge } from "@/components/founder/FounderBadge";
+import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import { useFounderState } from "@/lib/founder/useFounderState";
 import { useAuth } from "@/lib/auth/useAuth";
 import { useProfile } from "@/lib/profile/useProfile";
@@ -169,6 +170,7 @@ export default function ProfilePage() {
 
   return (
     <PageShell variant="form" className="pt-lg pb-10">
+      <InstallPrompt />
       <div className="flex flex-col gap-lg">
         {/* Avatar above name — uploader doubles as Edit/Remove affordance. */}
         <div className="flex flex-col items-start gap-sm">

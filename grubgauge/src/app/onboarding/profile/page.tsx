@@ -8,6 +8,7 @@ import { useProfile } from "@/lib/profile/useProfile";
 import { updateProfile, upsertProfile } from "@/lib/profile/profile";
 import { displayNameForProfile, initialForName } from "@/lib/profile/names";
 import { applyPendingFollow } from "@/lib/follows/applyPending";
+import { notifyCoreActionCompleted } from "@/lib/pwa/installPrompt";
 import { PageShell } from "@/components/layout/PageShell";
 import { AvatarUploader } from "@/components/profile/AvatarUploader";
 import { UsernameClaimField } from "@/components/onboarding/UsernameClaimField";
@@ -136,6 +137,7 @@ export default function OnboardingProfilePage() {
       // because applyPendingFollow internally requires an auth session.
       const supabase = createClient();
       const next = user ? await applyPendingFollow(supabase) : null;
+      if (user) notifyCoreActionCompleted();
       router.push(next ?? "/profile");
     } finally {
       setSaving(false);

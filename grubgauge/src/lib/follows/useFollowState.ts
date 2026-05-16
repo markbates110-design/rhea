@@ -11,6 +11,7 @@ import {
   isFollowing,
   unfollowUser,
 } from "./follows";
+import { notifyCoreActionCompleted } from "@/lib/pwa/installPrompt";
 
 /**
  * Reactive follow relationship + counts for a target user.
@@ -150,6 +151,7 @@ export function useFollowState(targetUserId: string | null | undefined): UseFoll
       return { ok: false, reason: "error", message };
     }
 
+    if (next) notifyCoreActionCompleted();
     return { ok: true, isFollowing: next };
   }, [kind, targetUserId, followingState, followerCount]);
 

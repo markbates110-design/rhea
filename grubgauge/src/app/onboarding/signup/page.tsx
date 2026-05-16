@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth/useAuth";
 import { PageShell } from "@/components/layout/PageShell";
 import { isOnboarded, setOnboarded } from "@/lib/identity/deviceId";
 import { applyPendingFollow } from "@/lib/follows/applyPending";
+import { notifyCoreActionCompleted } from "@/lib/pwa/installPrompt";
 
 type Mode = "signup" | "signin";
 
@@ -109,6 +110,7 @@ function OnboardingAuthPageInner() {
           return;
         }
         setOnboarded();
+        notifyCoreActionCompleted();
         const next = await applyPendingFollow(supabase);
         router.push(next ?? "/profile");
         return;
@@ -143,10 +145,12 @@ function OnboardingAuthPageInner() {
         return;
       }
       if (data.session) {
+        notifyCoreActionCompleted();
         router.push("/onboarding/profile");
         return;
       }
       setOnboarded();
+      notifyCoreActionCompleted();
       setPendingEmail(email);
     } catch {
       setError("Something went wrong. Please try again.");
