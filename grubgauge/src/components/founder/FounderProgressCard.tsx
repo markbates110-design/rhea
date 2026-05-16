@@ -50,13 +50,14 @@ export function FounderProgressCard({ rateHref = "/rate" }: Props) {
     <div className="flex flex-col gap-sm rounded-xl border border-tertiary-fixed bg-tertiary-container/40 p-md">
       <div className="flex items-center justify-between gap-sm">
         <p className="font-title-sm text-title-sm font-bold text-on-tertiary-container">
-          Be one of the first 100. Forever.
+          Unleash your inner food critic.
         </p>
         <FounderSlotCounter variant="pill" />
       </div>
 
       <p className="font-body-md text-body-md text-on-surface">
-        Rate <span className="tabular-nums font-bold">3 new places</span> with photos, on{" "}
+        Track the meals that matter and build a following. Rate{" "}
+        <span className="tabular-nums font-bold">3 new places</span> with photos, on{" "}
         <span className="font-bold">3 different days</span>, to earn{" "}
         <FounderBadge badge={{ kind: "founding-member", slotNumber: 100 - remaining + 1 }} size="compact" />{" "}
         as your permanent identity on every rating you make.

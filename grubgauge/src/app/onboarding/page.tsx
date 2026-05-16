@@ -65,8 +65,12 @@ export default function OnboardingWelcomePage() {
         {/* Brand — full lockup includes gauge arc; no separate icon tile */}
         <div className="flex flex-col items-center gap-sm text-center">
           <BrandMark as="h1" size="lg" />
-          <p className="font-body-md text-body-md text-on-surface-variant">
-            Find true culinary value.
+          <p className="font-headline-md text-headline-md font-semibold text-on-surface">
+            Unleash your inner food critic.
+          </p>
+          <p className="max-w-md font-body-md text-body-md text-on-surface-variant">
+            Track the meals that matter, build a following, and earn one of the
+            first 100 Founding Member badges.
           </p>
         </div>
 
@@ -77,7 +81,7 @@ export default function OnboardingWelcomePage() {
             generic product pitch. */}
         <div className="mt-lg flex flex-col items-center gap-xs rounded-2xl border border-tertiary/40 bg-tertiary-container/60 px-md py-md text-center">
           <p className="font-title-sm text-title-sm font-bold text-on-tertiary-container">
-            Be one of the first 100. Forever.
+            Earn your permanent spot.
           </p>
           <FounderSlotCounter variant="headline" />
           <p className="font-label-sm text-label-sm text-on-tertiary-container/80">
