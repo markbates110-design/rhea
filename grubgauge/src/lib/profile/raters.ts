@@ -78,10 +78,19 @@ export async function getRatersByUserIds(
 }
 
 /**
- * Attaches a `rater` field to each row in `rows`, computed from a single
- * batched profile lookup. Rows whose `user_id` is null OR whose profile
- * isn't found get `rater: null` (the card renders the deleted-user
- * fallback for both cases — indistinguishable from the UI's perspective).
+ * Attaches `rater` + `rater_is_guest` fields to each row in `rows`,
+ * computed from a single batched profile lookup.
+ *
+ *   - `rater` resolves the profile row when `user_id` is set and the
+ *     lookup succeeds; `null` when the user_id was missing (guest
+ *     rating) OR when the profile lookup failed (deleted user).
+ *   - `rater_is_guest` distinguishes the two `rater === null` cases:
+ *     `true` when the source row had `user_id is null` (intentional
+ *     guest post), `false` when the lookup just didn't find a profile.
+ *
+ * The card uses `rater_is_guest` to flip the chip's fallback copy from
+ * the alarming "Deleted user" to a neutral "Guest rating" — guests are
+ * a first-class post type, not a missing-data state.
  *
  * Generic on the row type so callers don't have to widen their local
  * Rating type to satisfy the helper.
@@ -89,7 +98,7 @@ export async function getRatersByUserIds(
 export async function attachRaters<R extends { user_id: string | null }>(
   supabase: SupabaseClient,
   rows: R[],
-): Promise<Array<R & { rater: RaterFields | null }>> {
+): Promise<Array<R & { rater: RaterFields | null; rater_is_guest: boolean }>> {
   if (rows.length === 0) return [];
   const raters = await getRatersByUserIds(
     supabase,
@@ -98,5 +107,6 @@ export async function attachRaters<R extends { user_id: string | null }>(
   return rows.map((r) => ({
     ...r,
     rater: r.user_id ? raters.get(r.user_id) ?? null : null,
+    rater_is_guest: !r.user_id,
   }));
 }

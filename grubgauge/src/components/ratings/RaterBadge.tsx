@@ -1,32 +1,58 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import type { RaterFields } from "@/lib/profile/raters";
 
 interface RaterBadgeProps {
   /**
-   * The rater fields fetched from `public.profiles`, or `null` when the
-   * rating has no associated user (guest rating with `user_id is null`)
-   * or the join missed (orphaned rating from a deleted profile).
+   * The rater fields fetched from `public.profiles`, or `null` for both
+   * guest ratings (no user_id at insert) and orphaned ratings (user_id
+   * set but profile lookup missed). `isGuest` disambiguates the two.
    */
   rater: RaterFields | null;
+  /**
+   * True when the rating row was posted without a user_id (intentional
+   * guest post). Drives a neutral "Guest rating" chip instead of the
+   * alarming "Deleted user" fallback. Ignored when `rater` is non-null.
+   */
+  isGuest?: boolean;
 }
 
 /**
  * Inline attribution badge for a rating card: small round avatar + display
- * name (falling back to username). Links to `/u/[username]` when a rater
- * is present; renders a no-link "Deleted user" fallback otherwise.
+ * name (falling back to username). Three states:
+ *
+ *   - real rater  → avatar + name, links to /u/[username]
+ *   - guest       → neutral person icon + "Guest rating", no link
+ *   - deleted     → bullet glyph + "Deleted user" muted, no link
  *
  * Sizing + chrome mirror `HomeHeader.ProfileAvatar` (h-8 w-8, rounded-full,
  * border-outline-variant, bg-surface-container-high, initial fallback) so
  * the header avatar and the card-level attribution avatars feel like a
  * matched set rather than two variants.
- *
- * Note: the `/u/[username]` route does not exist yet — taps will 404. This
- * is intentional (the route lands in a follow-up); when added, the existing
- * Link wrapper will resolve without any change to this component.
  */
-export function RaterBadge({ rater }: RaterBadgeProps) {
+export function RaterBadge({ rater, isGuest = false }: RaterBadgeProps) {
   if (!rater) {
-    return <RaterBadgeContent name="Deleted user" avatarUrl={null} initial="•" muted />;
+    if (isGuest) {
+      return (
+        <RaterBadgeContent
+          name="Guest rating"
+          avatarUrl={null}
+          glyph={
+            <span
+              className="material-symbols-outlined text-[18px] text-on-surface-variant"
+              style={{ fontVariationSettings: "'FILL' 0" }}
+              aria-hidden
+            >
+              person
+            </span>
+          }
+          muted
+        />
+      );
+    }
+    return (
+      <RaterBadgeContent name="Deleted user" avatarUrl={null} glyph="•" muted />
+    );
   }
 
   const displayName = rater.display_name?.trim() || rater.username;
@@ -38,7 +64,7 @@ export function RaterBadge({ rater }: RaterBadgeProps) {
       className="group inline-flex items-center gap-xs rounded-full px-0.5 py-0.5 transition-colors hover:bg-surface-container active:scale-[0.98]"
       aria-label={`View ${displayName}'s ratings`}
     >
-      <RaterBadgeContent name={displayName} avatarUrl={rater.avatar_url} initial={initial} />
+      <RaterBadgeContent name={displayName} avatarUrl={rater.avatar_url} glyph={initial} />
     </Link>
   );
 }
@@ -46,12 +72,13 @@ export function RaterBadge({ rater }: RaterBadgeProps) {
 function RaterBadgeContent({
   name,
   avatarUrl,
-  initial,
+  glyph,
   muted = false,
 }: {
   name: string;
   avatarUrl: string | null;
-  initial: string;
+  /** Fallback rendered inside the avatar tile when no avatarUrl exists. */
+  glyph: ReactNode;
   muted?: boolean;
 }) {
   // Mirrors HomeHeader.ProfileAvatar chrome — same border / background /
@@ -72,7 +99,7 @@ function RaterBadgeContent({
             referrerPolicy="no-referrer"
           />
         ) : (
-          initial
+          glyph
         )}
       </span>
       <span

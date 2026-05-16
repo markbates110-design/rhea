@@ -30,6 +30,14 @@ export interface RatingCardRating {
   notes: string | null;
   meal_photo_url: string | null;
   rater: RaterFields | null;
+  /**
+   * Distinguishes the two `rater === null` cases: `true` when the rating
+   * was posted without a user_id (intentional guest post → chip shows
+   * "Guest rating"), `false` when the profile lookup just missed
+   * (orphaned → chip shows "Deleted user"). Optional so existing call
+   * sites that don't pipe through `attachRaters` still compile.
+   */
+  rater_is_guest?: boolean;
 }
 
 export interface RatingCardProps {
@@ -120,7 +128,7 @@ export function RatingCard({ rating, rank, liked, likeCount, hideRater = false, 
     <div className="flex flex-col gap-sm rounded-xl border border-outline-variant bg-surface-container-low p-md transition-colors hover:bg-surface-container">
       {!hideRater && (
         <div className="flex items-center justify-between gap-sm">
-          <RaterBadge rater={rating.rater} />
+          <RaterBadge rater={rating.rater} isGuest={rating.rater_is_guest === true} />
           {/* Far-right slot — reserved for the founder pill in v1. Future
               popular-rater / city-expert badges land between RaterBadge
               and this position, so the founder pill stays rightmost as
