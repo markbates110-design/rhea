@@ -1,4 +1,5 @@
 import type { FounderBadgeInfo } from "@/lib/founder/founder";
+import { PILL_COMPACT_SIZE_CLASSES } from "@/lib/ui/pillSizes";
 
 interface Props {
   /**
@@ -46,17 +47,18 @@ export function FounderBadge({ badge, size = "compact" }: Props) {
 // FM #7 not FM #94, so the number deserves the spotlight).
 
 function TheFounderPill({ size }: { size: "compact" | "full" }) {
-  const padding = size === "full" ? "px-sm py-0.5" : "px-xs py-0";
-  const textCls =
-    size === "full" ? "font-label-sm text-label-sm" : "font-label-sm text-[10px]";
+  const sizeClasses =
+    size === "full"
+      ? "px-sm py-0.5 font-label-sm text-label-sm"
+      : PILL_COMPACT_SIZE_CLASSES;
   return (
     <span
-      className={`inline-flex shrink-0 items-center gap-xs rounded-full border border-tertiary bg-tertiary/10 text-tertiary font-semibold ${padding} ${textCls}`}
+      className={`inline-flex shrink-0 items-center gap-xs rounded-full border border-tertiary bg-tertiary/10 text-tertiary font-semibold ${sizeClasses}`}
       aria-label="The Founder badge"
       title="The Founder — the one and only."
     >
       <span
-        className="material-symbols-outlined text-[12px]"
+        className={`material-symbols-outlined ${size === "full" ? "text-[12px]" : "text-[11px]"}`}
         style={{ fontVariationSettings: "'FILL' 1" }}
         aria-hidden
       >
@@ -74,12 +76,13 @@ function FoundingMemberPill({
   slot: number;
   size: "compact" | "full";
 }) {
-  const padding = size === "full" ? "px-sm py-0.5" : "px-xs py-0";
-  const textCls =
-    size === "full" ? "font-label-sm text-label-sm" : "font-label-sm text-[10px]";
+  const sizeClasses =
+    size === "full"
+      ? "px-sm py-0.5 font-label-sm text-label-sm"
+      : PILL_COMPACT_SIZE_CLASSES;
   return (
     <span
-      className={`inline-flex shrink-0 items-center gap-xs rounded-full border border-primary bg-primary/10 text-primary font-semibold ${padding} ${textCls}`}
+      className={`inline-flex shrink-0 items-center gap-xs rounded-full border border-primary bg-primary/10 text-primary font-semibold ${sizeClasses}`}
       aria-label={`Founding Member number ${slot}`}
       title={`Founding Member #${slot} — one of the first 100.`}
     >

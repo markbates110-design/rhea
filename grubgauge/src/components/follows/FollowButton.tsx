@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useFollowState } from "@/lib/follows/useFollowState";
 import { setPendingFollow } from "@/lib/follows/pendingFollow";
+import { PILL_COMPACT_SIZE_CLASSES } from "@/lib/ui/pillSizes";
 import { FollowGateSheet, type FollowGateTarget } from "./FollowGateSheet";
 
 export type FollowButtonSize = "md" | "sm";
@@ -59,10 +60,15 @@ export function FollowButton({ target, size = "md" }: Props) {
 
   const labelText = isFollowing ? "Following" : "Follow";
   const iconName = isFollowing ? "check" : "person_add";
+  // `sm` matches the shared compact pill size so Follow and Founder
+  // pills read as a matched set in close-proximity contexts (rating
+  // cards, UserListRow, SuggestedUsersRow). `md` is the larger
+  // profile-page CTA size and stays unchanged.
   const sizeClass =
     size === "sm"
-      ? "px-sm py-0.5 font-label-sm text-label-sm"
+      ? PILL_COMPACT_SIZE_CLASSES
       : "px-md py-xs font-label-sm text-label-sm";
+  const iconSize = size === "sm" ? "text-[11px]" : "text-[16px]";
   const baseClass = isFollowing
     ? "border border-outline-variant bg-surface-container-high text-on-surface hover:bg-surface-variant"
     : "bg-primary-container text-on-primary-container hover:brightness-110";
@@ -78,7 +84,7 @@ export function FollowButton({ target, size = "md" }: Props) {
         className={`inline-flex shrink-0 items-center gap-xs rounded-full font-semibold transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed ${sizeClass} ${baseClass}`}
       >
         <span
-          className="material-symbols-outlined text-[16px]"
+          className={`material-symbols-outlined ${iconSize}`}
           style={{ fontVariationSettings: isFollowing ? "'FILL' 1" : "'FILL' 0" }}
           aria-hidden
         >
