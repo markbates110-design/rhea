@@ -37,17 +37,26 @@ export function FounderBadge({ badge, size = "compact" }: Props) {
   return <FoundingMemberPill slot={badge.slotNumber ?? 0} size={size} />;
 }
 
+// Outline variants keep recognition (icon + amber-or-green hue, distinct
+// from any other chip in the system) while dropping the visual shout of
+// a solid-filled brand pill. The Founder keeps its crown at every size
+// because the crown IS the asset (singular badge, no number to fall back
+// on); FoundingMember drops the medal icon at compact size and renders
+// just `#N` — the number IS the asset there (the whole appeal is being
+// FM #7 not FM #94, so the number deserves the spotlight).
+
 function TheFounderPill({ size }: { size: "compact" | "full" }) {
-  const padding = size === "full" ? "px-sm py-0.5" : "px-xs py-0.5";
-  const textCls = size === "full" ? "font-label-sm text-label-sm" : "font-label-sm text-[11px]";
+  const padding = size === "full" ? "px-sm py-0.5" : "px-xs py-0";
+  const textCls =
+    size === "full" ? "font-label-sm text-label-sm" : "font-label-sm text-[10px]";
   return (
     <span
-      className={`inline-flex shrink-0 items-center gap-xs rounded-full bg-tertiary text-on-tertiary font-semibold ${padding} ${textCls}`}
+      className={`inline-flex shrink-0 items-center gap-xs rounded-full border border-tertiary bg-tertiary/10 text-tertiary font-semibold ${padding} ${textCls}`}
       aria-label="The Founder badge"
       title="The Founder — the one and only."
     >
       <span
-        className="material-symbols-outlined text-[14px]"
+        className="material-symbols-outlined text-[12px]"
         style={{ fontVariationSettings: "'FILL' 1" }}
         aria-hidden
       >
@@ -58,25 +67,33 @@ function TheFounderPill({ size }: { size: "compact" | "full" }) {
   );
 }
 
-function FoundingMemberPill({ slot, size }: { slot: number; size: "compact" | "full" }) {
-  const padding = size === "full" ? "px-sm py-0.5" : "px-xs py-0.5";
-  const textCls = size === "full" ? "font-label-sm text-label-sm" : "font-label-sm text-[11px]";
-  const labelSuffix = size === "full" ? " FOUNDER" : "";
+function FoundingMemberPill({
+  slot,
+  size,
+}: {
+  slot: number;
+  size: "compact" | "full";
+}) {
+  const padding = size === "full" ? "px-sm py-0.5" : "px-xs py-0";
+  const textCls =
+    size === "full" ? "font-label-sm text-label-sm" : "font-label-sm text-[10px]";
   return (
     <span
-      className={`inline-flex shrink-0 items-center gap-xs rounded-full bg-primary-container text-on-primary-container font-semibold ${padding} ${textCls}`}
+      className={`inline-flex shrink-0 items-center gap-xs rounded-full border border-primary bg-primary/10 text-primary font-semibold ${padding} ${textCls}`}
       aria-label={`Founding Member number ${slot}`}
       title={`Founding Member #${slot} — one of the first 100.`}
     >
-      <span
-        className="material-symbols-outlined text-[14px]"
-        style={{ fontVariationSettings: "'FILL' 1" }}
-        aria-hidden
-      >
-        workspace_premium
-      </span>
+      {size === "full" && (
+        <span
+          className="material-symbols-outlined text-[12px]"
+          style={{ fontVariationSettings: "'FILL' 1" }}
+          aria-hidden
+        >
+          workspace_premium
+        </span>
+      )}
       <span className="tabular-nums">#{slot}</span>
-      {labelSuffix}
+      {size === "full" && <span>FOUNDER</span>}
     </span>
   );
 }
