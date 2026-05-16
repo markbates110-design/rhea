@@ -2,21 +2,43 @@ import type { VenueType } from "@/lib/ratings/scoring";
 
 /**
  * Google Places `types[]` that *legitimately* signal a venue's dining
- * format. The previous version of this file lumped cuisine-shaped tags
- * (`pizza_restaurant`, `taco_restaurant`, `hamburger_restaurant`,
- * `coffee_shop`, etc.) into `fast-food`, which mis-classified every
- * sit-down pizza joint, casual taquería, craft burger pub, and table-
- * service café as fast-food. Those tags describe *what the food is*,
- * not *how the venue serves it* — they belong in `lib/places/cuisine.ts`
- * (and they live there now). This file is format-only.
+ * format. There are two flavors of food-kind Google tag and only one is
+ * format-ambiguous:
  *
- * The four buckets here each map to genuinely format-revealing tags
- * Google attaches to a place. Anything not matching falls through to
- * `casual`, which is the right default for "a restaurant about which we
- * have no specific format signal."
+ *   - Format-ambiguous (excluded from venue_type entirely, captured as
+ *     cuisine instead in `lib/places/cuisine.ts`):
+ *     `pizza_restaurant`, `taco_restaurant`, `burrito_restaurant`,
+ *     `hamburger_restaurant`, `chicken_restaurant`, `sandwich_shop`.
+ *     These genuinely span all four venue_types — sit-down Italian
+ *     pizza joints, casual taquerías, craft burger pubs, fast-casual
+ *     chicken spots. The earlier classifier mis-tagged all of them as
+ *     fast-food because that's where these tags lived.
+ *
+ *   - Format-correlated (included in `fast-food` because the tag
+ *     reliably implies counter-service / grab-and-go regardless of
+ *     specific food kind): `donut_shop`, `bagel_shop`, `ice_cream_shop`,
+ *     `coffee_shop`, `cafe`, `bakery`. Sit-down patisseries / ice cream
+ *     parlors / coffee houses exist but are the minority; the dominant
+ *     experience is counter-order + quick transaction, which matches the
+ *     fast-food rating-criteria calibration. User override on /rate
+ *     catches the sit-down exceptions.
+ *
+ * Each bucket therefore lists genuinely format-revealing tags only —
+ * either explicit format tags (`fast_food_restaurant`) or food-kind
+ * tags whose format is reliably correlated. Anything not matching falls
+ * through to `casual`, the right default for "a restaurant we have no
+ * specific format signal about."
  */
 const TYPES_BY_VENUE: Record<VenueType, readonly string[]> = {
-  "fast-food": ["fast_food_restaurant"],
+  "fast-food": [
+    "fast_food_restaurant",
+    "donut_shop",
+    "bagel_shop",
+    "ice_cream_shop",
+    "coffee_shop",
+    "cafe",
+    "bakery",
+  ],
   "food-truck": ["food_truck", "food_stall", "street_food"],
   fine: ["fine_dining_restaurant"],
   casual: ["casual_dining_restaurant", "restaurant"],
