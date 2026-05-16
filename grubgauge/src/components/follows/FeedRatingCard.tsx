@@ -1,32 +1,30 @@
 "use client";
 
-import { useAuth } from "@/lib/auth/useAuth";
 import { RatingCard, type RatingCardProps } from "@/components/ratings/RatingCard";
 import { FollowButton } from "./FollowButton";
 
 /**
- * RatingCard wrapper for the FollowingFeed's guest variant. For signed-in
- * viewers it delegates to the plain RatingCard with no changes. For guests
- * it slots a small inline Follow button into the LikeButton row via the
- * card's `trailingAction` prop, turning every visible rater into a
- * single-tap conversion target via FollowGateSheet.
+ * RatingCard wrapper that slots a Follow button into the LikeButton row
+ * via the card's `trailingAction` prop. The button is one-tap for every
+ * viewer except themselves:
+ *
+ *   - Self    → FollowButton returns null (kind === "self"), so the
+ *               trailingAction slot becomes empty — the card renders as
+ *               a plain RatingCard would.
+ *   - Guest   → tap opens FollowGateSheet (the conversion mechanic).
+ *   - Member  → live Follow / Following toggle via useFollowState.
+ *
+ * Previously this wrapper short-circuited on any signed-in viewer and
+ * showed nothing — leaving members with no in-feed way to follow a
+ * rater they discovered (forcing a detour through /u/[username]). The
+ * gating-to-guest-only was the right call when the only purpose was
+ * conversion; with Follow shipped to members, the natural UX is the
+ * button-on-every-card pattern most social feeds use.
  *
  * Keeps RatingCard pristine for every other surface (history, explore,
  * /u/[username]) — they pass no `trailingAction` and render unchanged.
- *
- * The Follow button shares its row with LikeButton (right-aligned via
- * justify-between) instead of overlapping the founder pill at top-right.
  */
 export function FeedRatingCard(props: RatingCardProps) {
-  const { user, loading } = useAuth();
-
-  // Members + loading-state-during-auth-resolve get the standard card.
-  // The guest variant only renders once auth has resolved to "no user",
-  // so a member never sees the conversion overlay flash.
-  if (loading || user) {
-    return <RatingCard {...props} />;
-  }
-
   const rater = props.rating.rater;
   const userId = readUserId(props);
   // Cards without a resolved rater (deleted user) or a known user_id
