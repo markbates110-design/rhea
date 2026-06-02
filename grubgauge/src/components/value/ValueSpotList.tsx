@@ -14,7 +14,7 @@ interface ValueSpotListProps {
 export function ValueSpotList({ spots, showRank = true }: ValueSpotListProps) {
   if (spots.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-md rounded-xl border border-outline-variant bg-surface-container-low px-lg py-xl text-center">
+      <div className="flex w-full flex-col items-stretch gap-md rounded-xl border border-outline-variant bg-surface-container-low px-lg py-xl text-center">
         <span
           className="material-symbols-outlined text-[40px] text-on-surface-variant"
           style={{ fontVariationSettings: "'FILL' 1" }}

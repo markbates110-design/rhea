@@ -145,7 +145,7 @@ export default function ExplorePage() {
 
   if (loading) {
     return (
-      <main className="mx-auto min-w-0 w-full max-w-2xl pt-lg pb-10">
+      <main className="mx-auto w-full min-w-[280px] max-w-2xl self-stretch pt-lg pb-10">
         <div className="flex flex-col gap-md">
           <h1 className="font-display-lg text-[32px] font-bold leading-[40px] text-on-surface">Explore</h1>
           <div className="flex items-center gap-xs text-on-surface-variant">
@@ -161,14 +161,15 @@ export default function ExplorePage() {
 
   if (topSpots.length === 0) {
     return (
-      <main className="mx-auto min-w-0 w-full max-w-2xl pt-lg pb-10">
+      <main className="mx-auto w-full min-w-[280px] max-w-2xl self-stretch pt-lg pb-10">
         <div className="flex flex-col gap-md">
           <h1 className="font-display-lg text-[32px] font-bold leading-[40px] text-on-surface">Explore</h1>
           {error ? (
             <p className="rounded-xl border border-error-container bg-error-container/20 px-md py-sm font-body-md text-body-md text-error">{error}</p>
           ) : (
-            <div className="flex flex-col items-center gap-lg rounded-xl border border-outline-variant bg-surface-container-low px-lg py-xl text-center">
-              <span className="material-symbols-outlined text-[48px] text-on-surface-variant" style={{ fontVariationSettings: "'FILL' 1" }}>
+            <div className="flex w-full flex-col items-stretch gap-lg rounded-xl border border-outline-variant bg-surface-container-low px-lg py-xl text-center">
+              <span
+                className="material-symbols-outlined self-center text-[48px] text-on-surface-variant" style={{ fontVariationSettings: "'FILL' 1" }}>
                 explore
               </span>
               <div>
@@ -177,7 +178,7 @@ export default function ExplorePage() {
               </div>
               <Link
                 href="/rate"
-                className="inline-flex items-center gap-xs rounded-lg bg-primary-container px-md py-xs font-title-sm text-title-sm font-bold text-on-primary-container transition-all hover:bg-primary-fixed active:scale-95"
+                className="inline-flex items-center gap-xs self-center rounded-lg bg-primary-container px-md py-xs font-title-sm text-title-sm font-bold text-on-primary-container transition-all hover:bg-primary-fixed active:scale-95"
               >
                 <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>add_circle</span>
                 Rate a Spot
@@ -192,7 +193,7 @@ export default function ExplorePage() {
   // ── Main ─────────────────────────────────────────────────────────────────
 
   return (
-    <main className="mx-auto min-w-0 w-full max-w-2xl pt-lg pb-10">
+    <main className="mx-auto w-full min-w-[280px] max-w-2xl self-stretch pt-lg pb-10">
       <div className="flex flex-col gap-lg">
 
         {/* Header */}

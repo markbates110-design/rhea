@@ -129,6 +129,18 @@ body {
   word-break: normal;
 }
 
+/*
+ * Safety net: direct block copy in `flex-col items-center` stacks must stretch
+ * to the column width. Without this, cross-axis centering sizes the column to
+ * min-content (one pill / word wide) and paragraphs wrap one word per line.
+ * Prefer `<CenteredProse>` or `items-stretch text-center` for new UI.
+ */
+.flex.flex-col.items-center > :where(p, h1, h2, h3, h4, h5, h6, ul, ol) {
+  align-self: stretch;
+  width: 100%;
+  max-width: 100%;
+}
+
 /* Score / stat readouts: lock to tabular figures so digits never jitter and kerning stays uniform. */
 .tabular-nums {
   font-variant-numeric: tabular-nums;

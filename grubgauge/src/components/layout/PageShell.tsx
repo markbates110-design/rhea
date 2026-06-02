@@ -2,27 +2,19 @@ import type { ReactNode } from "react";
 
 type Variant = "form" | "feed" | "wide";
 
+const SHELL_BASE = "mx-auto w-full min-w-[280px] self-stretch";
+
 /**
  * Canonical width-contract tokens — one per page intent.
  *
- *  - `form`  — narrow column for inputs & onboarding. Carries a **280px floor**
- *              so block text can never collapse to one-glyph-per-line, even when
- *              an ancestor flex/grid context briefly resolves zero width.
- *  - `feed`  — medium column for dashboards, lists, profile screens. `min-w-0`
- *              is correct here so flex/grid descendants can host `w-full` rows
- *              with `truncate` semantics.
- *  - `wide`  — full application shell for rate / explore / history-feed style
- *              screens that want the full 5xl content column.
- *
- * Codifies the v3.10 width-contract learnings as a single artifact. New pages
- * render through `<PageShell variant=…>` and inherit immunity from the
- * vertical-text class by construction — see Verification Pass row "Page route"
- * in `rhea-governance-agent.md` v3.12.
+ * Every variant carries a **280px floor** so block text never collapses to
+ * one-glyph-per-line when nested in flex/grid shells. Pair with
+ * `<CenteredProse>` (or `items-stretch` + `text-center`) for centered copy.
  */
 const VARIANTS: Record<Variant, string> = {
-  form: "mx-auto w-full min-w-[280px] max-w-md",
-  feed: "mx-auto w-full min-w-0 max-w-2xl",
-  wide: "mx-auto w-full min-w-0 max-w-5xl",
+  form: `${SHELL_BASE} max-w-md`,
+  feed: `${SHELL_BASE} max-w-2xl`,
+  wide: `${SHELL_BASE} max-w-5xl`,
 };
 
 interface PageShellProps {

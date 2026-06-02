@@ -188,9 +188,9 @@ export default function HistoryPage() {
               {error}
             </p>
           ) : (
-            <div className="flex flex-col items-center gap-lg rounded-xl border border-outline-variant bg-surface-container-low px-lg py-xl text-center">
+            <div className="flex w-full flex-col items-stretch gap-lg rounded-xl border border-outline-variant bg-surface-container-low px-lg py-xl text-center">
               <span
-                className="material-symbols-outlined text-[48px] text-on-surface-variant"
+                className="material-symbols-outlined self-center text-[48px] text-on-surface-variant"
                 style={{ fontVariationSettings: "'FILL' 1" }}
               >
                 restaurant_menu

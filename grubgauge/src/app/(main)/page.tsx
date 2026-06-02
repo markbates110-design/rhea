@@ -176,7 +176,7 @@ export default function DashboardPage() {
               from day one with a sign-up CTA banner; members see their
               network or a "Start your feed" nudge. */}
           <FollowingFeed />
-          <div className="flex flex-col items-center gap-lg rounded-xl border border-outline-variant bg-surface-container-low px-lg py-xl text-center">
+          <div className="flex w-full flex-col items-stretch gap-lg rounded-xl border border-outline-variant bg-surface-container-low px-lg py-xl text-center">
             <span className="material-symbols-outlined text-[48px] text-on-surface-variant" style={{ fontVariationSettings: "'FILL' 1" }}>
               restaurant_menu
             </span>
@@ -243,7 +243,7 @@ export default function DashboardPage() {
         {/* Stats row */}
         <div className="grid grid-cols-3 gap-sm">
           {/* Total */}
-          <div className="flex flex-col items-center gap-base rounded-xl border border-outline-variant bg-surface-container-low p-md text-center">
+          <div className="flex w-full flex-col items-stretch gap-base rounded-xl border border-outline-variant bg-surface-container-low p-md text-center">
             <span className="font-display-lg text-[32px] font-bold leading-none tabular-nums text-primary">
               {stats!.total}
             </span>
@@ -251,7 +251,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Avg score */}
-          <div className="flex flex-col items-center gap-base rounded-xl border border-outline-variant bg-surface-container-low p-md text-center">
+          <div className="flex w-full flex-col items-stretch gap-base rounded-xl border border-outline-variant bg-surface-container-low p-md text-center">
             <span className="font-display-lg text-[32px] font-bold leading-none tabular-nums text-primary">
               {stats!.avg.toFixed(1)}
             </span>
@@ -259,7 +259,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Fav type */}
-          <div className="flex flex-col items-center gap-base rounded-xl border border-outline-variant bg-surface-container-low p-md text-center">
+          <div className="flex w-full flex-col items-stretch gap-base rounded-xl border border-outline-variant bg-surface-container-low p-md text-center">
             <span
               className="material-symbols-outlined text-[28px] text-primary"
               style={{ fontVariationSettings: "'FILL' 1" }}
@@ -306,7 +306,7 @@ export default function DashboardPage() {
             <Link
               key={a.href}
               href={a.href}
-              className="flex flex-col items-center gap-xs rounded-xl border border-outline-variant bg-surface-container-low p-md text-center transition-colors hover:bg-surface-container active:scale-95"
+              className="flex w-full flex-col items-stretch gap-xs rounded-xl border border-outline-variant bg-surface-container-low p-md text-center transition-colors hover:bg-surface-container active:scale-95"
             >
               <span
                 className="material-symbols-outlined text-[26px] text-primary"

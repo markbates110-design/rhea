@@ -14,7 +14,7 @@ export default function OnboardingLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="mx-auto flex min-h-screen w-full min-w-0 max-w-5xl flex-col px-margin-edge">
+    <div className="mx-auto flex min-h-screen w-full min-w-[280px] max-w-5xl flex-col px-margin-edge">
       {children}
     </div>
   );

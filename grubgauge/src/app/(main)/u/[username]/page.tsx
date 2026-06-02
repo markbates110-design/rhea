@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { PageShell } from "@/components/layout/PageShell";
+import { CenteredProse } from "@/components/layout/CenteredProse";
 import { RatingCard, type RatingCardRating } from "@/components/ratings/RatingCard";
 import { getProfileByUsername, type Profile } from "@/lib/profile/profile";
 import { displayNameForProfile, initialForName } from "@/lib/profile/names";
@@ -179,63 +180,71 @@ export default function PublicProfilePage() {
           <ShareCriticProfileBanner username={profile.username} displayName={name} />
         )}
 
-        <header className="flex w-full min-w-0 flex-col items-center gap-sm text-center">
-          <div
-            className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-primary/20 bg-surface-container-high shadow-sm"
-            aria-hidden
-          >
-            {profile.avatar_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={profile.avatar_url}
-                alt=""
-                className="h-full w-full object-cover"
-                referrerPolicy="no-referrer"
-              />
-            ) : (
-              <span className="font-headline-md text-headline-md font-bold text-on-surface">
-                {initial}
-              </span>
-            )}
-          </div>
-
-          <div className="flex w-full min-w-0 max-w-md flex-col items-center gap-xs">
-            <p className="w-full font-label-sm text-label-sm uppercase tracking-widest text-primary">
-              Food critic
-            </p>
-            <h1 className="w-full font-headline-md text-headline-md font-bold text-on-surface">
-              {name}
-            </h1>
-            <p className="w-full font-label-sm text-label-sm text-on-surface-variant">
-              @{profile.username}
-            </p>
-            {(founderBadge || topCriticBadge) && (
-              <div className="mt-xs flex w-full min-w-0 flex-wrap items-center justify-center gap-xs">
-                {founderBadge && (
-                  <FounderBadge badge={founderBadge} size="compact" />
-                )}
-                {topCriticBadge && (
-                  <CriticBadgePill badge={topCriticBadge} size="compact" />
+        <header className="flex w-full flex-col gap-sm">
+          <CenteredProse className="gap-sm">
+            <CenteredProse.Item>
+              <div
+                className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-primary/20 bg-surface-container-high shadow-sm"
+                aria-hidden
+              >
+                {profile.avatar_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={profile.avatar_url}
+                    alt=""
+                    className="h-full w-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <span className="font-headline-md text-headline-md font-bold text-on-surface">
+                    {initial}
+                  </span>
                 )}
               </div>
+            </CenteredProse.Item>
+
+            <CenteredProse maxWidth="md" className="gap-xs">
+              <p className="font-label-sm text-label-sm uppercase tracking-widest text-primary">
+                Food critic
+              </p>
+              <h1 className="font-headline-md text-headline-md font-bold text-on-surface">
+                {name}
+              </h1>
+              <p className="font-label-sm text-label-sm text-on-surface-variant">
+                @{profile.username}
+              </p>
+              {(founderBadge || topCriticBadge) && (
+                <CenteredProse.Item>
+                  <div className="mt-xs flex flex-wrap items-center justify-center gap-xs">
+                    {founderBadge && (
+                      <FounderBadge badge={founderBadge} size="compact" />
+                    )}
+                    {topCriticBadge && (
+                      <CriticBadgePill badge={topCriticBadge} size="compact" />
+                    )}
+                  </div>
+                </CenteredProse.Item>
+              )}
+              <p className="font-body-md text-body-md text-on-surface-variant text-pretty">
+                {portfolio.tagline}
+              </p>
+            </CenteredProse>
+
+            {!isSelf && (
+              <CenteredProse.Item>
+                <FollowButton
+                  target={{
+                    userId: profile.id,
+                    username: profile.username,
+                    displayName: name,
+                    avatarUrl: profile.avatar_url ?? null,
+                  }}
+                />
+              </CenteredProse.Item>
             )}
-            <p className="w-full font-body-md text-body-md text-on-surface-variant text-pretty">
-              {portfolio.tagline}
-            </p>
-          </div>
 
-          {!isSelf && (
-            <FollowButton
-              target={{
-                userId: profile.id,
-                username: profile.username,
-                displayName: name,
-                avatarUrl: profile.avatar_url ?? null,
-              }}
-            />
-          )}
-
-          <FollowStatRow userId={profile.id} username={profile.username} />
+            <FollowStatRow userId={profile.id} username={profile.username} />
+          </CenteredProse>
         </header>
 
         <CriticStatsStrip portfolio={portfolio} />

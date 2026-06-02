@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { BrandMark } from "@/components/brand/BrandMark";
 import { PageShell } from "@/components/layout/PageShell";
+import { CenteredProse } from "@/components/layout/CenteredProse";
 import { FounderSlotCounter } from "@/components/founder/FounderSlotCounter";
 import { UsernameClaimField } from "@/components/onboarding/UsernameClaimField";
 import { getUsername, setOnboarded, setUsername } from "@/lib/identity/deviceId";
@@ -62,32 +63,35 @@ export default function OnboardingWelcomePage() {
       <div className="flex-1" />
 
       <PageShell variant="form" className="pb-10">
-        {/* Brand — full lockup includes gauge arc; no separate icon tile */}
-        <div className="flex w-full min-w-0 flex-col items-center gap-sm text-center">
-          <BrandMark as="h1" size="lg" />
-          <p className="w-full font-headline-md text-headline-md font-semibold text-on-surface">
+        <CenteredProse className="gap-sm">
+          <CenteredProse.Item>
+            <BrandMark as="h1" size="lg" />
+          </CenteredProse.Item>
+          <p className="font-headline-md text-headline-md font-semibold text-on-surface">
             Unleash your inner food critic.
           </p>
-          <p className="w-full max-w-md font-body-md text-body-md text-on-surface-variant text-pretty">
+          <p className="font-body-md text-body-md text-on-surface-variant text-pretty">
             Track the meals that matter, build a following, and earn one of the
             first 100 Founding Member badges.
           </p>
-        </div>
+        </CenteredProse>
 
         {/* Founder hook — primary conversion lever for v1 launch. Live
             counter ticks down as slots fill, so the urgency is real
             rather than marketing-flavour. Sits above value props so a
             first-time visitor sees the scarcity message before any
             generic product pitch. */}
-        <div className="mt-lg flex w-full min-w-0 flex-col items-center gap-xs rounded-2xl border border-tertiary/40 bg-tertiary-container/60 px-md py-md text-center">
-          <p className="w-full font-title-sm text-title-sm font-bold text-on-tertiary-container">
+        <CenteredProse className="mt-lg gap-xs rounded-2xl border border-tertiary/40 bg-tertiary-container/60 px-md py-md">
+          <p className="font-title-sm text-title-sm font-bold text-on-tertiary-container">
             Earn your permanent spot.
           </p>
-          <FounderSlotCounter variant="headline" />
-          <p className="w-full font-label-sm text-label-sm text-on-tertiary-container/80">
+          <CenteredProse.Item>
+            <FounderSlotCounter variant="headline" />
+          </CenteredProse.Item>
+          <p className="font-label-sm text-label-sm text-on-tertiary-container/80">
             Sign up and rate 3 spots — claim a numbered Founding Member badge.
           </p>
-        </div>
+        </CenteredProse>
 
         {/* Value props */}
         <div className="mt-xl flex flex-col gap-sm">
@@ -116,11 +120,11 @@ export default function OnboardingWelcomePage() {
             keystroke so the value travels through to /onboarding/profile
             (post-signup) and into handle_new_user via user_metadata —
             zero-cost UX for the user, who never has to retype it. */}
-        <div className="mt-xl flex w-full min-w-0 flex-col gap-sm rounded-2xl border border-primary/40 bg-primary/5 px-md py-md">
-          <p className="w-full font-title-sm text-title-sm font-bold text-on-surface">
+        <div className="mt-xl flex w-full flex-col gap-sm rounded-2xl border border-primary/40 bg-primary/5 px-md py-md">
+          <p className="font-title-sm text-title-sm font-bold text-on-surface">
             Claim your handle
           </p>
-          <p className="w-full font-body-md text-body-md text-on-surface-variant">
+          <p className="font-body-md text-body-md text-on-surface-variant">
             Once it&apos;s yours, it&apos;s yours — only one @name per rater on GrubGauge.
           </p>
           <UsernameClaimField

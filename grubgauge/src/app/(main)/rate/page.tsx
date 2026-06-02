@@ -7,6 +7,7 @@ import { getDeviceId, getUsername } from "@/lib/identity/deviceId";
 import { useAuth } from "@/lib/auth/useAuth";
 import { useProfile } from "@/lib/profile/useProfile";
 import { ShareRatingButton } from "@/components/ratings/ShareRatingButton";
+import { CenteredProse } from "@/components/layout/CenteredProse";
 import { PlaceRatingContext } from "@/components/ratings/PlaceRatingContext";
 import { CommunityComparison } from "@/components/ratings/CommunityComparison";
 import {
@@ -628,23 +629,27 @@ function RatePageInner() {
 
   if (submitted && spot) {
     return (
-      <main className="mx-auto min-w-0 w-full max-w-2xl pt-lg pb-10">
+      <main className="mx-auto w-full min-w-[280px] max-w-2xl self-stretch pt-lg pb-10">
         {/* Score confirmation */}
-        <div className="mb-6 flex flex-col items-center gap-3 text-center">
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary-container/20">
-            <span className="material-symbols-outlined text-[48px] text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>
-              check_circle
-            </span>
-          </div>
-          {submittedMealPhotoUrl && (
-            <div className="mx-auto w-full max-w-xs overflow-hidden rounded-xl border border-outline-variant shadow-lg">
-              {/* eslint-disable-next-line @next/next/no-img-element -- Supabase CDN URL */}
-              <img
-                src={submittedMealPhotoUrl}
-                alt={`Food at ${spot.name}`}
-                className="aspect-[4/3] w-full max-h-[220px] object-cover"
-              />
+        <CenteredProse className="mb-6 gap-3">
+          <CenteredProse.Item>
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary-container/20">
+              <span className="material-symbols-outlined text-[48px] text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>
+                check_circle
+              </span>
             </div>
+          </CenteredProse.Item>
+          {submittedMealPhotoUrl && (
+            <CenteredProse.Item className="w-full max-w-xs">
+              <div className="overflow-hidden rounded-xl border border-outline-variant shadow-lg">
+                {/* eslint-disable-next-line @next/next/no-img-element -- Supabase CDN URL */}
+                <img
+                  src={submittedMealPhotoUrl}
+                  alt={`Food at ${spot.name}`}
+                  className="aspect-[4/3] w-full max-h-[220px] object-cover"
+                />
+              </div>
+            </CenteredProse.Item>
           )}
           <div>
             <p className="font-title-sm text-title-sm text-on-surface">{spot.name}</p>
@@ -674,7 +679,7 @@ function RatePageInner() {
             criteriaScores={draftCriteria}
             community={communityStats}
           />
-        </div>
+        </CenteredProse>
 
         {/* Feedback prompt */}
         <div className="w-full min-w-0 rounded-xl border border-outline-variant bg-surface-container-low p-md">
