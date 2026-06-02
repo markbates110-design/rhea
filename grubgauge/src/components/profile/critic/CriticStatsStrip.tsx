@@ -13,7 +13,7 @@ export function CriticStatsStrip({ portfolio }: CriticStatsStripProps) {
     : null;
 
   return (
-    <div className="grid grid-cols-3 gap-sm">
+    <div className="grid w-full grid-cols-3 gap-sm">
       <div className="flex flex-col items-center gap-base rounded-xl border border-outline-variant bg-surface-container-low p-md text-center">
         <span className="font-display-lg text-[28px] font-bold leading-none tabular-nums text-primary">
           {portfolio.avgScore.toFixed(1)}
@@ -39,7 +39,7 @@ export function CriticStatsStrip({ portfolio }: CriticStatsStripProps) {
         </span>
       </div>
       {venueLabel && (
-        <p className="col-span-3 text-center font-label-sm text-label-sm text-on-surface-variant">
+        <p className="col-span-3 w-full text-center font-label-sm text-label-sm text-on-surface-variant">
           Mostly rates {venueLabel.toLowerCase()}
           {portfolio.topCity ? ` · often in ${portfolio.topCity}` : ""}
         </p>

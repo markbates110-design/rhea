@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { PageShell } from "@/components/layout/PageShell";
-import { CenteredProse } from "@/components/layout/CenteredProse";
+import { CriticProfileHeader } from "@/components/profile/critic/CriticProfileHeader";
 import { RatingCard, type RatingCardRating } from "@/components/ratings/RatingCard";
 import { getProfileByUsername, type Profile } from "@/lib/profile/profile";
 import { displayNameForProfile, initialForName } from "@/lib/profile/names";
@@ -13,9 +13,6 @@ import {
   type CriticPortfolioRating,
 } from "@/lib/profile/criticPortfolio";
 import { getRatingsLikeCounts, getUserLikedRatings } from "@/lib/ratings/likes";
-import { FollowButton } from "@/components/follows/FollowButton";
-import { FollowStatRow } from "@/components/follows/FollowStatRow";
-import { FounderBadge } from "@/components/founder/FounderBadge";
 import { getFounderBadge, type FounderBadgeInfo } from "@/lib/founder/founder";
 import { useAuth } from "@/lib/auth/useAuth";
 import { CriticStatsStrip } from "@/components/profile/critic/CriticStatsStrip";
@@ -24,7 +21,7 @@ import {
   CriticPhotoGrid,
   CriticTopPicksRow,
 } from "@/components/profile/critic/CriticPortfolioSections";
-import { CriticBadgesSection, CriticBadgePill } from "@/components/profile/critic/CriticBadges";
+import { CriticBadgesSection } from "@/components/profile/critic/CriticBadges";
 import { ShareCriticProfileBanner } from "@/components/profile/critic/ShareCriticProfileBanner";
 import {
   computeCriticBadges,
@@ -175,77 +172,20 @@ export default function PublicProfilePage() {
 
   return (
     <PageShell variant="feed" className="pt-lg pb-10">
-      <div className="flex flex-col gap-lg">
+      <div className="flex w-full flex-col gap-lg">
         {isSelf && (
           <ShareCriticProfileBanner username={profile.username} displayName={name} />
         )}
 
-        <header className="flex w-full flex-col gap-sm">
-          <CenteredProse className="gap-sm">
-            <CenteredProse.Item>
-              <div
-                className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-primary/20 bg-surface-container-high shadow-sm"
-                aria-hidden
-              >
-                {profile.avatar_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={profile.avatar_url}
-                    alt=""
-                    className="h-full w-full object-cover"
-                    referrerPolicy="no-referrer"
-                  />
-                ) : (
-                  <span className="font-headline-md text-headline-md font-bold text-on-surface">
-                    {initial}
-                  </span>
-                )}
-              </div>
-            </CenteredProse.Item>
-
-            <CenteredProse maxWidth="md" className="gap-xs">
-              <p className="font-label-sm text-label-sm uppercase tracking-widest text-primary">
-                Food critic
-              </p>
-              <h1 className="font-headline-md text-headline-md font-bold text-on-surface">
-                {name}
-              </h1>
-              <p className="font-label-sm text-label-sm text-on-surface-variant">
-                @{profile.username}
-              </p>
-              {(founderBadge || topCriticBadge) && (
-                <CenteredProse.Item>
-                  <div className="mt-xs flex flex-wrap items-center justify-center gap-xs">
-                    {founderBadge && (
-                      <FounderBadge badge={founderBadge} size="compact" />
-                    )}
-                    {topCriticBadge && (
-                      <CriticBadgePill badge={topCriticBadge} size="compact" />
-                    )}
-                  </div>
-                </CenteredProse.Item>
-              )}
-              <p className="font-body-md text-body-md text-on-surface-variant text-pretty">
-                {portfolio.tagline}
-              </p>
-            </CenteredProse>
-
-            {!isSelf && (
-              <CenteredProse.Item>
-                <FollowButton
-                  target={{
-                    userId: profile.id,
-                    username: profile.username,
-                    displayName: name,
-                    avatarUrl: profile.avatar_url ?? null,
-                  }}
-                />
-              </CenteredProse.Item>
-            )}
-
-            <FollowStatRow userId={profile.id} username={profile.username} />
-          </CenteredProse>
-        </header>
+        <CriticProfileHeader
+          profile={profile}
+          displayName={name}
+          initial={initial}
+          tagline={portfolio.tagline}
+          founderBadge={founderBadge}
+          topCriticBadge={topCriticBadge}
+          isSelf={isSelf}
+        />
 
         <CriticStatsStrip portfolio={portfolio} />
 

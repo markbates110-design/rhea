@@ -135,10 +135,20 @@ body {
  * min-content (one pill / word wide) and paragraphs wrap one word per line.
  * Prefer `<CenteredProse>` or `items-stretch text-center` for new UI.
  */
-.flex.flex-col.items-center > :where(p, h1, h2, h3, h4, h5, h6, ul, ol) {
+.flex.flex-col.items-center > :where(p, h1, h2, h3, h4, h5, h6, ul, ol),
+.flex.flex-col.items-center > div:not(.self-center):not(.shrink-0) {
   align-self: stretch;
   width: 100%;
   max-width: 100%;
+}
+
+/* Block prose column — use on centered copy that must not collapse in flex shells */
+.gg-prose-column {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  text-align: center;
 }
 
 /* Score / stat readouts: lock to tabular figures so digits never jitter and kerning stays uniform. */

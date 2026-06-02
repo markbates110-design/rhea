@@ -20,7 +20,7 @@ export function CriticBadgesSection({
   return (
     <section
       aria-labelledby="critic-badges-heading"
-      className="flex w-full min-w-0 flex-col gap-sm"
+      className="flex w-full flex-col gap-sm"
     >
       <div className="flex flex-col gap-xs">
         <h2
@@ -32,13 +32,13 @@ export function CriticBadgesSection({
       </div>
 
       {badges.length === 0 ? (
-        <p className="rounded-xl border border-outline-variant bg-surface-container-low px-md py-sm font-body-md text-body-md text-on-surface-variant">
+        <p className="w-full rounded-xl border border-outline-variant bg-surface-container-low px-md py-sm font-body-md text-body-md text-on-surface-variant">
           {isSelf
             ? "Rate spots with photos and honest scores to earn critic badges others can trust."
             : "No critic badges yet."}
         </p>
       ) : (
-        <div className="flex w-full min-w-0 flex-wrap items-center gap-xs">
+        <div className="flex w-full flex-wrap items-center gap-xs">
           {badges.map((item) => (
             <CriticBadgePill key={item.id} badge={item} size="compact" />
           ))}
@@ -46,7 +46,7 @@ export function CriticBadgesSection({
       )}
 
       {isSelf && nextProgress && (
-        <div className="rounded-xl border border-primary/20 bg-primary/5 px-md py-sm">
+        <div className="w-full rounded-xl border border-primary/20 bg-primary/5 px-md py-sm">
           <p className="font-label-sm text-label-sm font-semibold text-on-surface">
             Next badge: {nextProgress.badge.label}
           </p>

@@ -81,20 +81,15 @@ export function ShareCriticProfileBanner({
   }
 
   return (
-    <div className="flex w-full min-w-0 flex-col gap-sm rounded-xl border border-primary/30 bg-primary/5 px-md py-sm">
-      <div className="flex w-full min-w-0 items-start justify-between gap-sm">
-        <p className="min-w-0 flex-1 font-label-sm text-label-sm text-on-surface">
-          Your public critic page — share this link to build your following.
-        </p>
-        <Link
-          href="/profile"
-          className="shrink-0 font-label-sm text-label-sm text-primary hover:underline"
-        >
+    <div className="gg-prose-column w-full rounded-xl border border-primary/30 bg-primary/5 px-md py-sm">
+      <p className="font-label-sm text-label-sm text-on-surface">
+        Your public critic page — share this link to build your following.{" "}
+        <Link href="/profile" className="font-semibold text-primary hover:underline">
           Edit profile
         </Link>
-      </div>
+      </p>
 
-      <div className="flex w-full min-w-0 flex-col gap-xs sm:flex-row sm:items-stretch">
+      <div className="mt-sm flex w-full flex-col gap-xs sm:flex-row sm:items-stretch">
         <a
           href={url}
           className="min-w-0 flex-1 truncate rounded-lg border border-outline-variant/60 bg-surface/80 px-sm py-xs font-label-sm text-label-sm text-primary underline-offset-2 hover:underline"

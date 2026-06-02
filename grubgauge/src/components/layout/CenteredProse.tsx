@@ -29,7 +29,7 @@ export function CenteredProse({
   const cap = maxWidth ? MAX_WIDTH_CLASS[maxWidth] : "";
   return (
     <div
-      className={`mx-auto flex w-full min-w-0 flex-col items-stretch self-stretch text-center ${cap} ${className}`.trim()}
+      className={`mx-auto flex w-full min-w-[280px] flex-col items-stretch self-stretch text-center ${cap} ${className}`.trim()}
     >
       {children}
     </div>
