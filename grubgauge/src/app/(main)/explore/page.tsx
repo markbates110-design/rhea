@@ -203,6 +203,12 @@ export default function ExplorePage() {
               {filtered.length} {filtered.length === 1 ? "spot" : "spots"}
               {activeFilter !== "all" ? ` · ${VENUE_META[activeFilter]?.label ?? activeFilter}` : ""}
             </p>
+            <Link
+              href="/city"
+              className="mt-xs inline-block font-label-sm text-label-sm text-primary hover:underline"
+            >
+              Browse best value by city
+            </Link>
           </div>
           <Link
             href="/rate"

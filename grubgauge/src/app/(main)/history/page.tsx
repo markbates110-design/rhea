@@ -7,7 +7,12 @@ import { getDeviceId } from "@/lib/identity/deviceId";
 import { useAuth } from "@/lib/auth/useAuth";
 import { useProfile } from "@/lib/profile/useProfile";
 import { ShareRatingButton } from "@/components/ratings/ShareRatingButton";
+import { CommunityComparison } from "@/components/ratings/CommunityComparison";
 import { applyRatingsOwnerScope } from "@/lib/ratings/scope";
+import {
+  fetchCommunityStatsForPlaces,
+  type CommunityPlaceStats,
+} from "@/lib/ratings/placeStats";
 import { PageShell } from "@/components/layout/PageShell";
 import { RatingEditSheet, type EditableRatingRow } from "@/components/history/RatingEditSheet";
 
@@ -93,6 +98,9 @@ export default function HistoryPage() {
   const { user, loading: authLoading } = useAuth();
   const { profile } = useProfile();
   const [ratings, setRatings] = useState<Rating[]>([]);
+  const [communityByPlace, setCommunityByPlace] = useState<
+    Map<string, CommunityPlaceStats>
+  >(() => new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [editing, setEditing] = useState<EditableRatingRow | null>(null);
@@ -122,6 +130,20 @@ export default function HistoryPage() {
           return;
         }
         setRatings((data ?? []) as Rating[]);
+
+        const placeIds = [
+          ...new Set(
+            (data ?? [])
+              .map((row) => row.place_id as string)
+              .filter(Boolean),
+          ),
+        ];
+        const community = await fetchCommunityStatsForPlaces(
+          supabase,
+          placeIds,
+          { user, deviceId: getDeviceId() },
+        );
+        if (!cancelled) setCommunityByPlace(community);
       } catch (err) {
         if (cancelled) return;
         console.error("Fetch error:", err);
@@ -256,6 +278,12 @@ export default function HistoryPage() {
                         {r.venue_name}
                       </p>
                       <div className="flex shrink-0 items-center gap-xs">
+                        <Link
+                          href={`/rate?placeId=${encodeURIComponent(r.place_id)}`}
+                          className="rounded-lg border border-outline-variant bg-surface-container px-xs py-0.5 font-label-sm text-label-sm text-primary hover:border-primary hover:bg-surface-container-high transition-colors"
+                        >
+                          Rate again
+                        </Link>
                         <ShareRatingButton
                           payload={{
                             venueName: r.venue_name,
@@ -313,6 +341,14 @@ export default function HistoryPage() {
                     {formatDate(r.visit_date)}
                   </span>
                 </div>
+
+                <CommunityComparison
+                  viewerScore={r.weighted_score}
+                  venueType={r.venue_type}
+                  criteriaScores={r.criteria_scores}
+                  community={communityByPlace.get(r.place_id)}
+                  compact
+                />
 
                 {/* Photo + notes */}
                 {r.meal_photo_url && (

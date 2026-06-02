@@ -4,8 +4,17 @@ import { Suspense, useState, useEffect, useRef, useMemo, useCallback } from "rea
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { getDeviceId, getUsername } from "@/lib/identity/deviceId";
+import { useAuth } from "@/lib/auth/useAuth";
 import { useProfile } from "@/lib/profile/useProfile";
 import { ShareRatingButton } from "@/components/ratings/ShareRatingButton";
+import { PlaceRatingContext } from "@/components/ratings/PlaceRatingContext";
+import { CommunityComparison } from "@/components/ratings/CommunityComparison";
+import {
+  fetchCommunityStatsForPlace,
+  fetchViewerPriorRatingsForPlace,
+  type CommunityPlaceStats,
+  type PriorRatingSnapshot,
+} from "@/lib/ratings/placeStats";
 import { notifyCoreActionCompleted } from "@/lib/pwa/installPrompt";
 import {
   DEFAULT_SCORE,
@@ -347,6 +356,7 @@ export default function RatePage() {
 function RatePageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user } = useAuth();
   const { profile } = useProfile();
   const [mapsReady, setMapsReady] = useState(false);
   const [mapsError, setMapsError] = useState(false);
@@ -374,6 +384,42 @@ function RatePageInner() {
   const [error, setError] = useState("");
   const [feedback, setFeedback] = useState("");
   const [feedbackSent, setFeedbackSent] = useState(false);
+  const [priorRatings, setPriorRatings] = useState<PriorRatingSnapshot[]>([]);
+  const [communityStats, setCommunityStats] =
+    useState<CommunityPlaceStats | null>(null);
+
+  const ownerScope = useMemo(
+    () => ({ user, deviceId: getDeviceId() }),
+    [user],
+  );
+
+  // Load prior visits + community stats when the selected spot changes.
+  useEffect(() => {
+    const placeId = spot?.placeId;
+    if (!placeId) {
+      setPriorRatings([]);
+      setCommunityStats(null);
+      return;
+    }
+
+    const resolvedPlaceId = placeId;
+    let cancelled = false;
+    async function loadContext() {
+      const supabase = createClient();
+      const [prior, community] = await Promise.all([
+        fetchViewerPriorRatingsForPlace(supabase, resolvedPlaceId, ownerScope),
+        fetchCommunityStatsForPlace(supabase, resolvedPlaceId, ownerScope),
+      ]);
+      if (cancelled) return;
+      setPriorRatings(prior);
+      setCommunityStats(community);
+    }
+
+    loadContext();
+    return () => {
+      cancelled = true;
+    };
+  }, [spot?.placeId, ownerScope]);
 
   // Load Google Maps / Places
   useEffect(() => {
@@ -409,17 +455,27 @@ function RatePageInner() {
   );
   const meta = spot ? VENUE_META[spot.venueType] : null;
 
-  const weightedScore = useMemo(
-    () => (spot ? calcWeightedScore(criteria, scores) : 0),
-    [criteria, scores, spot]
-  );
-
-  const { label: badge, colorClass } = scoreBadge(weightedScore);
-
-  function getScore(key: string) { return scores[key] ?? DEFAULT_SCORE; }
+  function getScore(key: string) {
+    return scores[key] ?? DEFAULT_SCORE;
+  }
   function setScore(key: string, value: number) {
     setScores((prev) => ({ ...prev, [key]: value }));
   }
+
+  const weightedScore = useMemo(
+    () => (spot ? calcWeightedScore(criteria, scores) : 0),
+    [criteria, scores, spot],
+  );
+
+  const draftCriteria = useMemo(
+    () =>
+      Object.fromEntries(
+        criteria.map((c) => [c.key, scores[c.key] ?? DEFAULT_SCORE]),
+      ),
+    [criteria, scores],
+  );
+
+  const { label: badge, colorClass } = scoreBadge(weightedScore);
 
   function clearMealPhoto() {
     setMealPhotoFile(null);
@@ -448,6 +504,20 @@ function RatePageInner() {
     if (!spot || spot.venueType === next) return;
     setSpot({ ...spot, venueType: next });
     setScores({});
+    setError("");
+  }
+
+  function handlePrefillFromLast() {
+    const latest = priorRatings[0];
+    if (!latest) return;
+    if (
+      latest.criteria_scores &&
+      typeof latest.criteria_scores === "object" &&
+      Object.keys(latest.criteria_scores).length > 0
+    ) {
+      setScores({ ...latest.criteria_scores });
+    }
+    setVisitDate(today());
     setError("");
   }
 
@@ -593,12 +663,16 @@ function RatePageInner() {
               venueType: spot.venueType,
               mealPhotoUrl: submittedMealPhotoUrl,
               notes: notes.trim() || null,
-              criteriaScores: Object.fromEntries(
-                criteria.map((c) => [c.key, getScore(c.key)]),
-              ),
+              criteriaScores: draftCriteria,
               visitDate,
               raterUsername: profile?.username ?? (getUsername().trim() || null),
             }}
+          />
+          <CommunityComparison
+            viewerScore={weightedScore}
+            venueType={spot.venueType}
+            criteriaScores={draftCriteria}
+            community={communityStats}
           />
         </div>
 
@@ -728,6 +802,17 @@ function RatePageInner() {
                 value={spot.venueType}
                 onChange={handleVenueTypeChange}
                 autoDetected
+              />
+            )}
+
+            {spot && (priorRatings.length > 0 || communityStats) && (
+              <PlaceRatingContext
+                priorRatings={priorRatings}
+                community={communityStats}
+                venueType={spot.venueType}
+                draftScore={weightedScore}
+                draftCriteria={draftCriteria}
+                onPrefillFromLast={handlePrefillFromLast}
               />
             )}
           </section>
