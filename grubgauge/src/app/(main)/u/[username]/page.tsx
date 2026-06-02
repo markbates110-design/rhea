@@ -26,6 +26,7 @@ import { ShareCriticProfileBanner } from "@/components/profile/critic/ShareCriti
 import {
   computeCriticBadges,
   getNextCriticBadgeProgress,
+  getPublicProfileRoleLabel,
   getTopCriticBadge,
 } from "@/lib/profile/criticBadges";
 
@@ -169,6 +170,10 @@ export default function PublicProfilePage() {
   const initial = initialForName(name);
   const isSelf = user?.id === profile.id;
   const topCriticBadge = getTopCriticBadge(criticBadges);
+  const roleLabel = getPublicProfileRoleLabel(
+    criticBadges,
+    portfolio.ratingCount,
+  );
 
   return (
     <PageShell variant="feed" className="pt-lg pb-10">
@@ -181,6 +186,7 @@ export default function PublicProfilePage() {
           profile={profile}
           displayName={name}
           initial={initial}
+          roleLabel={roleLabel}
           tagline={portfolio.tagline}
           founderBadge={founderBadge}
           topCriticBadge={topCriticBadge}
@@ -213,7 +219,7 @@ export default function PublicProfilePage() {
           </h2>
           {portfolio.ratingCount === 0 ? (
             <p className="text-center font-body-md text-body-md text-on-surface-variant py-lg">
-              No ratings yet — this critic portfolio is just getting started.
+              No ratings yet — this profile is just getting started.
             </p>
           ) : (
             <div className="flex flex-col gap-sm">

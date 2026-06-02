@@ -253,6 +253,29 @@ export function getTopCriticBadge(badges: CriticBadge[]): CriticBadge | null {
   return badges[0] ?? null;
 }
 
+/** Likes on reviews — the only source for public “critic” / trust copy. */
+const COMMUNITY_BADGE_IDS = new Set<CriticBadgeId>([
+  "likes-5",
+  "likes-25",
+  "likes-50",
+]);
+
+/**
+ * Eyebrow above the display name on `/u/[username]`.
+ * Neutral by default; community badge labels only when earned via likes.
+ */
+export function getPublicProfileRoleLabel(
+  badges: CriticBadge[],
+  ratingCount: number,
+): string {
+  const topCommunity = badges
+    .filter((b) => COMMUNITY_BADGE_IDS.has(b.id))
+    .sort((a, b) => b.priority - a.priority)[0];
+  if (topCommunity) return labelFor(topCommunity);
+  if (ratingCount === 0) return "New on GrubGauge";
+  return "Reviewer";
+}
+
 export function getNextCriticBadgeProgress(
   ratings: CriticPortfolioRating[],
   portfolio: CriticPortfolio,

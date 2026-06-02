@@ -64,8 +64,8 @@ export function ShareCriticProfileBanner({
         await navigator.share({
           title: displayName
             ? `${displayName} on GrubGauge`
-            : "My GrubGauge critic page",
-          text: "Check out my food critic portfolio",
+            : "My GrubGauge profile",
+          text: "Check out my reviews on GrubGauge",
           url,
         });
         flash("Shared");
@@ -83,7 +83,7 @@ export function ShareCriticProfileBanner({
   return (
     <div className="gg-prose-column w-full rounded-xl border border-primary/30 bg-primary/5 px-md py-sm">
       <p className="font-label-sm text-label-sm text-on-surface">
-        Your public critic page — share this link to build your following.{" "}
+        Your public profile — share this link to build your following.{" "}
         <Link href="/profile" className="font-semibold text-primary hover:underline">
           Edit profile
         </Link>

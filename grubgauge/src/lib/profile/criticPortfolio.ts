@@ -84,35 +84,61 @@ function toPick(row: CriticPortfolioRating): CriticPick {
   };
 }
 
+/** Mirrors `criticBadges` like milestones — tagline trust copy only when earned. */
+const LIKES_TRUSTED = 50;
+const LIKES_COMMUNITY = 25;
+const LIKES_NOTICED = 5;
+const CUISINE_SPECIALIST_MIN = 10;
+const SCORE_CLAIM_MIN_REVIEWS = 10;
+
 function buildTagline(
   ratingCount: number,
   avgScore: number,
+  totalLikes: number,
   topCuisine: Cuisine | null,
+  topCuisineCount: number,
   topCity: string | null,
   topVenueType: VenueType | null,
 ): string {
   if (ratingCount === 0) {
-    return "Building a food critic portfolio — every rating adds to the story.";
+    return "Building your taste profile — every rating adds to the story.";
   }
 
   const parts: string[] = [];
 
-  if (topCuisine && topCuisine !== "other") {
-    parts.push(`${cuisineLabel(topCuisine)} critic`);
-  } else {
-    parts.push("Trusted local food critic");
+  if (totalLikes >= LIKES_TRUSTED) {
+    parts.push("Trusted by the community");
+  } else if (totalLikes >= LIKES_COMMUNITY) {
+    parts.push("Community-backed reviews");
+  } else if (totalLikes >= LIKES_NOTICED) {
+    parts.push("Getting noticed by fellow eaters");
   }
 
-  if (avgScore >= 8.5) parts.push("high standards");
-  else if (avgScore >= 7.5) parts.push("value-focused");
-  else if (avgScore >= 6.5) parts.push("honest takes");
+  if (topCuisine && topCuisine !== "other") {
+    if (topCuisineCount >= CUISINE_SPECIALIST_MIN) {
+      parts.push(`${cuisineLabel(topCuisine)} specialist`);
+    } else {
+      parts.push(`Often rates ${cuisineLabel(topCuisine).toLowerCase()}`);
+    }
+  }
+
+  if (ratingCount >= SCORE_CLAIM_MIN_REVIEWS && avgScore >= 8.5) {
+    parts.push("high standards");
+  } else if (ratingCount >= SCORE_CLAIM_MIN_REVIEWS && avgScore < 7.0) {
+    parts.push("honest takes");
+  }
 
   if (topVenueType) {
-    parts.push(`${VENUE_META[topVenueType].label.toLowerCase()} explorer`);
+    parts.push(`mostly ${VENUE_META[topVenueType].label.toLowerCase()}`);
   }
 
   if (topCity) {
     parts.push(topCity);
+  }
+
+  if (parts.length === 0) {
+    const noun = ratingCount === 1 ? "review" : "reviews";
+    return `${ratingCount} ${noun} on GrubGauge`;
   }
 
   return parts.join(" · ");
@@ -128,7 +154,7 @@ export function buildCriticPortfolio(
       uniquePlaceCount: 0,
       avgScore: 0,
       totalLikes,
-      tagline: buildTagline(0, 0, null, null, null),
+      tagline: buildTagline(0, 0, 0, null, 0, null, null),
       topVenueType: null,
       topCity: null,
       specialties: [],
@@ -171,6 +197,9 @@ export function buildCriticPortfolio(
     }));
 
   const topCuisine = specialties[0]?.cuisine ?? null;
+  const topCuisineCount = topCuisine
+    ? (cuisineCounts.get(topCuisine) ?? 0)
+    : 0;
   const topVenueType =
     [...venueCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
   const topCity =
@@ -191,7 +220,9 @@ export function buildCriticPortfolio(
     tagline: buildTagline(
       ratings.length,
       avgScore,
+      totalLikes,
       topCuisine,
+      topCuisineCount,
       topCity,
       topVenueType,
     ),

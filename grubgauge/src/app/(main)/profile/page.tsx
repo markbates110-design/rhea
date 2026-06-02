@@ -222,7 +222,7 @@ export default function ProfilePage() {
           >
             <div className="flex flex-col items-start gap-0.5 text-left">
               <span className="font-body-md text-body-md font-medium text-on-surface">
-                View public critic page
+                View public profile
               </span>
               <span className="font-label-sm text-label-sm text-on-surface-variant">
                 Share your portfolio, top picks, and critic badges

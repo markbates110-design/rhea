@@ -11,6 +11,8 @@ interface CriticProfileHeaderProps {
   profile: Profile;
   displayName: string;
   initial: string;
+  /** Eyebrow above the name — neutral or community-earned only. */
+  roleLabel: string;
   tagline: string;
   founderBadge: FounderBadgeInfo | null;
   topCriticBadge: CriticBadge | null;
@@ -46,6 +48,7 @@ export function CriticProfileHeader({
   profile,
   displayName,
   initial,
+  roleLabel,
   tagline,
   founderBadge,
   topCriticBadge,
@@ -74,7 +77,7 @@ export function CriticProfileHeader({
 
       <div style={IDENTITY_COLUMN_STYLE}>
         <p className="font-label-sm text-label-sm uppercase tracking-wide text-primary">
-          Food critic
+          {roleLabel}
         </p>
         <h1 className="mt-xs font-headline-md text-headline-md font-bold text-on-surface">
           {displayName}
