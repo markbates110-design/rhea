@@ -16,6 +16,7 @@ import { inferVenueType } from "@/lib/places/venueType";
 import { googleTypesToCuisine, type Cuisine } from "@/lib/places/cuisine";
 import { extractAddressComponents, type AddressComponentLike } from "@/lib/places/address";
 import { uploadMealPhoto } from "@/lib/storage/mealPhoto";
+import { AutoGrowTextarea } from "@/components/forms/AutoGrowTextarea";
 import { VenueTypePicker } from "@/components/rate/VenueTypePicker";
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -765,12 +766,12 @@ function RatePageInner() {
             <label className="font-label-sm text-label-sm text-on-surface-variant">
               What did you eat? <span className="text-on-surface-variant/50">(optional)</span>
             </label>
-            <textarea
+            <AutoGrowTextarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Note standout dishes, what to order next time, or anything memorable…"
               rows={3}
-              className="resize-none rounded-lg border border-outline-variant bg-surface-container px-sm py-xs font-body-md text-body-md text-on-surface outline-none placeholder:text-on-surface-variant/50 transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
+              className="resize-none overflow-hidden rounded-lg border border-outline-variant bg-surface-container px-sm py-xs font-body-md text-body-md text-on-surface outline-none placeholder:text-on-surface-variant/50 transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
             />
           </section>
 

@@ -309,7 +309,7 @@ export default function HistoryPage() {
                   </div>
                 )}
                 {r.notes && (
-                  <p className="border-t border-outline-variant/50 pt-xs font-body-md text-body-md italic text-on-surface-variant line-clamp-2">
+                  <p className="border-t border-outline-variant/50 pt-xs font-body-md text-body-md italic text-on-surface-variant whitespace-pre-wrap break-words">
                     {`\u201C${r.notes}\u201D`}
                   </p>
                 )}

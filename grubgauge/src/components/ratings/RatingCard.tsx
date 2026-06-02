@@ -195,7 +195,7 @@ export function RatingCard({ rating, rank, liked, likeCount, hideRater = false, 
       </div>
 
       {rating.notes && (
-        <p className={`border-t border-outline-variant/50 pt-xs ${bodyIndent} font-body-md text-body-md italic text-on-surface-variant line-clamp-2`}>
+        <p className={`border-t border-outline-variant/50 pt-xs ${bodyIndent} font-body-md text-body-md italic text-on-surface-variant whitespace-pre-wrap break-words`}>
           {`\u201C${rating.notes}\u201D`}
         </p>
       )}

@@ -15,6 +15,7 @@ import {
   type VenueType,
 } from "@/lib/ratings/scoring";
 import { uploadMealPhoto } from "@/lib/storage/mealPhoto";
+import { AutoGrowTextarea } from "@/components/forms/AutoGrowTextarea";
 import { DeleteRatingConfirm } from "@/components/history/DeleteRatingConfirm";
 import { VenueTypePicker } from "@/components/rate/VenueTypePicker";
 
@@ -400,12 +401,12 @@ function RatingEditSheetInner({ rating, onClose, onSaved, onDeleted }: InnerProp
               <label className="font-label-sm text-label-sm text-on-surface-variant">
                 Notes <span className="text-on-surface-variant/50">(optional)</span>
               </label>
-              <textarea
+              <AutoGrowTextarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Anything memorable about this visit…"
                 rows={3}
-                className="resize-none rounded-lg border border-outline-variant bg-surface-container px-sm py-xs font-body-md text-body-md text-on-surface outline-none transition-colors placeholder:text-on-surface-variant/50 focus:border-primary focus:ring-1 focus:ring-primary"
+                className="resize-none overflow-hidden rounded-lg border border-outline-variant bg-surface-container px-sm py-xs font-body-md text-body-md text-on-surface outline-none transition-colors placeholder:text-on-surface-variant/50 focus:border-primary focus:ring-1 focus:ring-primary"
               />
             </section>
 
