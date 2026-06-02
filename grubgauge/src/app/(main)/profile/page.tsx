@@ -215,6 +215,25 @@ export default function ProfilePage() {
           <FollowStatRow userId={user.id} username={profileUsername} />
         )}
 
+        {profileUsername && (
+          <Link
+            href={`/u/${encodeURIComponent(profileUsername)}`}
+            className="flex items-center justify-between rounded-xl border border-primary/30 bg-primary/5 px-md py-sm transition-colors hover:bg-primary/10"
+          >
+            <div className="flex flex-col items-start gap-0.5 text-left">
+              <span className="font-body-md text-body-md font-medium text-on-surface">
+                View public critic page
+              </span>
+              <span className="font-label-sm text-label-sm text-on-surface-variant">
+                Share your portfolio, top picks, and critic badges
+              </span>
+            </div>
+            <span className="material-symbols-outlined text-[20px] text-primary">
+              open_in_new
+            </span>
+          </Link>
+        )}
+
         {/* Actions */}
         <div className="flex flex-col gap-sm">
           <Link

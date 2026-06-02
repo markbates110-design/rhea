@@ -8,6 +8,7 @@ import { CriteriaBreakdown } from "@/components/ratings/CriteriaBreakdown";
 import { sharePayloadFromRatingCard } from "@/lib/ratings/shareCard";
 import { RaterBadge } from "@/components/ratings/RaterBadge";
 import { FounderBadge } from "@/components/founder/FounderBadge";
+import { CriticBadgePill } from "@/components/profile/critic/CriticBadges";
 import {
   PILL_COMPACT_GAP_CLASS,
   PILL_COMPACT_ICON_SIZE_CLASS,
@@ -139,11 +140,10 @@ export function RatingCard({ rating, rank, liked, likeCount, hideRater = false, 
       {!hideRater && (
         <div className="flex items-center justify-between gap-sm">
           <RaterBadge rater={rating.rater} isGuest={rating.rater_is_guest === true} />
-          {/* Far-right slot — reserved for the founder pill in v1. Future
-              popular-rater / city-expert badges land between RaterBadge
-              and this position, so the founder pill stays rightmost as
-              the rarest marker. */}
-          <FounderBadge badge={rating.rater?.founder ?? null} size="compact" />
+          <div className={`flex shrink-0 items-center ${PILL_COMPACT_GAP_CLASS}`}>
+            <CriticBadgePill badge={rating.rater?.topCriticBadge ?? null} size="compact" />
+            <FounderBadge badge={rating.rater?.founder ?? null} size="compact" />
+          </div>
         </div>
       )}
 

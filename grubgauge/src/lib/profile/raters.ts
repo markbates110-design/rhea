@@ -4,6 +4,10 @@ import {
   type FounderBadgeInfo,
   getFounderBadgesByUserIds,
 } from "@/lib/founder/founder";
+import {
+  type CriticBadge,
+  getTopCriticBadgesByUserIds,
+} from "@/lib/profile/criticBadges";
 
 /**
  * Public-facing slice of a `public.profiles` row plus optional founder
@@ -21,6 +25,8 @@ export interface RaterFields {
   display_name: string | null;
   avatar_url: string | null;
   founder: FounderBadgeInfo | null;
+  /** Highest-priority earned critic badge, when the user has one. */
+  topCriticBadge: CriticBadge | null;
 }
 
 /**
@@ -56,12 +62,13 @@ export async function getRatersByUserIds(
   // Parallel: profile fields + founder badges (FM rows + The Founder env
   // resolution). Both queries are public-read and hit independent indexes,
   // so launching them together adds no contention.
-  const [profileRes, founderMap] = await Promise.all([
+  const [profileRes, founderMap, criticMap] = await Promise.all([
     supabase
       .from(PROFILES_TABLE)
       .select("id, username, display_name, avatar_url")
       .in("id", unique),
     getFounderBadgesByUserIds(supabase, unique),
+    getTopCriticBadgesByUserIds(supabase, unique),
   ]);
   if (profileRes.error || !profileRes.data) return map;
 
@@ -72,6 +79,7 @@ export async function getRatersByUserIds(
       display_name: (row.display_name as string | null) ?? null,
       avatar_url: (row.avatar_url as string | null) ?? null,
       founder: founderMap.get(id) ?? null,
+      topCriticBadge: criticMap.get(id) ?? null,
     });
   }
   return map;
