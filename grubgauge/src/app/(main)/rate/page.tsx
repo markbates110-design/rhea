@@ -39,6 +39,8 @@ interface SpotSelection {
   state: string | null;
   postal_code: string | null;
   price_level: number | null;
+  latitude: number | null;
+  longitude: number | null;
 }
 
 // Google Places types → VenueType mapping has been extracted to
@@ -62,11 +64,19 @@ function today(): string {
   return new Date().toISOString().split("T")[0];
 }
 
+function readLatLngValue(
+  value: number | (() => number) | null | undefined,
+): number | null {
+  if (typeof value === "function") return value();
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  return null;
+}
+
 // ── Place Details capture ──────────────────────────────────────────────────
 
 /**
- * Fields requested on every Place Details call. `address_components` is
- * free (Basic Data SKU, same bucket as name/types/formatted_address);
+ * Fields requested on every Place Details call. `address_components` and
+ * `geometry` are Basic Data (same bucket as name/types/formatted_address);
  * `price_level` is Atmosphere Data — billed separately at ~$5/1K, which
  * is negligible at MVP scale and is the source of truth for the SEO
  * "cheapest in [city]" query pattern.
@@ -77,6 +87,7 @@ const PLACE_DETAILS_FIELDS: string[] = [
   "types",
   "place_id",
   "address_components",
+  "geometry",
   "price_level",
 ];
 
@@ -102,6 +113,10 @@ function spotSelectionFromPlace(
       ? rawPriceLevel
       : null;
 
+  const location = place.geometry?.location;
+  const latitude = readLatLngValue(location?.lat);
+  const longitude = readLatLngValue(location?.lng);
+
   return {
     placeId: place.place_id ?? fallbackPlaceId,
     name: place.name ?? prediction?.structured_formatting.main_text ?? "",
@@ -120,6 +135,8 @@ function spotSelectionFromPlace(
     state: address.state,
     postal_code: address.postal_code,
     price_level: priceLevel,
+    latitude,
+    longitude,
   };
 }
 
@@ -237,6 +254,8 @@ function SpotSearch({ onSelect, initialPlaceId }: SpotSearchProps) {
             state: null,
             postal_code: null,
             price_level: null,
+            latitude: null,
+            longitude: null,
           });
         }
       }
@@ -500,6 +519,8 @@ function RatePageInner() {
         state: spot.state,
         postal_code: spot.postal_code,
         price_level: spot.price_level,
+        latitude: spot.latitude,
+        longitude: spot.longitude,
       });
       notifyCoreActionCompleted();
       setSubmittedMealPhotoUrl(mealPhotoUrl);

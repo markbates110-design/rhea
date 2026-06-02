@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { PageShell } from "@/components/layout/PageShell";
-import { FeaturedSpotsRow } from "@/components/discovery/FeaturedSpotsRow";
+import { NearbyRatedPlacesRow } from "@/components/discovery/NearbyRatedPlacesRow";
 import { FounderProgressCard } from "@/components/founder/FounderProgressCard";
 import { SuggestedUsersRow } from "@/components/follows/SuggestedUsersRow";
 import { FollowingFeed } from "@/components/follows/FollowingFeed";
@@ -155,7 +155,7 @@ export default function DashboardPage() {
           <div>
             <h1 className="font-headline-md text-headline-md font-semibold text-on-surface">{greetingTitle}</h1>
             <p className="mt-xs font-body-md text-body-md text-on-surface-variant">
-              No ratings yet — tap a featured spot below, or search for any
+              No ratings yet — tap a rated spot below, or search for any
               place.
             </p>
           </div>
@@ -163,12 +163,10 @@ export default function DashboardPage() {
               slots remain. Self-hides for guests / founders / closed program
               so this slot collapses cleanly when not applicable. */}
           <FounderProgressCard rateHref={rateHref} />
-          {/* Featured spots — hand-curated row of must-try places powered
-              by lib/places/featured.ts. Replaces the deleted Google-backed
-              NearbyVenuesRow; zero per-load API cost. Self-hides while the
-              curated list is empty so the dashboard collapses cleanly until
-              photos are populated in public/featured/. */}
-          <FeaturedSpotsRow />
+          {/* Community-rated spots with photos near the viewer. Powered by
+              Supabase ratings only — zero Google API cost. Self-hides when
+              no community ratings include meal photos. */}
+          <NearbyRatedPlacesRow />
           {/* People to follow — guest/member both see this; FollowButton
               inside opens the gate sheet for guests. Self-hides when no
               suggestions exist (brand-new project). */}
@@ -184,7 +182,7 @@ export default function DashboardPage() {
             </span>
             <div>
               <p className="font-title-sm text-title-sm text-on-surface">No ratings yet</p>
-              <p className="mt-xs font-body-md text-body-md text-on-surface-variant">Tap a featured spot above, or search for any place.</p>
+              <p className="mt-xs font-body-md text-body-md text-on-surface-variant">Tap a rated spot above, or search for any place.</p>
             </div>
             <Link
               href={rateHref}
@@ -231,9 +229,9 @@ export default function DashboardPage() {
             history below. */}
         <FounderProgressCard rateHref={rateHref} />
 
-        {/* Featured spots — curated discovery row, lead content above
-            retrospective stats. Replaces the deleted NearbyVenuesRow. */}
-        <FeaturedSpotsRow />
+        {/* Community-rated spots with photos — lead discovery content
+            above retrospective stats. Replaces FeaturedSpotsRow / NearbyVenuesRow. */}
+        <NearbyRatedPlacesRow />
 
         {/* Social discovery + network feed — sit above retrospective
             stats because their content is more time-sensitive (people
