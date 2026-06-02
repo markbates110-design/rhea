@@ -30,6 +30,7 @@ export interface TrendingRatingRow {
   weighted_score: number;
   notes: string | null;
   meal_photo_url: string | null;
+  criteria_scores: Record<string, number> | null;
   created_at: string;
   user_id: string | null;
 }
@@ -49,7 +50,7 @@ export async function getTrendingRatings(
   const { data: candidates, error: candErr } = await supabase
     .from("ratings")
     .select(
-      "id, place_id, venue_name, venue_address, venue_type, visit_date, weighted_score, notes, meal_photo_url, created_at, user_id",
+      "id, place_id, venue_name, venue_address, venue_type, visit_date, weighted_score, notes, meal_photo_url, criteria_scores, created_at, user_id",
     )
     .gte("created_at", since)
     .not("user_id", "is", null)

@@ -77,7 +77,7 @@ export function FollowingFeed() {
       const { data, error } = await supabase
         .from("ratings")
         .select(
-          "id, place_id, venue_name, venue_address, venue_type, visit_date, weighted_score, notes, meal_photo_url, created_at, user_id",
+          "id, place_id, venue_name, venue_address, venue_type, visit_date, weighted_score, notes, meal_photo_url, criteria_scores, created_at, user_id",
         )
         .in("user_id", followeeIds)
         .order("created_at", { ascending: false })

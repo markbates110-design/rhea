@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { PageShell } from "@/components/layout/PageShell";
-import { NearbyRatedPlacesRow } from "@/components/discovery/NearbyRatedPlacesRow";
+import { NearbyDiscoverySection } from "@/components/discovery/NearbyDiscoverySection";
 import { FounderProgressCard } from "@/components/founder/FounderProgressCard";
 import { SuggestedUsersRow } from "@/components/follows/SuggestedUsersRow";
 import { FollowingFeed } from "@/components/follows/FollowingFeed";
@@ -166,7 +166,7 @@ export default function DashboardPage() {
           {/* Community-rated spots with photos near the viewer. Powered by
               Supabase ratings only — zero Google API cost. Self-hides when
               no community ratings include meal photos. */}
-          <NearbyRatedPlacesRow />
+          <NearbyDiscoverySection />
           {/* People to follow — guest/member both see this; FollowButton
               inside opens the gate sheet for guests. Self-hides when no
               suggestions exist (brand-new project). */}
@@ -231,7 +231,7 @@ export default function DashboardPage() {
 
         {/* Community-rated spots with photos — lead discovery content
             above retrospective stats. Replaces FeaturedSpotsRow / NearbyVenuesRow. */}
-        <NearbyRatedPlacesRow />
+        <NearbyDiscoverySection />
 
         {/* Social discovery + network feed — sit above retrospective
             stats because their content is more time-sensitive (people

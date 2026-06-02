@@ -3,6 +3,9 @@
 import type { ReactNode } from "react";
 import type { RaterFields } from "@/lib/profile/raters";
 import { LikeButton } from "@/components/ratings/LikeButton";
+import { ShareRatingButton } from "@/components/ratings/ShareRatingButton";
+import { CriteriaBreakdown } from "@/components/ratings/CriteriaBreakdown";
+import { sharePayloadFromRatingCard } from "@/lib/ratings/shareCard";
 import { RaterBadge } from "@/components/ratings/RaterBadge";
 import { FounderBadge } from "@/components/founder/FounderBadge";
 import {
@@ -34,6 +37,8 @@ export interface RatingCardRating {
   weighted_score: number;
   notes: string | null;
   meal_photo_url: string | null;
+  /** Per-criterion scores; when present, cards show a compact breakdown. */
+  criteria_scores?: Record<string, number> | null;
   rater: RaterFields | null;
   /**
    * Distinguishes the two `rater === null` cases: `true` when the rating
@@ -163,6 +168,12 @@ export function RatingCard({ rating, rank, liked, likeCount, hideRater = false, 
         </div>
       </div>
 
+      <CriteriaBreakdown
+        venueType={rating.venue_type}
+        criteriaScores={rating.criteria_scores}
+        className={bodyIndent}
+      />
+
       {rating.meal_photo_url && (
         <div className={`${bodyIndent} pr-0`}>
           <div className="overflow-hidden rounded-lg border border-outline-variant/50">
@@ -190,7 +201,10 @@ export function RatingCard({ rating, rank, liked, likeCount, hideRater = false, 
       </div>
 
       <div className={`flex items-center justify-between gap-sm ${bodyIndent}`}>
-        <LikeButton ratingId={rating.id} initialLiked={liked} initialCount={likeCount} />
+        <div className="flex flex-wrap items-center gap-sm">
+          <LikeButton ratingId={rating.id} initialLiked={liked} initialCount={likeCount} />
+          <ShareRatingButton payload={sharePayloadFromRatingCard(rating)} />
+        </div>
         {trailingAction}
       </div>
 

@@ -99,7 +99,7 @@ export default function PublicProfilePage() {
 
         const { data, error } = await supabase
           .from("ratings")
-          .select("id, place_id, venue_name, venue_address, venue_type, visit_date, weighted_score, notes, meal_photo_url, created_at")
+          .select("id, place_id, venue_name, venue_address, venue_type, visit_date, weighted_score, notes, meal_photo_url, criteria_scores, created_at")
           .eq("user_id", found.id)
           .order("created_at", { ascending: false });
         if (cancelled) return;

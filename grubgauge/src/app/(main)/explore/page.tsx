@@ -35,6 +35,7 @@ interface Rating {
   weighted_score: number;
   notes: string | null;
   meal_photo_url: string | null;
+  criteria_scores: Record<string, number> | null;
   user_id: string | null;
   // Hydrated via `attachRaters` after the ratings query lands. `null` for
   // guest ratings (user_id is null) and orphaned rows whose profile was
@@ -82,7 +83,7 @@ export default function ExplorePage() {
         const supabase = createClient();
         const { data, error } = await supabase
           .from("ratings")
-          .select("id, place_id, venue_name, venue_address, venue_type, meal_type, visit_date, weighted_score, notes, meal_photo_url, user_id")
+          .select("id, place_id, venue_name, venue_address, venue_type, meal_type, visit_date, weighted_score, notes, meal_photo_url, criteria_scores, user_id")
           .order("weighted_score", { ascending: false });
         if (error) {
           console.error("Supabase error:", error.code, error.message);

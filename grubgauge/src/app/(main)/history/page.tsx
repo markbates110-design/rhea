@@ -5,6 +5,8 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { getDeviceId } from "@/lib/identity/deviceId";
 import { useAuth } from "@/lib/auth/useAuth";
+import { useProfile } from "@/lib/profile/useProfile";
+import { ShareRatingButton } from "@/components/ratings/ShareRatingButton";
 import { applyRatingsOwnerScope } from "@/lib/ratings/scope";
 import { PageShell } from "@/components/layout/PageShell";
 import { RatingEditSheet, type EditableRatingRow } from "@/components/history/RatingEditSheet";
@@ -89,6 +91,7 @@ function GuestUpsellCard() {
 
 export default function HistoryPage() {
   const { user, loading: authLoading } = useAuth();
+  const { profile } = useProfile();
   const [ratings, setRatings] = useState<Rating[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -252,14 +255,28 @@ export default function HistoryPage() {
                       <p className="min-w-0 flex-1 font-title-sm text-title-sm font-semibold text-on-surface truncate">
                         {r.venue_name}
                       </p>
-                      <button
-                        type="button"
-                        onClick={() => openEditor(r)}
-                        className="shrink-0 rounded-lg border border-outline-variant bg-surface-container px-xs py-0.5 font-label-sm text-label-sm text-on-surface hover:border-primary hover:bg-surface-container-high transition-colors"
-                        aria-label={`Edit rating for ${r.venue_name}`}
-                      >
-                        Edit
-                      </button>
+                      <div className="flex shrink-0 items-center gap-xs">
+                        <ShareRatingButton
+                          payload={{
+                            venueName: r.venue_name,
+                            weightedScore: r.weighted_score,
+                            venueType: r.venue_type,
+                            mealPhotoUrl: r.meal_photo_url,
+                            notes: r.notes,
+                            criteriaScores: r.criteria_scores,
+                            visitDate: r.visit_date,
+                            raterUsername: profile?.username ?? null,
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => openEditor(r)}
+                          className="rounded-lg border border-outline-variant bg-surface-container px-xs py-0.5 font-label-sm text-label-sm text-on-surface hover:border-primary hover:bg-surface-container-high transition-colors"
+                          aria-label={`Edit rating for ${r.venue_name}`}
+                        >
+                          Edit
+                        </button>
+                      </div>
                     </div>
                     {r.venue_address && (
                       <p className="mt-0.5 font-label-sm text-label-sm text-on-surface-variant truncate">

@@ -3,7 +3,9 @@
 import { Suspense, useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { getDeviceId } from "@/lib/identity/deviceId";
+import { getDeviceId, getUsername } from "@/lib/identity/deviceId";
+import { useProfile } from "@/lib/profile/useProfile";
+import { ShareRatingButton } from "@/components/ratings/ShareRatingButton";
 import { notifyCoreActionCompleted } from "@/lib/pwa/installPrompt";
 import {
   DEFAULT_SCORE,
@@ -345,6 +347,7 @@ export default function RatePage() {
 function RatePageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { profile } = useProfile();
   const [mapsReady, setMapsReady] = useState(false);
   const [mapsError, setMapsError] = useState(false);
 
@@ -581,6 +584,22 @@ function RatePageInner() {
             <span className="font-display-lg text-[64px] leading-none tabular-nums text-primary">{weightedScore.toFixed(1)}</span>
             <span className="font-headline-md text-headline-md text-on-surface-variant">/10</span>
           </div>
+          <ShareRatingButton
+            variant="button"
+            className="w-full max-w-xs"
+            payload={{
+              venueName: spot.name,
+              weightedScore,
+              venueType: spot.venueType,
+              mealPhotoUrl: submittedMealPhotoUrl,
+              notes: notes.trim() || null,
+              criteriaScores: Object.fromEntries(
+                criteria.map((c) => [c.key, getScore(c.key)]),
+              ),
+              visitDate,
+              raterUsername: profile?.username ?? (getUsername().trim() || null),
+            }}
+          />
         </div>
 
         {/* Feedback prompt */}
