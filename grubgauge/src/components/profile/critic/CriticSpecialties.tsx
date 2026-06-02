@@ -14,14 +14,17 @@ export function CriticSpecialties({
   if (specialties.length === 0 && !topVenueType) return null;
 
   return (
-    <section aria-labelledby="critic-specialties-heading" className="flex flex-col gap-sm">
+    <section
+      aria-labelledby="critic-specialties-heading"
+      className="flex w-full min-w-0 flex-col gap-sm"
+    >
       <h2
         id="critic-specialties-heading"
         className="font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant"
       >
         Specialties
       </h2>
-      <div className="flex flex-wrap gap-xs">
+      <div className="flex w-full min-w-0 flex-wrap gap-xs">
         {topVenueType && (
           <span className="inline-flex items-center gap-xs rounded-full bg-primary/10 px-sm py-xs font-label-sm text-label-sm font-semibold text-primary">
             <span

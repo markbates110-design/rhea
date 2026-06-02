@@ -18,7 +18,10 @@ export function CriticBadgesSection({
   isSelf = false,
 }: CriticBadgesSectionProps) {
   return (
-    <section aria-labelledby="critic-badges-heading" className="flex flex-col gap-sm">
+    <section
+      aria-labelledby="critic-badges-heading"
+      className="flex w-full min-w-0 flex-col gap-sm"
+    >
       <div className="flex flex-col gap-xs">
         <h2
           id="critic-badges-heading"
@@ -35,7 +38,7 @@ export function CriticBadgesSection({
             : "No critic badges yet."}
         </p>
       ) : (
-        <div className="flex flex-wrap items-center gap-xs">
+        <div className="flex w-full min-w-0 flex-wrap items-center gap-xs">
           {badges.map((item) => (
             <CriticBadgePill key={item.id} badge={item} size="compact" />
           ))}

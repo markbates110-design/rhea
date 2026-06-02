@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { useParams, notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { PageShell } from "@/components/layout/PageShell";
@@ -25,6 +24,7 @@ import {
   CriticTopPicksRow,
 } from "@/components/profile/critic/CriticPortfolioSections";
 import { CriticBadgesSection, CriticBadgePill } from "@/components/profile/critic/CriticBadges";
+import { ShareCriticProfileBanner } from "@/components/profile/critic/ShareCriticProfileBanner";
 import {
   computeCriticBadges,
   getNextCriticBadgeProgress,
@@ -176,20 +176,10 @@ export default function PublicProfilePage() {
     <PageShell variant="feed" className="pt-lg pb-10">
       <div className="flex flex-col gap-lg">
         {isSelf && (
-          <div className="flex items-center justify-between gap-sm rounded-xl border border-primary/30 bg-primary/5 px-md py-sm">
-            <p className="font-label-sm text-label-sm text-on-surface">
-              Your public critic page — share this link to build your following.
-            </p>
-            <Link
-              href="/profile"
-              className="shrink-0 font-label-sm text-label-sm text-primary hover:underline"
-            >
-              Edit profile
-            </Link>
-          </div>
+          <ShareCriticProfileBanner username={profile.username} displayName={name} />
         )}
 
-        <header className="flex flex-col items-center gap-sm text-center">
+        <header className="flex w-full min-w-0 flex-col items-center gap-sm text-center">
           <div
             className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-primary/20 bg-surface-container-high shadow-sm"
             aria-hidden
@@ -209,18 +199,18 @@ export default function PublicProfilePage() {
             )}
           </div>
 
-          <div className="flex flex-col items-center gap-xs max-w-md">
-            <p className="font-label-sm text-label-sm uppercase tracking-widest text-primary">
+          <div className="flex w-full min-w-0 max-w-md flex-col items-center gap-xs">
+            <p className="w-full font-label-sm text-label-sm uppercase tracking-widest text-primary">
               Food critic
             </p>
-            <h1 className="font-headline-md text-headline-md font-bold text-on-surface">
+            <h1 className="w-full font-headline-md text-headline-md font-bold text-on-surface">
               {name}
             </h1>
-            <p className="font-label-sm text-label-sm text-on-surface-variant">
+            <p className="w-full font-label-sm text-label-sm text-on-surface-variant">
               @{profile.username}
             </p>
             {(founderBadge || topCriticBadge) && (
-              <div className="mt-xs flex max-w-full flex-wrap items-center justify-center gap-xs">
+              <div className="mt-xs flex w-full min-w-0 flex-wrap items-center justify-center gap-xs">
                 {founderBadge && (
                   <FounderBadge badge={founderBadge} size="compact" />
                 )}
@@ -229,7 +219,7 @@ export default function PublicProfilePage() {
                 )}
               </div>
             )}
-            <p className="font-body-md text-body-md text-on-surface-variant">
+            <p className="w-full font-body-md text-body-md text-on-surface-variant text-pretty">
               {portfolio.tagline}
             </p>
           </div>
