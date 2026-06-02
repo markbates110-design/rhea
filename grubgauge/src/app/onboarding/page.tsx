@@ -61,14 +61,14 @@ export default function OnboardingWelcomePage() {
       {/* Top spacer (vertical centering within the onboarding layout's flex column) */}
       <div className="flex-1" />
 
-      <PageShell variant="feed" className="pb-10">
+      <PageShell variant="form" className="pb-10">
         {/* Brand — full lockup includes gauge arc; no separate icon tile */}
-        <div className="flex flex-col items-center gap-sm text-center">
+        <div className="flex w-full min-w-0 flex-col items-center gap-sm text-center">
           <BrandMark as="h1" size="lg" />
-          <p className="font-headline-md text-headline-md font-semibold text-on-surface">
+          <p className="w-full font-headline-md text-headline-md font-semibold text-on-surface">
             Unleash your inner food critic.
           </p>
-          <p className="max-w-md font-body-md text-body-md text-on-surface-variant">
+          <p className="w-full max-w-md font-body-md text-body-md text-on-surface-variant text-pretty">
             Track the meals that matter, build a following, and earn one of the
             first 100 Founding Member badges.
           </p>
@@ -79,12 +79,12 @@ export default function OnboardingWelcomePage() {
             rather than marketing-flavour. Sits above value props so a
             first-time visitor sees the scarcity message before any
             generic product pitch. */}
-        <div className="mt-lg flex flex-col items-center gap-xs rounded-2xl border border-tertiary/40 bg-tertiary-container/60 px-md py-md text-center">
-          <p className="font-title-sm text-title-sm font-bold text-on-tertiary-container">
+        <div className="mt-lg flex w-full min-w-0 flex-col items-center gap-xs rounded-2xl border border-tertiary/40 bg-tertiary-container/60 px-md py-md text-center">
+          <p className="w-full font-title-sm text-title-sm font-bold text-on-tertiary-container">
             Earn your permanent spot.
           </p>
           <FounderSlotCounter variant="headline" />
-          <p className="font-label-sm text-label-sm text-on-tertiary-container/80">
+          <p className="w-full font-label-sm text-label-sm text-on-tertiary-container/80">
             Sign up and rate 3 spots — claim a numbered Founding Member badge.
           </p>
         </div>
@@ -116,11 +116,11 @@ export default function OnboardingWelcomePage() {
             keystroke so the value travels through to /onboarding/profile
             (post-signup) and into handle_new_user via user_metadata —
             zero-cost UX for the user, who never has to retype it. */}
-        <div className="mt-xl flex flex-col gap-sm rounded-2xl border border-primary/40 bg-primary/5 px-md py-md">
-          <p className="font-title-sm text-title-sm font-bold text-on-surface">
+        <div className="mt-xl flex w-full min-w-0 flex-col gap-sm rounded-2xl border border-primary/40 bg-primary/5 px-md py-md">
+          <p className="w-full font-title-sm text-title-sm font-bold text-on-surface">
             Claim your handle
           </p>
-          <p className="font-body-md text-body-md text-on-surface-variant">
+          <p className="w-full font-body-md text-body-md text-on-surface-variant">
             Once it&apos;s yours, it&apos;s yours — only one @name per rater on GrubGauge.
           </p>
           <UsernameClaimField
