@@ -17,8 +17,6 @@ export function CriticBadgesSection({
   nextProgress = null,
   isSelf = false,
 }: CriticBadgesSectionProps) {
-  const topBadge = badges[0] ?? null;
-
   return (
     <section aria-labelledby="critic-badges-heading" className="flex flex-col gap-sm">
       <div className="flex flex-col gap-xs">
@@ -28,11 +26,6 @@ export function CriticBadgesSection({
         >
           Critic credentials
         </h2>
-        {topBadge && (
-          <p className="font-body-md text-body-md text-on-surface-variant">
-            {criticBadgeLabel(topBadge)} — {topBadge.description}
-          </p>
-        )}
       </div>
 
       {badges.length === 0 ? (
@@ -42,9 +35,9 @@ export function CriticBadgesSection({
             : "No critic badges yet."}
         </p>
       ) : (
-        <div className="flex flex-wrap gap-xs">
+        <div className="flex flex-wrap items-center gap-xs">
           {badges.map((item) => (
-            <CriticBadgePill key={item.id} badge={item} size="full" />
+            <CriticBadgePill key={item.id} badge={item} size="compact" />
           ))}
         </div>
       )}

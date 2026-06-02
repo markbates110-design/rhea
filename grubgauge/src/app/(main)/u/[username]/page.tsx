@@ -219,11 +219,17 @@ export default function PublicProfilePage() {
             <p className="font-label-sm text-label-sm text-on-surface-variant">
               @{profile.username}
             </p>
-            {founderBadge && <FounderBadge badge={founderBadge} size="full" />}
-            {topCriticBadge && (
-              <CriticBadgePill badge={topCriticBadge} size="full" />
+            {(founderBadge || topCriticBadge) && (
+              <div className="mt-xs flex max-w-full flex-wrap items-center justify-center gap-xs">
+                {founderBadge && (
+                  <FounderBadge badge={founderBadge} size="compact" />
+                )}
+                {topCriticBadge && (
+                  <CriticBadgePill badge={topCriticBadge} size="compact" />
+                )}
+              </div>
             )}
-            <p className="mt-xs font-body-md text-body-md text-on-surface-variant">
+            <p className="font-body-md text-body-md text-on-surface-variant">
               {portfolio.tagline}
             </p>
           </div>
