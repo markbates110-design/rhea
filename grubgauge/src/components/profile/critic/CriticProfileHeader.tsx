@@ -17,9 +17,11 @@ interface CriticProfileHeaderProps {
 }
 
 /**
- * Public critic identity block. Uses block layout (not flex-col items-center)
- * so copy always spans the full readable column width — flex centering was
- * collapsing the column to pill-width and stacking one word per line.
+ * Public critic identity block.
+ *
+ * Tagline copy uses the same class pattern as CriticStatsStrip footer text
+ * (w-full text-center, no break-word). overflow-wrap: break-word on a grid/flex
+ * child lets min-content collapse to one character → one glyph per line.
  */
 export function CriticProfileHeader({
   profile,
@@ -31,7 +33,7 @@ export function CriticProfileHeader({
   isSelf,
 }: CriticProfileHeaderProps) {
   return (
-    <header className="block w-full min-w-[280px] self-stretch text-center">
+    <div className="w-full text-center">
       <div
         className="mx-auto mb-sm flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 border-primary/20 bg-surface-container-high shadow-sm"
         aria-hidden
@@ -51,19 +53,19 @@ export function CriticProfileHeader({
         )}
       </div>
 
-      <div className="mx-auto grid w-full max-w-md grid-cols-1 gap-y-xs text-center">
-        <p className="col-span-1 w-full font-label-sm text-label-sm uppercase tracking-widest text-primary">
+      <div className="mx-auto w-full max-w-md">
+        <p className="font-label-sm text-label-sm uppercase tracking-widest text-primary">
           Food critic
         </p>
-        <h1 className="col-span-1 w-full font-headline-md text-headline-md font-bold text-on-surface">
+        <h1 className="mt-xs font-headline-md text-headline-md font-bold text-on-surface">
           {displayName}
         </h1>
-        <p className="col-span-1 w-full font-label-sm text-label-sm text-on-surface-variant">
+        <p className="mt-xs font-label-sm text-label-sm text-on-surface-variant">
           @{profile.username}
         </p>
 
         {(founderBadge || topCriticBadge) && (
-          <div className="col-span-1 flex w-full flex-wrap items-center justify-center gap-xs">
+          <div className="mt-sm flex flex-wrap items-center justify-center gap-xs">
             {founderBadge && <FounderBadge badge={founderBadge} size="compact" />}
             {topCriticBadge && (
               <CriticBadgePill badge={topCriticBadge} size="compact" />
@@ -71,7 +73,7 @@ export function CriticProfileHeader({
           </div>
         )}
 
-        <p className="gg-readable-text col-span-1 w-full font-body-md text-body-md text-on-surface-variant">
+        <p className="mt-sm w-full text-center font-body-md text-body-md text-on-surface-variant">
           {tagline}
         </p>
       </div>
@@ -92,6 +94,6 @@ export function CriticProfileHeader({
       <div className="mt-sm">
         <FollowStatRow userId={profile.id} username={profile.username} />
       </div>
-    </header>
+    </div>
   );
 }

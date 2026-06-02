@@ -23,7 +23,8 @@ Centered body copy (hero pitch, profile header, empty-state paragraphs):
 2. **Do** use one of: plain **block layout** (`mx-auto w-full max-w-md`, children are block elements); **`<CenteredProse>`** (`items-stretch` + `text-center`, `CenteredProse.Item` only for avatars/icons); or **`items-stretch text-center`** on the flex column (never `items-center` when paragraphs are direct/indirect children).
 3. **Page routes** render through **`<PageShell>`** — all variants include `min-w-[280px] self-stretch`.
 4. **Badge/chip rows** inside centered headers: full-width container + `flex flex-wrap justify-center` — not a shrink-wrapped `items-center` parent.
-5. **Before closing** any UI task with centered multi-line copy, confirm in browser that paragraphs wrap at normal line length (not one word per column). If the symptom persists after utility patches, replace the layout primitive — do not add another layer of `w-full`.
+5. **Never `overflow-wrap: break-word`** on centered taglines inside grid/flex — min-content collapses to one character (glyph-per-line). Use `w-full text-center` with normal wrap, same as `CriticStatsStrip` footer.
+6. **Before closing** any UI task with centered multi-line copy, confirm in browser that paragraphs wrap at normal line length (not one word or glyph per column). If the symptom persists after utility patches, replace the layout primitive — do not add another layer of `w-full` or `break-word`.
 
 Artifacts: `grubgauge/src/components/layout/PageShell.tsx`, `CenteredProse.tsx`, `CriticProfileHeader.tsx`; `globals.css` safety net for `.flex.flex-col.items-center` children.
 

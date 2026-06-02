@@ -151,18 +151,6 @@ body {
   text-align: center;
 }
 
-/* Hard floor for multi-line centered copy (critic tagline, hero pitch). Grid/block
-   parents can still resolve ~0 width in nested flex — inline width beats utilities. */
-.gg-readable-text {
-  display: block;
-  width: 100%;
-  max-width: 100%;
-  white-space: normal;
-  overflow-wrap: break-word;
-  word-break: normal;
-  writing-mode: horizontal-tb;
-}
-
 /* Score / stat readouts: lock to tabular figures so digits never jitter and kerning stays uniform. */
 .tabular-nums {
   font-variant-numeric: tabular-nums;

@@ -172,7 +172,7 @@ export default function PublicProfilePage() {
 
   return (
     <PageShell variant="feed" className="pt-lg pb-10">
-      <div className="flex w-full min-w-[280px] flex-col gap-lg self-stretch">
+      <div className="w-full space-y-lg">
         {isSelf && (
           <ShareCriticProfileBanner username={profile.username} displayName={name} />
         )}
