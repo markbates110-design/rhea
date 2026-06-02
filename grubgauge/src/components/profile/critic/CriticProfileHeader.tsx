@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { FounderBadge } from "@/components/founder/FounderBadge";
 import { FollowButton } from "@/components/follows/FollowButton";
 import { FollowStatRow } from "@/components/follows/FollowStatRow";
@@ -16,13 +17,31 @@ interface CriticProfileHeaderProps {
   isSelf: boolean;
 }
 
-/**
- * Public critic identity block.
- *
- * Tagline copy uses the same class pattern as CriticStatsStrip footer text
- * (w-full text-center, no break-word). overflow-wrap: break-word on a grid/flex
- * child lets min-content collapse to one character → one glyph per line.
- */
+/** Same width contract as ShareCriticProfileBanner — inline so it cannot lose to Tailwind %/flex. */
+const IDENTITY_COLUMN_STYLE: CSSProperties = {
+  display: "block",
+  boxSizing: "border-box",
+  width: "min(28rem, 100%)",
+  minWidth: 280,
+  maxWidth: "28rem",
+  marginInline: "auto",
+  textAlign: "center",
+};
+
+const TAGLINE_STYLE: CSSProperties = {
+  display: "block",
+  width: "100%",
+  margin: 0,
+  marginTop: 12,
+  fontSize: 16,
+  lineHeight: 1.5,
+  fontWeight: 400,
+  whiteSpace: "normal",
+  overflowWrap: "normal",
+  wordBreak: "normal",
+  writingMode: "horizontal-tb",
+};
+
 export function CriticProfileHeader({
   profile,
   displayName,
@@ -33,7 +52,7 @@ export function CriticProfileHeader({
   isSelf,
 }: CriticProfileHeaderProps) {
   return (
-    <div className="w-full text-center">
+    <div className="gg-prose-column w-full">
       <div
         className="mx-auto mb-sm flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 border-primary/20 bg-surface-container-high shadow-sm"
         aria-hidden
@@ -53,8 +72,8 @@ export function CriticProfileHeader({
         )}
       </div>
 
-      <div className="mx-auto w-full max-w-md">
-        <p className="font-label-sm text-label-sm uppercase tracking-widest text-primary">
+      <div style={IDENTITY_COLUMN_STYLE}>
+        <p className="font-label-sm text-label-sm uppercase tracking-wide text-primary">
           Food critic
         </p>
         <h1 className="mt-xs font-headline-md text-headline-md font-bold text-on-surface">
@@ -73,7 +92,10 @@ export function CriticProfileHeader({
           </div>
         )}
 
-        <p className="mt-sm w-full text-center font-body-md text-body-md text-on-surface-variant">
+        <p
+          className="text-on-surface-variant"
+          style={TAGLINE_STYLE}
+        >
           {tagline}
         </p>
       </div>

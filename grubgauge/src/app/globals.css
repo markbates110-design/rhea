@@ -142,12 +142,15 @@ body {
   max-width: 100%;
 }
 
-/* Block prose column — use on centered copy that must not collapse in flex shells */
+/* Centered copy column — fixed width floor so %/w-full cannot collapse to min-content.
+   Used by ShareCriticProfileBanner (works) and critic profile identity block. */
 .gg-prose-column {
   display: block;
-  width: 100%;
-  min-width: min(100%, 280px);
-  max-width: 100%;
+  box-sizing: border-box;
+  width: min(28rem, 100%);
+  min-width: 280px;
+  max-width: 28rem;
+  margin-inline: auto;
   text-align: center;
 }
 
