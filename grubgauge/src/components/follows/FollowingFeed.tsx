@@ -8,6 +8,7 @@ import { FOLLOW_CHANGED_EVENT, getFollowingIds } from "@/lib/follows/follows";
 import { getTrendingRatings, type TrendingRatingRow } from "@/lib/ratings/trending";
 import { attachRaters } from "@/lib/profile/raters";
 import { getRatingsLikeCounts, getUserLikedRatings } from "@/lib/ratings/likes";
+import { sortFeedRatings } from "@/lib/ratings/feedSort";
 import { RatingCard, type RatingCardRating } from "@/components/ratings/RatingCard";
 import { FeedRatingCard } from "./FeedRatingCard";
 
@@ -26,7 +27,7 @@ interface FeedRow extends RatingCardRating {
  *   - "member-no-follows"   → a small nudge card pointing back to the
  *                              SuggestedUsersRow above ("Follow raters to
  *                              fill this with their newest ratings").
- *   - "guest"               → trending ratings from the last 30 days +
+ *   - "guest"               → recent ratings from the last 30 days +
  *                              a sticky section banner with a sign-up CTA.
  *                              Each card uses FeedRatingCard so every
  *                              rater chip becomes a 1-tap Follow that
@@ -81,7 +82,7 @@ export function FollowingFeed() {
         )
         .in("user_id", followeeIds)
         .order("created_at", { ascending: false })
-        .limit(10);
+        .limit(50);
       if (cancelled) return;
       if (error || !data) {
         setMode("member-with-follows");
@@ -106,13 +107,14 @@ export function FollowingFeed() {
         ...r,
         rater: r.rater,
       })) as FeedRow[];
-      const ids = feedRows.map((r) => r.id);
+      const sorted = sortFeedRatings(feedRows, "recent").slice(0, 10);
+      const ids = sorted.map((r) => r.id);
       const [liked, counts] = await Promise.all([
         getUserLikedRatings(supabase, ids),
         getRatingsLikeCounts(supabase, ids),
       ]);
       if (cancelled) return;
-      setRows(feedRows);
+      setRows(sorted);
       setLikedSet(liked);
       setCountMap(counts);
     }
@@ -200,7 +202,7 @@ export function FollowingFeed() {
           id="following-feed-heading"
           className="font-title-sm text-title-sm font-bold text-on-surface"
         >
-          Trending from raters you&apos;ll want to follow
+          Recent from raters you&apos;ll want to follow
         </h2>
         <div className="flex flex-col gap-sm">
           {rows.map((r) => (

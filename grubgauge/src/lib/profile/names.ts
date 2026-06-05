@@ -7,6 +7,13 @@ export interface ProfileNameFields {
  * Friendly public name for UI copy. `display_name` is the human label; the
  * unique username only appears as the fallback so older profiles still render.
  */
+/** True when the user set a non-empty `display_name` (not username fallback). */
+export function hasLegitimateDisplayName(
+  profile: ProfileNameFields | null | undefined,
+): boolean {
+  return Boolean(profile?.display_name?.trim());
+}
+
 export function displayNameForProfile(
   profile: ProfileNameFields | null | undefined,
   fallback = "",

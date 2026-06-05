@@ -1,16 +1,14 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 /**
- * Trending ratings = the most-liked ratings from the last N days, capped.
- * Used by the FollowingFeed's guest variant ("Trending from raters you'll
- * want to follow") so a visitor lands on a populated feed before they have
- * any follow graph of their own.
+ * Recent community ratings from the last N days — candidate pool for the
+ * dashboard guest feed. Used by FollowingFeed so a visitor lands on a
+ * populated feed before they have any follow graph of their own.
  *
  * Implementation notes:
- *   - We pull a generous candidate window (200 recent ratings from the last
- *     N days), batch-fetch their like counts via the existing `rating_likes`
- *     join, sort client-side, and trim to `limit`. This avoids a custom RPC
- *     while staying within a single round-trip per resource.
+ *   - Pulls a generous candidate window (recent ratings from the last N
+ *     days). FollowingFeed re-sorts after rater hydration (named profiles
+ *     first, then newest) and trims to the visible limit.
  *   - Ratings with `user_id is null` (legacy guest posts) are excluded — the
  *     feed is meant to surface rater identities for the conversion hook,
  *     and an anonymous rating has no rater chip to follow.
@@ -43,8 +41,6 @@ export async function getTrendingRatings(
   const limit = options.limit ?? 10;
   const candidateLimit = Math.max(limit * 4, 50);
 
-  // Window: the last N days. The candidate set is filtered by recency
-  // first, then re-sorted by like count below.
   const since = new Date(Date.now() - sinceDays * 24 * 60 * 60 * 1000).toISOString();
 
   const { data: candidates, error: candErr } = await supabase
@@ -58,28 +54,5 @@ export async function getTrendingRatings(
     .limit(candidateLimit);
   if (candErr || !candidates || candidates.length === 0) return [];
 
-  const ids = candidates.map((r) => r.id as string);
-
-  const { data: likeRows, error: likeErr } = await supabase
-    .from("rating_likes")
-    .select("rating_id")
-    .in("rating_id", ids);
-  if (likeErr) {
-    // No likes data → fall back to recency ordering (already in order).
-    return (candidates as TrendingRatingRow[]).slice(0, limit);
-  }
-  const counts = new Map<string, number>();
-  for (const row of likeRows ?? []) {
-    const rid = row.rating_id as string;
-    counts.set(rid, (counts.get(rid) ?? 0) + 1);
-  }
-
-  const sorted = [...(candidates as TrendingRatingRow[])].sort((a, b) => {
-    const ca = counts.get(a.id) ?? 0;
-    const cb = counts.get(b.id) ?? 0;
-    if (cb !== ca) return cb - ca;
-    // Tie-break: newer wins. ISO strings compare lexically as timestamps.
-    return b.created_at.localeCompare(a.created_at);
-  });
-  return sorted.slice(0, limit);
+  return candidates as TrendingRatingRow[];
 }

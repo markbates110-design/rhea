@@ -12,6 +12,10 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { getRatingsLikeCounts, getUserLikedRatings } from "@/lib/ratings/likes";
 import { attachRaters, type RaterFields } from "@/lib/profile/raters";
+import {
+  pickNewestRatingPerPlace,
+  sortFeedRatings,
+} from "@/lib/ratings/feedSort";
 import { RatingCard } from "@/components/ratings/RatingCard";
 // FeedRatingCard wraps RatingCard with a Follow control in the like row
 // (member → live Follow / Following toggle, guest → FollowGateSheet,
@@ -32,6 +36,7 @@ interface Rating {
   venue_type: string;
   meal_type: string;
   visit_date: string;
+  created_at: string;
   weighted_score: number;
   notes: string | null;
   meal_photo_url: string | null;
@@ -69,7 +74,7 @@ export default function ExplorePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeFilter, setActiveFilter] = useState<VenueType>("all");
-  const [sort, setSort] = useState<SortOption>("score");
+  const [sort, setSort] = useState<SortOption>("recent");
   // Like state hydrated once per fetch and passed down to <LikeButton>.
   // Holding both as Sets/Maps means O(1) lookups per card render and zero
   // per-card round-trips. Empty values are safe defaults (no liked rows /
@@ -83,8 +88,8 @@ export default function ExplorePage() {
         const supabase = createClient();
         const { data, error } = await supabase
           .from("ratings")
-          .select("id, place_id, venue_name, venue_address, venue_type, meal_type, visit_date, weighted_score, notes, meal_photo_url, criteria_scores, user_id")
-          .order("weighted_score", { ascending: false });
+          .select("id, place_id, venue_name, venue_address, venue_type, meal_type, visit_date, created_at, weighted_score, notes, meal_photo_url, criteria_scores, user_id")
+          .order("created_at", { ascending: false });
         if (error) {
           console.error("Supabase error:", error.code, error.message);
           setError(error.message || "Could not load spots.");
@@ -116,29 +121,18 @@ export default function ExplorePage() {
     fetchRatings();
   }, []);
 
-  // Deduplicate by place_id — keep highest score per spot
-  const topSpots = useMemo(() => {
-    const map = new Map<string, Rating>();
-    for (const r of ratings) {
-      const existing = map.get(r.place_id);
-      if (!existing || r.weighted_score > existing.weighted_score) {
-        map.set(r.place_id, r);
-      } else if (
-        existing &&
-        Math.abs(r.weighted_score - existing.weighted_score) < 0.001 &&
-        r.meal_photo_url &&
-        !existing.meal_photo_url
-      ) {
-        map.set(r.place_id, r);
-      }
-    }
-    return Array.from(map.values());
-  }, [ratings]);
+  // Deduplicate by place_id — keep the newest rating per spot
+  const topSpots = useMemo(
+    () => pickNewestRatingPerPlace(ratings),
+    [ratings],
+  );
 
   const filtered = useMemo(() => {
-    const base = activeFilter === "all" ? topSpots : topSpots.filter((r) => r.venue_type === activeFilter);
-    if (sort === "score") return [...base].sort((a, b) => b.weighted_score - a.weighted_score);
-    return [...base].sort((a, b) => b.visit_date.localeCompare(a.visit_date));
+    const base =
+      activeFilter === "all"
+        ? topSpots
+        : topSpots.filter((r) => r.venue_type === activeFilter);
+    return sortFeedRatings(base, sort === "score" ? "score" : "recent");
   }, [topSpots, activeFilter, sort]);
 
   // ── Loading ──────────────────────────────────────────────────────────────
@@ -246,7 +240,7 @@ export default function ExplorePage() {
         {/* Sort toggle */}
         <div className="flex items-center gap-xs">
           <span className="font-label-sm text-label-sm text-on-surface-variant">Sort:</span>
-          {(["score", "recent"] as SortOption[]).map((s) => (
+          {(["recent", "score"] as SortOption[]).map((s) => (
             <button
               key={s}
               onClick={() => setSort(s)}
