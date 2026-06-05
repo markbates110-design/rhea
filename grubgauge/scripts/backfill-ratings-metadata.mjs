@@ -18,6 +18,8 @@
  *   3. Run from the grubgauge/ directory:
  *        node scripts/backfill-ratings-metadata.mjs
  *      Add `--dry-run` to log what would be updated without writing.
+ *      Add `--reinfer-cuisine` to re-fetch Google types and refresh cuisine
+ *      on every row (fixes mis-inferred snack tags like dessert on diners).
  *
  * Cost: Place Details Basic Data + Atmosphere Data per unique place_id,
  * roughly $22 per 1,000 unique places. At MVP scale this is well under
@@ -41,6 +43,7 @@ const GOOGLE_PLACES_API_KEY =
   process.env.GOOGLE_PLACES_API_KEY ?? process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
 const DRY_RUN = process.argv.includes("--dry-run");
+const REINFER_CUISINE = process.argv.includes("--reinfer-cuisine");
 
 function assertEnv() {
   const missing = [];
@@ -81,9 +84,6 @@ const TYPE_TO_CUISINE = [
   { types: ["pizza_restaurant"], cuisine: "pizza" },
   { types: ["hamburger_restaurant"], cuisine: "burger" },
   { types: ["breakfast_restaurant", "brunch_restaurant"], cuisine: "breakfast" },
-  { types: ["bakery", "donut_shop", "ice_cream_shop"], cuisine: "dessert" },
-  { types: ["coffee_shop", "cafe"], cuisine: "cafe" },
-  { types: ["bar", "pub", "wine_bar", "brewery"], cuisine: "bar" },
   {
     types: [
       "american_restaurant",
@@ -95,6 +95,9 @@ const TYPE_TO_CUISINE = [
     ],
     cuisine: "american",
   },
+  { types: ["bakery", "donut_shop", "ice_cream_shop"], cuisine: "dessert" },
+  { types: ["coffee_shop", "cafe"], cuisine: "cafe" },
+  { types: ["bar", "pub", "wine_bar", "brewery"], cuisine: "bar" },
 ];
 
 function googleTypesToCuisine(types) {
@@ -158,23 +161,33 @@ async function fetchPlaceDetails(placeId) {
 
 async function main() {
   assertEnv();
-  console.log(`Backfill starting${DRY_RUN ? " (dry-run)" : ""}.`);
+  const modeLabel = REINFER_CUISINE ? "reinfer-cuisine" : "null-cuisine";
+  console.log(
+    `Backfill starting (${modeLabel})${DRY_RUN ? " (dry-run)" : ""}.`,
+  );
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false },
   });
 
-  const { data: rows, error: readErr } = await supabase
+  let query = supabase
     .from("ratings")
-    .select("id, place_id")
-    .is("cuisine", null)
+    .select("id, place_id, cuisine")
     .not("place_id", "is", null);
+  if (!REINFER_CUISINE) {
+    query = query.is("cuisine", null);
+  }
+  const { data: rows, error: readErr } = await query;
   if (readErr) {
     console.error("Read error:", readErr);
     process.exit(1);
   }
   if (!rows || rows.length === 0) {
-    console.log("Nothing to backfill — all rows already have cuisine set.");
+    console.log(
+      REINFER_CUISINE
+        ? "Nothing to reinfer — no ratings with place_id."
+        : "Nothing to backfill — all rows already have cuisine set.",
+    );
     return;
   }
 
@@ -209,8 +222,12 @@ async function main() {
       };
 
       if (DRY_RUN) {
+        const prev = rows
+          .filter((r) => r.place_id === placeId)
+          .map((r) => r.cuisine)
+          .filter((v, i, a) => a.indexOf(v) === i);
         console.log(
-          `  [dry-run] ${placeId} (${ratingIds.length} row${ratingIds.length === 1 ? "" : "s"}) → ${JSON.stringify(patch)}`,
+          `  [dry-run] ${placeId} (${ratingIds.length} row${ratingIds.length === 1 ? "" : "s"}) was [${prev.join(", ")}] → ${JSON.stringify(patch)}`,
         );
       } else {
         const { error: updErr } = await supabase

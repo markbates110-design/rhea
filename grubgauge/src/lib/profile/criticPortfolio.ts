@@ -91,6 +91,44 @@ const LIKES_NOTICED = 5;
 const CUISINE_SPECIALIST_MIN = 10;
 const SCORE_CLAIM_MIN_REVIEWS = 10;
 
+/** Snack/drink buckets — need a stronger share before we claim them publicly. */
+const SNACK_TIER_CUISINES = new Set<Cuisine>(["dessert", "cafe", "bar"]);
+
+function cuisineMeetsPortfolioThreshold(
+  cuisine: Cuisine,
+  count: number,
+  ratingCount: number,
+): boolean {
+  if (cuisine === "other" || count <= 0) return false;
+  const share = count / ratingCount;
+  if (SNACK_TIER_CUISINES.has(cuisine)) {
+    return count >= 2 && share >= 0.5;
+  }
+  if (ratingCount <= 2) return count >= 1;
+  return count >= 2 || share >= 0.5;
+}
+
+function rankedCuisinesForPortfolio(
+  cuisineCounts: Map<Cuisine, number>,
+): Array<{ cuisine: Cuisine; count: number }> {
+  return [...cuisineCounts.entries()]
+    .filter(([cuisine]) => cuisine !== "other")
+    .sort((a, b) => b[1] - a[1])
+    .map(([cuisine, count]) => ({ cuisine, count }));
+}
+
+function pickRepresentativeCuisine(
+  cuisineCounts: Map<Cuisine, number>,
+  ratingCount: number,
+): { cuisine: Cuisine; count: number } | null {
+  for (const row of rankedCuisinesForPortfolio(cuisineCounts)) {
+    if (cuisineMeetsPortfolioThreshold(row.cuisine, row.count, ratingCount)) {
+      return row;
+    }
+  }
+  return null;
+}
+
 function buildTagline(
   ratingCount: number,
   avgScore: number,
@@ -186,20 +224,20 @@ export function buildCriticPortfolio(
     }
   }
 
-  const specialties: CriticSpecialty[] = [...cuisineCounts.entries()]
-    .filter(([cuisine]) => cuisine !== "other")
-    .sort((a, b) => b[1] - a[1])
+  const specialties: CriticSpecialty[] = rankedCuisinesForPortfolio(cuisineCounts)
+    .filter((row) =>
+      cuisineMeetsPortfolioThreshold(row.cuisine, row.count, ratings.length),
+    )
     .slice(0, 4)
-    .map(([cuisine, count]) => ({
-      cuisine,
-      label: cuisineLabel(cuisine),
-      count,
+    .map((row) => ({
+      cuisine: row.cuisine,
+      label: cuisineLabel(row.cuisine),
+      count: row.count,
     }));
 
-  const topCuisine = specialties[0]?.cuisine ?? null;
-  const topCuisineCount = topCuisine
-    ? (cuisineCounts.get(topCuisine) ?? 0)
-    : 0;
+  const representative = pickRepresentativeCuisine(cuisineCounts, ratings.length);
+  const topCuisine = representative?.cuisine ?? null;
+  const topCuisineCount = representative?.count ?? 0;
   const topVenueType =
     [...venueCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
   const topCity =

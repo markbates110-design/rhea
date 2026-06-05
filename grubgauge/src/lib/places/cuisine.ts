@@ -73,9 +73,6 @@ const TYPE_TO_CUISINE: ReadonlyArray<{
   { types: ["pizza_restaurant"], cuisine: "pizza" },
   { types: ["hamburger_restaurant"], cuisine: "burger" },
   { types: ["breakfast_restaurant", "brunch_restaurant"], cuisine: "breakfast" },
-  { types: ["bakery", "donut_shop", "ice_cream_shop"], cuisine: "dessert" },
-  { types: ["coffee_shop", "cafe"], cuisine: "cafe" },
-  { types: ["bar", "pub", "wine_bar", "brewery"], cuisine: "bar" },
   {
     types: [
       "american_restaurant",
@@ -87,6 +84,11 @@ const TYPE_TO_CUISINE: ReadonlyArray<{
     ],
     cuisine: "american",
   },
+  // Snack / drink formats last — Google often adds `bakery` or `cafe` as a
+  // secondary type on sit-down restaurants; those must not beat a meal cuisine.
+  { types: ["bakery", "donut_shop", "ice_cream_shop"], cuisine: "dessert" },
+  { types: ["coffee_shop", "cafe"], cuisine: "cafe" },
+  { types: ["bar", "pub", "wine_bar", "brewery"], cuisine: "bar" },
 ];
 
 /**

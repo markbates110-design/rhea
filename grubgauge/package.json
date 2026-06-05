@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "node --use-system-ca ./node_modules/next/dist/bin/next start",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "backfill:cuisine": "node --env-file=.env.local scripts/backfill-ratings-metadata.mjs --reinfer-cuisine",
+    "backfill:cuisine:dry": "node --env-file=.env.local scripts/backfill-ratings-metadata.mjs --reinfer-cuisine --dry-run"
   },
   "dependencies": {
     "@googlemaps/js-api-loader": "^2.0.2",
