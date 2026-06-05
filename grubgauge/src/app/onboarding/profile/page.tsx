@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth/useAuth";
 import { useProfile } from "@/lib/profile/useProfile";
 import { updateProfile, upsertProfile } from "@/lib/profile/profile";
 import { displayNameForProfile, initialForName } from "@/lib/profile/names";
+import { clearDisplayNameNudgeSnooze } from "@/lib/profile/displayNameNudge";
 import { applyPendingFollow } from "@/lib/follows/applyPending";
 import { notifyCoreActionCompleted } from "@/lib/pwa/installPrompt";
 import { PageShell } from "@/components/layout/PageShell";
@@ -77,6 +78,15 @@ export default function OnboardingProfilePage() {
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [authLoading, hydrated, user, profile, profileLoading]);
 
+  useEffect(() => {
+    if (!hydrated || typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("focus") !== "display-name") return;
+    window.requestAnimationFrame(() => {
+      document.getElementById("display-name")?.focus();
+    });
+  }, [hydrated]);
+
   function togglePref(id: string) {
     setSelected((prev) =>
       prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
@@ -119,6 +129,7 @@ export default function OnboardingProfilePage() {
             : updateProfile(supabase, profilePatch),
           supabase.auth.updateUser({ data: { food_prefs: selected } }),
         ]);
+        if (trimmedDisplayName) clearDisplayNameNudgeSnooze();
         // Keep the local mirror aligned with the canonical write — covers
         // the edge where the avatar URL changed but the user hit Skip
         // without triggering an AvatarUploader update flow.
@@ -160,7 +171,7 @@ export default function OnboardingProfilePage() {
           You&apos;re in!
         </h1>
         <p className="font-body-md text-body-md text-on-surface-variant">
-          Quick setup — takes 10 seconds. All optional.
+          Quick setup — display name recommended.
         </p>
       </div>
 
@@ -207,7 +218,8 @@ export default function OnboardingProfilePage() {
             className="w-full rounded-xl border border-outline-variant bg-surface-container-low px-md py-[13px] font-body-md text-body-md text-on-surface placeholder-on-surface-variant/50 outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
           />
           <p className="font-label-sm text-label-sm text-on-surface-variant">
-            Shown on your profile, ratings, and follow lists. You can change it anytime.
+            Helps your ratings stand out in Explore and follower feeds. You can
+            change it anytime.
           </p>
         </div>
       )}

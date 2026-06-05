@@ -23,6 +23,7 @@ import { RatingCard } from "@/components/ratings/RatingCard";
 // Follow control closes the "discovered a great rater" loop without
 // forcing a detour through /u/[username].
 import { FeedRatingCard } from "@/components/follows/FeedRatingCard";
+import { DisplayNameNudgeCard } from "@/components/profile/DisplayNameNudgeCard";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -213,6 +214,8 @@ export default function ExplorePage() {
             Rate
           </Link>
         </div>
+
+        <DisplayNameNudgeCard variant="compact" />
 
         {/* Filter pills */}
         <div className="flex gap-xs overflow-x-auto pb-xs no-scrollbar">

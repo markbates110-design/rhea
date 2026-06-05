@@ -6,6 +6,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { PageShell } from "@/components/layout/PageShell";
 import { AvatarUploader } from "@/components/profile/AvatarUploader";
+import { DisplayNameNudgeCard } from "@/components/profile/DisplayNameNudgeCard";
 import { FollowStatRow } from "@/components/follows/FollowStatRow";
 import { FounderBadge } from "@/components/founder/FounderBadge";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
@@ -190,6 +191,8 @@ export default function ProfilePage() {
             </p>
           )}
         </div>
+
+        <DisplayNameNudgeCard dismissible={false} variant="compact" />
 
         <div className="flex flex-col gap-xs">
           <h1 className="font-headline-md text-headline-md font-semibold text-on-surface">
