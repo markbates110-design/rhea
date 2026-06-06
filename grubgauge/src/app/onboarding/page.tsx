@@ -8,6 +8,7 @@ import { PageShell } from "@/components/layout/PageShell";
 import { CenteredProse } from "@/components/layout/CenteredProse";
 import { FounderSlotCounter } from "@/components/founder/FounderSlotCounter";
 import { UsernameClaimField } from "@/components/onboarding/UsernameClaimField";
+import { BloodSugarFeaturePromo } from "@/components/profile/BloodSugarFeaturePromo";
 import { getUsername, setOnboarded, setUsername } from "@/lib/identity/deviceId";
 
 const VALUE_PROPS = [
@@ -77,12 +78,16 @@ export default function OnboardingWelcomePage() {
           </p>
         </CenteredProse>
 
+        <div className="mt-lg w-full">
+          <BloodSugarFeaturePromo variant="welcome" />
+        </div>
+
         {/* Founder hook — primary conversion lever for v1 launch. Live
             counter ticks down as slots fill, so the urgency is real
             rather than marketing-flavour. Sits above value props so a
             first-time visitor sees the scarcity message before any
             generic product pitch. */}
-        <CenteredProse className="mt-lg gap-xs rounded-2xl border border-tertiary/40 bg-tertiary-container/60 px-md py-md">
+        <CenteredProse className="mt-md gap-xs rounded-2xl border border-tertiary/40 bg-tertiary-container/60 px-md py-md">
           <p className="font-title-sm text-title-sm font-bold text-on-tertiary-container">
             Earn your permanent spot.
           </p>
@@ -93,36 +98,6 @@ export default function OnboardingWelcomePage() {
             Sign up and rate 3 spots on 3 different days — claim a numbered
             Founding Member badge.
           </p>
-        </CenteredProse>
-
-        {/* Blood sugar — distinct product hook; sits with founder urgency but
-            uses primary tones so it reads as a capability, not scarcity. */}
-        <CenteredProse className="mt-md gap-xs rounded-2xl border border-primary/30 bg-primary/5 px-md py-md">
-          <div className="flex items-start gap-sm">
-            <span
-              className="material-symbols-outlined mt-[2px] shrink-0 text-[22px] text-primary"
-              style={{ fontVariationSettings: "'FILL' 1" }}
-              aria-hidden
-            >
-              monitor_heart
-            </span>
-            <div className="min-w-0 text-left">
-              <p className="font-title-sm text-title-sm font-bold text-on-surface">
-                Blood sugar tracking, kept private
-              </p>
-              <p className="mt-xs font-body-md text-body-md text-on-surface-variant text-pretty">
-                Optionally log how a meal affected you — Low, Medium, or High —
-                and add personal notes. Only you see them in your history; never
-                on your public profile or the feed.
-              </p>
-              <p className="mt-xs inline-flex items-center gap-xs font-label-sm text-label-sm text-on-surface-variant">
-                <span className="material-symbols-outlined text-[14px]" aria-hidden>
-                  lock
-                </span>
-                Personal observation only — not medical advice.
-              </p>
-            </div>
-          </div>
         </CenteredProse>
 
         {/* Value props */}
