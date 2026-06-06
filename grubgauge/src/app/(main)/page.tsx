@@ -11,7 +11,7 @@ import { SuggestedUsersRow } from "@/components/follows/SuggestedUsersRow";
 import { FollowingFeed } from "@/components/follows/FollowingFeed";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import { DisplayNameNudgeCard } from "@/components/profile/DisplayNameNudgeCard";
-import { getDeviceId, getUsername, isOnboarded } from "@/lib/identity/deviceId";
+import { getDeviceId, isOnboarded } from "@/lib/identity/deviceId";
 import { useAuth } from "@/lib/auth/useAuth";
 import { useProfile } from "@/lib/profile/useProfile";
 import { displayNameForProfile } from "@/lib/profile/names";
@@ -125,8 +125,7 @@ export default function DashboardPage() {
 
   const greetingTitle = useMemo(() => {
     if (!user) {
-      const guest = getUsername().trim();
-      return guest ? `Welcome, ${guest}` : "Welcome";
+      return "Welcome, Guest";
     }
     const emailLocal = (user.email ?? "").split("@")[0];
     const displayName = displayNameForProfile(profile, emailLocal || "there");
