@@ -31,6 +31,7 @@ import { isAcceptableMealPhoto, uploadMealPhoto } from "@/lib/storage/mealPhoto"
 import { AutoGrowTextarea } from "@/components/forms/AutoGrowTextarea";
 import { VenueTypePicker } from "@/components/rate/VenueTypePicker";
 import { BloodSugarImpactPicker } from "@/components/ratings/BloodSugarImpactPicker";
+import { MealPhotoPickButtons } from "@/components/ratings/MealPhotoPickButtons";
 import {
   canTrackBloodSugarImpact,
   getLastBloodSugarHealthForPlace,
@@ -997,27 +998,14 @@ function RatePageInner() {
               <span className="font-body-md text-body-md font-normal text-on-surface-variant">(optional)</span>
             </h2>
             <p className="font-body-md text-body-md text-on-surface-variant">
-              Add a photo from your gallery or camera — shown in your history and explore.
+              Take a new photo or pick one from your gallery — shown in your history and explore.
             </p>
-            <input
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              className="hidden"
-              id="meal-photo-input"
-              disabled={submitting}
-              onChange={(e) => {
-                handleMealPhotoPick(e.target.files);
-                e.target.value = "";
-              }}
-            />
             {!mealPhotoPreviewUrl ? (
-              <label
-                htmlFor="meal-photo-input"
-                className={`inline-flex w-fit cursor-pointer items-center gap-xs rounded-xl border border-outline-variant bg-surface-container px-md py-xs font-label-sm text-label-sm text-on-surface transition-colors hover:border-primary hover:bg-surface-container-high ${submitting ? "pointer-events-none opacity-40" : ""}`}
-              >
-                <span className="material-symbols-outlined text-[18px]">add_photo_alternate</span>
-                Choose photo
-              </label>
+              <MealPhotoPickButtons
+                idPrefix="meal-photo"
+                disabled={submitting}
+                onPick={handleMealPhotoPick}
+              />
             ) : (
               <div className="flex flex-col gap-sm">
                 <div className="relative overflow-hidden rounded-xl border border-outline-variant bg-surface-container">
@@ -1028,14 +1016,22 @@ function RatePageInner() {
                     className="aspect-[4/3] w-full object-cover max-h-[220px]"
                   />
                 </div>
-                <button
-                  type="button"
-                  onClick={() => clearMealPhoto()}
-                  disabled={submitting}
-                  className="w-fit rounded-lg border border-outline-variant px-sm py-xs font-label-sm text-label-sm text-on-surface-variant hover:bg-surface-container transition-colors disabled:opacity-40"
-                >
-                  Remove photo
-                </button>
+                <div className="flex flex-wrap items-center gap-xs">
+                  <MealPhotoPickButtons
+                    idPrefix="meal-photo-replace"
+                    disabled={submitting}
+                    onPick={handleMealPhotoPick}
+                    variant="replace"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => clearMealPhoto()}
+                    disabled={submitting}
+                    className="rounded-lg border border-outline-variant px-sm py-xs font-label-sm text-label-sm text-on-surface-variant hover:bg-surface-container transition-colors disabled:opacity-40"
+                  >
+                    Remove photo
+                  </button>
+                </div>
               </div>
             )}
           </section>

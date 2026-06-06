@@ -7,6 +7,7 @@ import { getDeviceId } from "@/lib/identity/deviceId";
 import { useAuth } from "@/lib/auth/useAuth";
 import { useProfile } from "@/lib/profile/useProfile";
 import { BloodSugarImpactPicker } from "@/components/ratings/BloodSugarImpactPicker";
+import { MealPhotoPickButtons } from "@/components/ratings/MealPhotoPickButtons";
 import {
   canTrackBloodSugarImpact,
   hasBloodSugarHealthContent,
@@ -483,17 +484,6 @@ function RatingEditSheetInner({ rating, onClose, onSaved, onDeleted }: InnerProp
                 </span>
                 Meal photo <span className="font-body-md text-body-md font-normal text-on-surface-variant">(optional)</span>
               </h3>
-              <input
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                className="hidden"
-                id={`edit-meal-photo-${rating.id}`}
-                disabled={saving}
-                onChange={(e) => {
-                  handleMealPhotoPick(e.target.files);
-                  e.target.value = "";
-                }}
-              />
               {displayPhoto ? (
                 <div className="flex flex-col gap-sm">
                   <div className="overflow-hidden rounded-xl border border-outline-variant bg-surface-container">
@@ -504,13 +494,13 @@ function RatingEditSheetInner({ rating, onClose, onSaved, onDeleted }: InnerProp
                       className="aspect-[4/3] max-h-[200px] w-full object-cover"
                     />
                   </div>
-                  <div className="flex flex-wrap gap-xs">
-                    <label
-                      htmlFor={`edit-meal-photo-${rating.id}`}
-                      className={`inline-flex cursor-pointer items-center gap-xs rounded-lg border border-outline-variant px-sm py-xs font-label-sm text-label-sm text-on-surface hover:bg-surface-container ${saving ? "pointer-events-none opacity-40" : ""}`}
-                    >
-                      Replace photo
-                    </label>
+                  <div className="flex flex-wrap items-center gap-xs">
+                    <MealPhotoPickButtons
+                      idPrefix={`edit-meal-photo-${rating.id}`}
+                      disabled={saving || deleting}
+                      onPick={handleMealPhotoPick}
+                      variant="replace"
+                    />
                     <button
                       type="button"
                       onClick={() => {
@@ -518,7 +508,7 @@ function RatingEditSheetInner({ rating, onClose, onSaved, onDeleted }: InnerProp
                         setPhotoCleared(true);
                         setError("");
                       }}
-                      disabled={saving}
+                      disabled={saving || deleting}
                       className="rounded-lg border border-outline-variant px-sm py-xs font-label-sm text-label-sm text-on-surface-variant hover:bg-surface-container disabled:opacity-40"
                     >
                       Remove photo
@@ -526,13 +516,11 @@ function RatingEditSheetInner({ rating, onClose, onSaved, onDeleted }: InnerProp
                   </div>
                 </div>
               ) : (
-                <label
-                  htmlFor={`edit-meal-photo-${rating.id}`}
-                  className={`inline-flex w-fit cursor-pointer items-center gap-xs rounded-xl border border-outline-variant bg-surface-container px-md py-xs font-label-sm text-label-sm text-on-surface transition-colors hover:border-primary hover:bg-surface-container-high ${saving ? "pointer-events-none opacity-40" : ""}`}
-                >
-                  <span className="material-symbols-outlined text-[18px]">add_photo_alternate</span>
-                  Add photo
-                </label>
+                <MealPhotoPickButtons
+                  idPrefix={`edit-meal-photo-${rating.id}`}
+                  disabled={saving || deleting}
+                  onPick={handleMealPhotoPick}
+                />
               )}
             </section>
 
