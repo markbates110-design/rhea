@@ -8,7 +8,6 @@ import { PageShell } from "@/components/layout/PageShell";
 import { CenteredProse } from "@/components/layout/CenteredProse";
 import { FounderSlotCounter } from "@/components/founder/FounderSlotCounter";
 import { UsernameClaimField } from "@/components/onboarding/UsernameClaimField";
-import { BloodSugarFeaturePromo } from "@/components/profile/BloodSugarFeaturePromo";
 import { getUsername, setOnboarded, setUsername } from "@/lib/identity/deviceId";
 
 const VALUE_PROPS = [
@@ -26,6 +25,11 @@ const VALUE_PROPS = [
     icon: "history",
     label: "Your food history",
     desc: "Every meal rated and remembered, all in one place.",
+  },
+  {
+    icon: "monitor_heart",
+    label: "Blood sugar, kept private",
+    desc: "Optionally log how a meal affected you and add personal notes — only you see them in your history.",
   },
 ];
 
@@ -72,22 +76,17 @@ export default function OnboardingWelcomePage() {
             Unleash your inner food critic.
           </p>
           <p className="font-body-md text-body-md text-on-surface-variant text-pretty">
-            Track the meals that matter, log private blood sugar notes when you
-            want to, build a following, and earn one of the first 100 Founding
-            Member badges.
+            Track the meals that matter, build a following, and earn one of the
+            first 100 Founding Member badges.
           </p>
         </CenteredProse>
-
-        <div className="mt-lg w-full">
-          <BloodSugarFeaturePromo variant="welcome" />
-        </div>
 
         {/* Founder hook — primary conversion lever for v1 launch. Live
             counter ticks down as slots fill, so the urgency is real
             rather than marketing-flavour. Sits above value props so a
             first-time visitor sees the scarcity message before any
             generic product pitch. */}
-        <CenteredProse className="mt-md gap-xs rounded-2xl border border-tertiary/40 bg-tertiary-container/60 px-md py-md">
+        <CenteredProse className="mt-lg gap-xs rounded-2xl border border-tertiary/40 bg-tertiary-container/60 px-md py-md">
           <p className="font-title-sm text-title-sm font-bold text-on-tertiary-container">
             Earn your permanent spot.
           </p>

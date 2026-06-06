@@ -11,7 +11,6 @@ import { SuggestedUsersRow } from "@/components/follows/SuggestedUsersRow";
 import { FollowingFeed } from "@/components/follows/FollowingFeed";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import { DisplayNameNudgeCard } from "@/components/profile/DisplayNameNudgeCard";
-import { BloodSugarFeaturePromo } from "@/components/profile/BloodSugarFeaturePromo";
 import { getDeviceId, getUsername, isOnboarded } from "@/lib/identity/deviceId";
 import { useAuth } from "@/lib/auth/useAuth";
 import { useProfile } from "@/lib/profile/useProfile";
@@ -165,7 +164,6 @@ export default function DashboardPage() {
               slots remain. Self-hides for guests / founders / closed program
               so this slot collapses cleanly when not applicable. */}
           <DisplayNameNudgeCard />
-          <BloodSugarFeaturePromo variant="feed" />
           <FounderProgressCard rateHref={rateHref} />
           {/* Community-rated spots with photos near the viewer. Powered by
               Supabase ratings only — zero Google API cost. Self-hides when
@@ -228,8 +226,6 @@ export default function DashboardPage() {
         </div>
 
         <DisplayNameNudgeCard />
-
-        <BloodSugarFeaturePromo variant="feed" />
 
         {/* Founder hook — same self-hiding behaviour as in the empty
             branch. For a rated-but-not-yet-FM user this nudges them to
