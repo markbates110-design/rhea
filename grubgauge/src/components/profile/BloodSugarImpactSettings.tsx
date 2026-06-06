@@ -109,13 +109,14 @@ export function BloodSugarImpactSettings({ profile }: BloodSugarImpactSettingsPr
           aria-checked={enabled}
           disabled={saving}
           onClick={handleToggleClick}
-          className={`relative h-7 w-12 shrink-0 rounded-full transition-colors disabled:opacity-50 ${
+          className={`relative inline-flex h-7 w-12 shrink-0 overflow-hidden rounded-full transition-colors disabled:opacity-50 ${
             enabled ? "bg-primary" : "bg-outline-variant"
           }`}
         >
           <span
-            className={`absolute top-0.5 h-6 w-6 rounded-full bg-surface shadow-sm transition-transform ${
-              enabled ? "translate-x-5" : "translate-x-0.5"
+            aria-hidden
+            className={`pointer-events-none absolute left-0.5 top-0.5 block h-6 w-6 rounded-full bg-surface shadow-sm transition-transform duration-200 ease-in-out ${
+              enabled ? "translate-x-5" : "translate-x-0"
             }`}
           />
         </button>
