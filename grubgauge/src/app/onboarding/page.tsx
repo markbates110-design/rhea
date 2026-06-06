@@ -26,11 +26,6 @@ const VALUE_PROPS = [
     label: "Your food history",
     desc: "Every meal rated and remembered, all in one place.",
   },
-  {
-    icon: "monitor_heart",
-    label: "Blood sugar, kept private",
-    desc: "Optionally log how a meal affected you and add personal notes — only you see them in your history.",
-  },
 ];
 
 export default function OnboardingWelcomePage() {
@@ -76,8 +71,9 @@ export default function OnboardingWelcomePage() {
             Unleash your inner food critic.
           </p>
           <p className="font-body-md text-body-md text-on-surface-variant text-pretty">
-            Track the meals that matter, build a following, and earn one of the
-            first 100 Founding Member badges.
+            Track the meals that matter, log private blood sugar notes when you
+            want to, build a following, and earn one of the first 100 Founding
+            Member badges.
           </p>
         </CenteredProse>
 
@@ -94,8 +90,39 @@ export default function OnboardingWelcomePage() {
             <FounderSlotCounter variant="headline" />
           </CenteredProse.Item>
           <p className="font-label-sm text-label-sm text-on-tertiary-container/80">
-            Sign up and rate 3 spots — claim a numbered Founding Member badge.
+            Sign up and rate 3 spots on 3 different days — claim a numbered
+            Founding Member badge.
           </p>
+        </CenteredProse>
+
+        {/* Blood sugar — distinct product hook; sits with founder urgency but
+            uses primary tones so it reads as a capability, not scarcity. */}
+        <CenteredProse className="mt-md gap-xs rounded-2xl border border-primary/30 bg-primary/5 px-md py-md">
+          <div className="flex items-start gap-sm">
+            <span
+              className="material-symbols-outlined mt-[2px] shrink-0 text-[22px] text-primary"
+              style={{ fontVariationSettings: "'FILL' 1" }}
+              aria-hidden
+            >
+              monitor_heart
+            </span>
+            <div className="min-w-0 text-left">
+              <p className="font-title-sm text-title-sm font-bold text-on-surface">
+                Blood sugar tracking, kept private
+              </p>
+              <p className="mt-xs font-body-md text-body-md text-on-surface-variant text-pretty">
+                Optionally log how a meal affected you — Low, Medium, or High —
+                and add personal notes. Only you see them in your history; never
+                on your public profile or the feed.
+              </p>
+              <p className="mt-xs inline-flex items-center gap-xs font-label-sm text-label-sm text-on-surface-variant">
+                <span className="material-symbols-outlined text-[14px]" aria-hidden>
+                  lock
+                </span>
+                Personal observation only — not medical advice.
+              </p>
+            </div>
+          </div>
         </CenteredProse>
 
         {/* Value props */}
