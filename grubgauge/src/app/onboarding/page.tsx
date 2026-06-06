@@ -26,6 +26,11 @@ const VALUE_PROPS = [
     label: "Your food history",
     desc: "Every meal rated and remembered, all in one place.",
   },
+  {
+    icon: "monitor_heart",
+    label: "Blood sugar, kept private",
+    desc: "Optionally log how a meal affected you and add personal notes — only you see them in your history.",
+  },
 ];
 
 export default function OnboardingWelcomePage() {
