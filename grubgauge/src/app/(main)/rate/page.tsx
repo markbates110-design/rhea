@@ -27,7 +27,7 @@ import {
 import { inferVenueType } from "@/lib/places/venueType";
 import { googleTypesToCuisine, type Cuisine } from "@/lib/places/cuisine";
 import { extractAddressComponents, type AddressComponentLike } from "@/lib/places/address";
-import { uploadMealPhoto } from "@/lib/storage/mealPhoto";
+import { isAcceptableMealPhoto, uploadMealPhoto } from "@/lib/storage/mealPhoto";
 import { AutoGrowTextarea } from "@/components/forms/AutoGrowTextarea";
 import { VenueTypePicker } from "@/components/rate/VenueTypePicker";
 import { BloodSugarImpactPicker } from "@/components/ratings/BloodSugarImpactPicker";
@@ -551,12 +551,8 @@ function RatePageInner() {
   function handleMealPhotoPick(fileList: FileList | null) {
     const file = fileList?.[0];
     if (!file) return;
-    if (!/^image\/(jpeg|png|webp)$/.test(file.type)) {
-      setError("Photo must be JPEG, PNG, or WebP.");
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      setError("Photo must be 5 MB or smaller.");
+    if (!isAcceptableMealPhoto(file)) {
+      setError("Photo must be JPEG, PNG, or WebP and 5 MB or smaller.");
       return;
     }
     setError("");
@@ -591,7 +587,11 @@ function RatePageInner() {
           mealPhotoUrl = await uploadMealPhoto(supabase, mealPhotoFile, deviceId);
         } catch (uploadErr) {
           console.error(uploadErr);
-          setError("Photo upload failed. Remove the photo or try a smaller image.");
+          const detail =
+            uploadErr instanceof Error && uploadErr.message
+              ? uploadErr.message
+              : "Remove the photo or try a smaller image.";
+          setError(`Photo upload failed: ${detail}`);
           return;
         }
       }
@@ -997,12 +997,11 @@ function RatePageInner() {
               <span className="font-body-md text-body-md font-normal text-on-surface-variant">(optional)</span>
             </h2>
             <p className="font-body-md text-body-md text-on-surface-variant">
-              Add a snapshot of what you ate — shown in your history and explore.
+              Add a photo from your gallery or camera — shown in your history and explore.
             </p>
             <input
               type="file"
               accept="image/jpeg,image/png,image/webp"
-              capture="environment"
               className="hidden"
               id="meal-photo-input"
               disabled={submitting}

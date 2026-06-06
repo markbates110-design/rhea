@@ -23,7 +23,7 @@ import {
   normalizeVenueType,
   type VenueType,
 } from "@/lib/ratings/scoring";
-import { uploadMealPhoto } from "@/lib/storage/mealPhoto";
+import { isAcceptableMealPhoto, uploadMealPhoto } from "@/lib/storage/mealPhoto";
 import { AutoGrowTextarea } from "@/components/forms/AutoGrowTextarea";
 import { DeleteRatingConfirm } from "@/components/history/DeleteRatingConfirm";
 import { VenueTypePicker } from "@/components/rate/VenueTypePicker";
@@ -155,12 +155,8 @@ function RatingEditSheetInner({ rating, onClose, onSaved, onDeleted }: InnerProp
   function handleMealPhotoPick(fileList: FileList | null) {
     const file = fileList?.[0];
     if (!file) return;
-    if (!/^image\/(jpeg|png|webp)$/.test(file.type)) {
-      setError("Photo must be JPEG, PNG, or WebP.");
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      setError("Photo must be 5 MB or smaller.");
+    if (!isAcceptableMealPhoto(file)) {
+      setError("Photo must be JPEG, PNG, or WebP and 5 MB or smaller.");
       return;
     }
     setError("");
@@ -197,7 +193,11 @@ function RatingEditSheetInner({ rating, onClose, onSaved, onDeleted }: InnerProp
           mealPhotoUrl = await uploadMealPhoto(supabase, mealPhotoFile, deviceId);
         } catch (uploadErr) {
           console.error(uploadErr);
-          setError("Photo upload failed. Remove the photo or try a smaller image.");
+          const detail =
+            uploadErr instanceof Error && uploadErr.message
+              ? uploadErr.message
+              : "Remove the photo or try a smaller image.";
+          setError(`Photo upload failed: ${detail}`);
           setSaving(false);
           return;
         }
@@ -486,7 +486,6 @@ function RatingEditSheetInner({ rating, onClose, onSaved, onDeleted }: InnerProp
               <input
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
-                capture="environment"
                 className="hidden"
                 id={`edit-meal-photo-${rating.id}`}
                 disabled={saving}
