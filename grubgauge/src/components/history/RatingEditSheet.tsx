@@ -5,6 +5,15 @@ import { createPortal } from "react-dom";
 import { createClient } from "@/lib/supabase/client";
 import { getDeviceId } from "@/lib/identity/deviceId";
 import { useAuth } from "@/lib/auth/useAuth";
+import { useProfile } from "@/lib/profile/useProfile";
+import { BloodSugarImpactPicker } from "@/components/ratings/BloodSugarImpactPicker";
+import {
+  canTrackBloodSugarImpact,
+  hasBloodSugarHealthContent,
+  upsertBloodSugarHealth,
+  type BloodSugarHealthRecord,
+  type BloodSugarImpact,
+} from "@/lib/ratings/bloodSugarImpact";
 import { applyRatingsOwnerScope } from "@/lib/ratings/scope";
 import {
   DEFAULT_SCORE,
@@ -32,6 +41,7 @@ export interface EditableRatingRow {
   meal_photo_url: string | null;
   criteria_scores: Record<string, number> | null;
   created_at: string;
+  bloodSugarHealth?: BloodSugarHealthRecord | null;
 }
 
 type InnerProps = {
@@ -74,6 +84,8 @@ function RatingEditSheetInner({ rating, onClose, onSaved, onDeleted }: InnerProp
   // edit/delete from succeeding cross-account or failing for a signed-in
   // user who rated on a different device.
   const { user } = useAuth();
+  const { profile } = useProfile();
+  const trackBloodSugar = canTrackBloodSugarImpact(profile);
   // venueType is editable here — if the original /rate auto-inference was
   // wrong, the user can correct it post-hoc without losing visit date,
   // photo, notes, etc. Criteria + meta derive from the live state.
@@ -90,6 +102,12 @@ function RatingEditSheetInner({ rating, onClose, onSaved, onDeleted }: InnerProp
   const [mealPhotoFile, setMealPhotoFile] = useState<File | null>(null);
   const [mealPhotoPreviewUrl, setMealPhotoPreviewUrl] = useState<string | null>(null);
   const [photoCleared, setPhotoCleared] = useState(false);
+  const [bloodSugarImpact, setBloodSugarImpact] = useState<BloodSugarImpact | null>(
+    rating.bloodSugarHealth?.impact ?? null,
+  );
+  const [bloodSugarNotes, setBloodSugarNotes] = useState(
+    rating.bloodSugarHealth?.notes ?? "",
+  );
 
   /**
    * Re-derive criteria scores when the venue type changes. We reuse the
@@ -216,9 +234,32 @@ function RatingEditSheetInner({ rating, onClose, onSaved, onDeleted }: InnerProp
         return;
       }
 
+      const bloodSugarHealth = {
+        impact: bloodSugarImpact,
+        notes: bloodSugarNotes,
+      };
+      if (trackBloodSugar && user?.id) {
+        const bgResult = await upsertBloodSugarHealth(
+          supabase,
+          rating.id,
+          user.id,
+          bloodSugarHealth,
+        );
+        if (!bgResult.ok) {
+          setError(bgResult.message || "Could not save blood sugar notes.");
+          return;
+        }
+      }
+
       clearLocalPhotoPreview();
       setPhotoCleared(false);
-      onSaved(data as EditableRatingRow);
+      onSaved({
+        ...(data as EditableRatingRow),
+        bloodSugarHealth:
+          trackBloodSugar && hasBloodSugarHealthContent(bloodSugarHealth)
+            ? bloodSugarHealth
+            : null,
+      });
       onClose();
     } finally {
       setSaving(false);
@@ -396,6 +437,31 @@ function RatingEditSheetInner({ rating, onClose, onSaved, onDeleted }: InnerProp
                 ))}
               </div>
             </section>
+
+            {trackBloodSugar && (
+              <section className="flex flex-col gap-sm rounded-xl border border-outline-variant bg-surface-container-low p-md">
+                <h3 className="flex min-w-0 items-center gap-xs font-title-sm text-title-sm text-primary">
+                  <span
+                    className="material-symbols-outlined text-[20px]"
+                    style={{ fontVariationSettings: "'FILL' 1" }}
+                  >
+                    monitor_heart
+                  </span>
+                  Blood sugar
+                  <span className="font-body-md text-body-md font-normal text-on-surface-variant">
+                    (private)
+                  </span>
+                </h3>
+                <BloodSugarImpactPicker
+                  value={bloodSugarImpact}
+                  onChange={setBloodSugarImpact}
+                  notesValue={bloodSugarNotes}
+                  onNotesChange={setBloodSugarNotes}
+                  disabled={saving || deleting}
+                  idPrefix={`edit-bg-${rating.id}`}
+                />
+              </section>
+            )}
 
             <section className="flex flex-col gap-xs rounded-xl border border-outline-variant bg-surface-container-low p-md">
               <label className="font-label-sm text-label-sm text-on-surface-variant">

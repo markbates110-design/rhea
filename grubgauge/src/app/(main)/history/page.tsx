@@ -15,6 +15,13 @@ import {
 } from "@/lib/ratings/placeStats";
 import { PageShell } from "@/components/layout/PageShell";
 import { RatingEditSheet, type EditableRatingRow } from "@/components/history/RatingEditSheet";
+import {
+  bloodSugarImpactLabel,
+  canTrackBloodSugarImpact,
+  getBloodSugarHealthByRatingIds,
+  hasBloodSugarHealthContent,
+  type BloodSugarHealthRecord,
+} from "@/lib/ratings/bloodSugarImpact";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -104,6 +111,11 @@ export default function HistoryPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [editing, setEditing] = useState<EditableRatingRow | null>(null);
+  const [healthByRatingId, setHealthByRatingId] = useState<
+    Map<string, BloodSugarHealthRecord>
+  >(() => new Map());
+
+  const trackBloodSugar = canTrackBloodSugarImpact(profile);
 
   useEffect(() => {
     // Wait for auth resolution before querying — without this, a freshly-
@@ -130,6 +142,16 @@ export default function HistoryPage() {
           return;
         }
         setRatings((data ?? []) as Rating[]);
+
+        if (user) {
+          const health = await getBloodSugarHealthByRatingIds(
+            supabase,
+            (data ?? []).map((row) => row.id as string),
+          );
+          if (!cancelled) setHealthByRatingId(health);
+        } else if (!cancelled) {
+          setHealthByRatingId(new Map());
+        }
 
         const placeIds = [
           ...new Set(
@@ -223,7 +245,10 @@ export default function HistoryPage() {
   // ── Main ─────────────────────────────────────────────────────────────────
 
   function openEditor(r: Rating) {
-    setEditing(r as EditableRatingRow);
+    setEditing({
+      ...(r as EditableRatingRow),
+      bloodSugarHealth: healthByRatingId.get(r.id) ?? null,
+    });
   }
 
   return (
@@ -231,10 +256,32 @@ export default function HistoryPage() {
       <RatingEditSheet
         rating={editing}
         onClose={() => setEditing(null)}
-        onSaved={(row) =>
-          setRatings((prev) => prev.map((x) => (x.id === row.id ? ({ ...x, ...row } as Rating) : x)))
-        }
-        onDeleted={(id) => setRatings((prev) => prev.filter((x) => x.id !== id))}
+        onSaved={(row) => {
+          setRatings((prev) =>
+            prev.map((x) => (x.id === row.id ? ({ ...x, ...row } as Rating) : x)),
+          );
+          if (row.bloodSugarHealth && hasBloodSugarHealthContent(row.bloodSugarHealth)) {
+            setHealthByRatingId((prev) => {
+              const next = new Map(prev);
+              next.set(row.id, row.bloodSugarHealth!);
+              return next;
+            });
+          } else {
+            setHealthByRatingId((prev) => {
+              const next = new Map(prev);
+              next.delete(row.id);
+              return next;
+            });
+          }
+        }}
+        onDeleted={(id) => {
+          setRatings((prev) => prev.filter((x) => x.id !== id));
+          setHealthByRatingId((prev) => {
+            const next = new Map(prev);
+            next.delete(id);
+            return next;
+          });
+        }}
       />
 
       <div className="flex flex-col gap-lg">
@@ -265,6 +312,7 @@ export default function HistoryPage() {
           {ratings.map((r) => {
             const meta = VENUE_META[r.venue_type] ?? VENUE_META.casual;
             const { label: badge, colorClass } = scoreBadge(r.weighted_score);
+            const bloodSugarHealth = healthByRatingId.get(r.id);
             return (
               <div
                 key={r.id}
@@ -337,6 +385,15 @@ export default function HistoryPage() {
                   <span className={`inline-flex items-center rounded-full bg-surface-container-high px-xs py-0.5 font-label-sm text-label-sm font-semibold ${colorClass}`}>
                     {badge}
                   </span>
+                  {trackBloodSugar && bloodSugarHealth?.impact && (
+                    <span
+                      className="inline-flex items-center gap-0.5 rounded-full border border-outline-variant bg-surface-container px-xs py-0.5 font-label-sm text-label-sm text-on-surface-variant"
+                      title="Private to you — blood sugar impact"
+                    >
+                      <span className="material-symbols-outlined text-[12px]">lock</span>
+                      BG: {bloodSugarImpactLabel(bloodSugarHealth.impact)}
+                    </span>
+                  )}
                   <span className="ml-auto font-label-sm text-label-sm text-on-surface-variant shrink-0">
                     {formatDate(r.visit_date)}
                   </span>
@@ -349,6 +406,19 @@ export default function HistoryPage() {
                   community={communityByPlace.get(r.place_id)}
                   compact
                 />
+
+                {trackBloodSugar && bloodSugarHealth?.notes && (
+                  <div className="flex flex-col gap-xs rounded-lg border border-outline-variant/70 bg-surface-container px-sm py-xs">
+                    <p className="inline-flex items-center gap-xs font-label-sm text-label-sm font-semibold text-on-surface-variant">
+                      <span className="material-symbols-outlined text-[14px]">lock</span>
+                      Blood sugar notes
+                      <span className="font-normal text-on-surface-variant/70">(private)</span>
+                    </p>
+                    <p className="font-body-md text-body-md text-on-surface whitespace-pre-wrap break-words">
+                      {bloodSugarHealth.notes}
+                    </p>
+                  </div>
+                )}
 
                 {/* Photo + notes */}
                 {r.meal_photo_url && (

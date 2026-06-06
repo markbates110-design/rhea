@@ -6,6 +6,11 @@ import {
   type CommunityPlaceStats,
   type PriorRatingSnapshot,
 } from "@/lib/ratings/placeStats";
+import {
+  bloodSugarImpactLabel,
+  hasBloodSugarHealthContent,
+  type BloodSugarHealthRecord,
+} from "@/lib/ratings/bloodSugarImpact";
 
 interface PlaceRatingContextProps {
   priorRatings: PriorRatingSnapshot[];
@@ -14,6 +19,7 @@ interface PlaceRatingContextProps {
   draftScore: number;
   draftCriteria: Record<string, number>;
   onPrefillFromLast: () => void;
+  lastBloodSugarHealth?: BloodSugarHealthRecord | null;
 }
 
 /**
@@ -27,6 +33,7 @@ export function PlaceRatingContext({
   draftScore,
   draftCriteria,
   onPrefillFromLast,
+  lastBloodSugarHealth = null,
 }: PlaceRatingContextProps) {
   const latest = priorRatings[0] ?? null;
   const scoreComparison = compareScoreToCommunity(draftScore, community);
@@ -81,6 +88,30 @@ export function PlaceRatingContext({
             </span>
             Pre-fill scores from last visit
           </button>
+          {hasBloodSugarHealthContent(lastBloodSugarHealth) && (
+            <div className="font-label-sm text-label-sm text-on-surface-variant">
+              <p>
+                Last time here you logged blood sugar
+                {lastBloodSugarHealth?.impact ? (
+                  <>
+                    {" "}
+                    impact:{" "}
+                    <span className="font-semibold text-on-surface">
+                      {bloodSugarImpactLabel(lastBloodSugarHealth.impact)}
+                    </span>
+                  </>
+                ) : (
+                  " notes"
+                )}
+                .
+              </p>
+              {lastBloodSugarHealth?.notes && (
+                <p className="mt-xs whitespace-pre-wrap break-words italic text-on-surface-variant/90">
+                  &ldquo;{lastBloodSugarHealth.notes}&rdquo;
+                </p>
+              )}
+            </div>
+          )}
         </div>
       )}
 

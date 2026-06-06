@@ -52,7 +52,9 @@ export function useProfile(): { profile: Profile | null; loading: boolean; error
       const supabase = createClient();
       const { data, error: queryError } = await supabase
         .from(PROFILES_TABLE)
-        .select("id, username, display_name, avatar_url, created_at, updated_at")
+        .select(
+          "id, username, display_name, avatar_url, track_blood_sugar_impact, blood_sugar_disclaimer_accepted_at, created_at, updated_at",
+        )
         .eq("id", userId)
         .maybeSingle();
       if (cancelled) return;
@@ -60,7 +62,17 @@ export function useProfile(): { profile: Profile | null; loading: boolean; error
         setError(queryError.message);
         setProfile(null);
       } else {
-        setProfile((data as Profile | null) ?? null);
+        if (data) {
+          const row = data as Profile;
+          setProfile({
+            ...row,
+            track_blood_sugar_impact: row.track_blood_sugar_impact ?? false,
+            blood_sugar_disclaimer_accepted_at:
+              row.blood_sugar_disclaimer_accepted_at ?? null,
+          });
+        } else {
+          setProfile(null);
+        }
         setError(null);
       }
       setLoading(false);

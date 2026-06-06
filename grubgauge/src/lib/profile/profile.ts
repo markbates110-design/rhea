@@ -16,6 +16,8 @@ export interface Profile {
   username: string;
   display_name: string | null;
   avatar_url: string | null;
+  track_blood_sugar_impact: boolean;
+  blood_sugar_disclaimer_accepted_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -24,6 +26,8 @@ export interface ProfilePatch {
   username?: string;
   display_name?: string | null;
   avatar_url?: string | null;
+  track_blood_sugar_impact?: boolean;
+  blood_sugar_disclaimer_accepted_at?: string | null;
 }
 
 export type UpsertProfileResult =
@@ -76,6 +80,12 @@ export async function updateProfile(
   if (patch.username !== undefined) row.username = patch.username;
   if (patch.display_name !== undefined) row.display_name = patch.display_name;
   if (patch.avatar_url !== undefined) row.avatar_url = patch.avatar_url;
+  if (patch.track_blood_sugar_impact !== undefined) {
+    row.track_blood_sugar_impact = patch.track_blood_sugar_impact;
+  }
+  if (patch.blood_sugar_disclaimer_accepted_at !== undefined) {
+    row.blood_sugar_disclaimer_accepted_at = patch.blood_sugar_disclaimer_accepted_at;
+  }
 
   const { data, error } = await supabase
     .from(PROFILES_TABLE)
@@ -111,6 +121,12 @@ export async function upsertProfile(
   };
   if (patch.display_name !== undefined) row.display_name = patch.display_name;
   if (patch.avatar_url !== undefined) row.avatar_url = patch.avatar_url;
+  if (patch.track_blood_sugar_impact !== undefined) {
+    row.track_blood_sugar_impact = patch.track_blood_sugar_impact;
+  }
+  if (patch.blood_sugar_disclaimer_accepted_at !== undefined) {
+    row.blood_sugar_disclaimer_accepted_at = patch.blood_sugar_disclaimer_accepted_at;
+  }
 
   const { error } = await supabase.from(PROFILES_TABLE).upsert(row);
   if (error) {
@@ -144,7 +160,9 @@ export async function getProfileByUsername(
 
   const { data, error } = await supabase
     .from(PROFILES_TABLE)
-    .select("id, username, display_name, avatar_url, created_at, updated_at")
+    .select(
+      "id, username, display_name, avatar_url, track_blood_sugar_impact, blood_sugar_disclaimer_accepted_at, created_at, updated_at",
+    )
     .eq("username", trimmed)
     .maybeSingle();
   if (error) {

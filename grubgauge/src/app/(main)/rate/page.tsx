@@ -30,6 +30,15 @@ import { extractAddressComponents, type AddressComponentLike } from "@/lib/place
 import { uploadMealPhoto } from "@/lib/storage/mealPhoto";
 import { AutoGrowTextarea } from "@/components/forms/AutoGrowTextarea";
 import { VenueTypePicker } from "@/components/rate/VenueTypePicker";
+import { BloodSugarImpactPicker } from "@/components/ratings/BloodSugarImpactPicker";
+import {
+  canTrackBloodSugarImpact,
+  getLastBloodSugarHealthForPlace,
+  hasBloodSugarHealthContent,
+  upsertBloodSugarHealth,
+  type BloodSugarImpact,
+  type BloodSugarHealthRecord,
+} from "@/lib/ratings/bloodSugarImpact";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -388,6 +397,12 @@ function RatePageInner() {
   const [priorRatings, setPriorRatings] = useState<PriorRatingSnapshot[]>([]);
   const [communityStats, setCommunityStats] =
     useState<CommunityPlaceStats | null>(null);
+  const [bloodSugarImpact, setBloodSugarImpact] = useState<BloodSugarImpact | null>(null);
+  const [bloodSugarNotes, setBloodSugarNotes] = useState("");
+  const [lastBloodSugarHealth, setLastBloodSugarHealth] =
+    useState<BloodSugarHealthRecord | null>(null);
+
+  const trackBloodSugar = canTrackBloodSugarImpact(profile);
 
   const ownerScope = useMemo(
     () => ({ user, deviceId: getDeviceId() }),
@@ -400,27 +415,36 @@ function RatePageInner() {
     if (!placeId) {
       setPriorRatings([]);
       setCommunityStats(null);
+      setLastBloodSugarHealth(null);
       return;
     }
 
+    setBloodSugarImpact(null);
+    setBloodSugarNotes("");
+
     const resolvedPlaceId = placeId;
+    const userId = user?.id;
     let cancelled = false;
     async function loadContext() {
       const supabase = createClient();
-      const [prior, community] = await Promise.all([
+      const [prior, community, lastHealth] = await Promise.all([
         fetchViewerPriorRatingsForPlace(supabase, resolvedPlaceId, ownerScope),
         fetchCommunityStatsForPlace(supabase, resolvedPlaceId, ownerScope),
+        trackBloodSugar && userId
+          ? getLastBloodSugarHealthForPlace(supabase, resolvedPlaceId, userId)
+          : Promise.resolve(null),
       ]);
       if (cancelled) return;
       setPriorRatings(prior);
       setCommunityStats(community);
+      setLastBloodSugarHealth(lastHealth);
     }
 
     loadContext();
     return () => {
       cancelled = true;
     };
-  }, [spot?.placeId, ownerScope]);
+  }, [spot?.placeId, ownerScope, user?.id, trackBloodSugar]);
 
   // Load Google Maps / Places
   useEffect(() => {
@@ -489,6 +513,8 @@ function RatePageInner() {
   function handleSpotSelect(s: SpotSelection) {
     setSpot(s);
     setScores({});
+    setBloodSugarImpact(null);
+    setBloodSugarNotes("");
     setError("");
     clearMealPhoto();
     // Mark the deep-link consumed so a later "Change" → SpotSearch remount
@@ -570,32 +596,61 @@ function RatePageInner() {
         }
       }
       const criteriaScores = Object.fromEntries(criteria.map((c) => [c.key, getScore(c.key)]));
-      await supabase.from("ratings").insert({
-        place_id: spot.placeId,
-        venue_name: spot.name,
-        venue_address: spot.address,
-        venue_type: spot.venueType,
-        meal_type: mealType,
-        visit_date: visitDate,
-        criteria_scores: criteriaScores,
-        weighted_score: parseFloat(weightedScore.toFixed(1)),
-        notes: notes.trim() || null,
-        meal_photo_url: mealPhotoUrl,
-        device_id: deviceId,
-        user_id: userId,
-        // Derived metadata that powers the SEO "best [cuisine] in [city]" /
-        // "cheapest in [city]" query patterns + future auto-generated
-        // public pages. All nullable upstream — null is legitimate
-        // ("Google didn't return it") not error.
-        cuisine: spot.cuisine,
-        city: spot.city,
-        neighborhood: spot.neighborhood,
-        state: spot.state,
-        postal_code: spot.postal_code,
-        price_level: spot.price_level,
-        latitude: spot.latitude,
-        longitude: spot.longitude,
-      });
+      const { data: inserted, error: insertErr } = await supabase
+        .from("ratings")
+        .insert({
+          place_id: spot.placeId,
+          venue_name: spot.name,
+          venue_address: spot.address,
+          venue_type: spot.venueType,
+          meal_type: mealType,
+          visit_date: visitDate,
+          criteria_scores: criteriaScores,
+          weighted_score: parseFloat(weightedScore.toFixed(1)),
+          notes: notes.trim() || null,
+          meal_photo_url: mealPhotoUrl,
+          device_id: deviceId,
+          user_id: userId,
+          // Derived metadata that powers the SEO "best [cuisine] in [city]" /
+          // "cheapest in [city]" query patterns + future auto-generated
+          // public pages. All nullable upstream — null is legitimate
+          // ("Google didn't return it") not error.
+          cuisine: spot.cuisine,
+          city: spot.city,
+          neighborhood: spot.neighborhood,
+          state: spot.state,
+          postal_code: spot.postal_code,
+          price_level: spot.price_level,
+          latitude: spot.latitude,
+          longitude: spot.longitude,
+        })
+        .select("id")
+        .single();
+      if (insertErr || !inserted?.id) {
+        console.error(insertErr);
+        setError("Could not save. Check your connection and try again.");
+        return;
+      }
+
+      const bloodSugarHealth = {
+        impact: bloodSugarImpact,
+        notes: bloodSugarNotes,
+      };
+      if (trackBloodSugar && userId && hasBloodSugarHealthContent(bloodSugarHealth)) {
+        const bgResult = await upsertBloodSugarHealth(
+          supabase,
+          inserted.id as string,
+          userId,
+          bloodSugarHealth,
+        );
+        if (!bgResult.ok) {
+          console.error(bgResult.message);
+          setError(
+            "Rating saved, but your blood sugar notes could not be saved. Edit them from History.",
+          );
+        }
+      }
+
       notifyCoreActionCompleted();
       setSubmittedMealPhotoUrl(mealPhotoUrl);
       clearMealPhoto();
@@ -786,6 +841,8 @@ function RatePageInner() {
                     onClick={() => {
                       setSpot(null);
                       setScores({});
+                      setBloodSugarImpact(null);
+                      setBloodSugarNotes("");
                       setError("");
                       clearMealPhoto();
                     }}
@@ -818,6 +875,7 @@ function RatePageInner() {
                 draftScore={weightedScore}
                 draftCriteria={draftCriteria}
                 onPrefillFromLast={handlePrefillFromLast}
+                lastBloodSugarHealth={lastBloodSugarHealth}
               />
             )}
           </section>
@@ -888,6 +946,30 @@ function RatePageInner() {
                   </div>
                 ))}
               </div>
+            </section>
+          )}
+
+          {spot && trackBloodSugar && (
+            <section className="flex flex-col gap-sm rounded-xl border border-outline-variant bg-surface-container-low p-md">
+              <h2 className="flex items-center gap-xs font-title-sm text-title-sm text-primary">
+                <span
+                  className="material-symbols-outlined text-[20px]"
+                  style={{ fontVariationSettings: "'FILL' 1" }}
+                >
+                  monitor_heart
+                </span>
+                Blood sugar
+                <span className="font-body-md text-body-md font-normal text-on-surface-variant">
+                  (private)
+                </span>
+              </h2>
+              <BloodSugarImpactPicker
+                value={bloodSugarImpact}
+                onChange={setBloodSugarImpact}
+                notesValue={bloodSugarNotes}
+                onNotesChange={setBloodSugarNotes}
+                disabled={submitting}
+              />
             </section>
           )}
 
